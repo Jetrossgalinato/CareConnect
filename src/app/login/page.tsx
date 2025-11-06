@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
@@ -14,14 +14,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const searchParams = useSearchParams();
-
-  useEffect(() => {
-    if (searchParams.get("registered") === "true") {
-      setShowSuccess(true);
-    }
-  }, [searchParams]);
+  const showSuccess = searchParams.get("registered") === "true";
 
   const {
     register,
@@ -112,7 +106,6 @@ export default function LoginPage() {
             <Alert
               type="success"
               message="Account created successfully! Please sign in to continue."
-              onClose={() => setShowSuccess(false)}
             />
           )}
 
