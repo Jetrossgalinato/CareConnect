@@ -88,8 +88,11 @@ export async function register(data: RegisterInput) {
     }
   }
 
+  // Sign out the user after registration
+  await supabase.auth.signOut();
+
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect("/login?registered=true");
 }
 
 export async function logout() {

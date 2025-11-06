@@ -1,17 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { login } from "@/lib/actions/auth";
 import Link from "next/link";
 import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Alert } from "@/components/Alert";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("registered") === "true") {
+      setShowSuccess(true);
+    }
+  }, [searchParams]);
 
   const {
     register,
@@ -25,16 +35,12 @@ export default function LoginPage() {
     setIsLoading(true);
     setError(null);
 
-    try {
-      const result = await login(data);
-      if (result?.error) {
-        setError(result.error);
-      }
-    } catch {
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
+    const result = await login(data);
+    if (result?.error) {
+      setError(result.error);
       setIsLoading(false);
     }
+    // If no error, redirect will happen automatically from server action
   };
 
   return (
@@ -101,6 +107,14 @@ export default function LoginPage() {
               Sign in to your CareConnect account
             </p>
           </div>
+
+          {showSuccess && (
+            <Alert
+              type="success"
+              message="Account created successfully! Please sign in to continue."
+              onClose={() => setShowSuccess(false)}
+            />
+          )}
 
           {error && (
             <div

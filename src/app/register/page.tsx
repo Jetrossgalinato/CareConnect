@@ -38,16 +38,12 @@ export default function RegisterPage() {
     setIsLoading(true);
     setError(null);
 
-    try {
-      const result = await registerAction(data);
-      if (result?.error) {
-        setError(result.error);
-      }
-    } catch {
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
+    const result = await registerAction(data);
+    if (result?.error) {
+      setError(result.error);
       setIsLoading(false);
     }
+    // If no error, redirect will happen automatically from server action
   };
 
   return (
