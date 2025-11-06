@@ -1,5 +1,12 @@
-import LoginPage from "./login/page";
+import { redirect } from "next/navigation";
+import { getUser } from "@/lib/actions/auth";
 
-export default function Home() {
-  return <LoginPage />;
+export default async function Home() {
+  const user = await getUser();
+
+  if (user) {
+    redirect("/dashboard");
+  } else {
+    redirect("/login");
+  }
 }
