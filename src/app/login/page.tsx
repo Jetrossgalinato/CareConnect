@@ -41,7 +41,7 @@ export default function LoginPage() {
   return (
     <div
       className="flex min-h-screen relative"
-      style={{ background: "var(--bg)" }}
+      style={{ background: "var(--bg)", transition: "background 0.3s" }}
     >
       {/* Theme Toggle - Top Right */}
       <div className="absolute top-4 right-4 z-50">
@@ -51,7 +51,10 @@ export default function LoginPage() {
       {/* Left side - Branding */}
       <div
         className="hidden lg:flex lg:w-1/2 p-12 flex-col justify-between"
-        style={{ background: "var(--bg-dark)" }}
+        style={{
+          background: "var(--bg-dark)",
+          transition: "background 0.3s, border-radius 0.3s",
+        }}
       >
         <div>
           <h1
@@ -80,6 +83,7 @@ export default function LoginPage() {
             background: "var(--bg-light)",
             borderRadius: "1rem",
             boxShadow: "0 2px 16px 0 var(--border-muted)",
+            transition: "box-shadow 0.3s, background 0.3s, border-radius 0.3s",
           }}
         >
           <div className="text-center mb-8">
