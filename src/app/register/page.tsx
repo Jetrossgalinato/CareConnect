@@ -51,21 +51,34 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen" style={{ background: "var(--bg)" }}>
       {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 p-12 flex-col justify-between">
+      <div
+        className="hidden lg:flex lg:w-1/2 p-12 flex-col justify-between"
+        style={{ background: "var(--bg-dark)" }}
+      >
         <div>
-          <h1 className="text-4xl font-bold text-white mb-4">CareConnect</h1>
-          <p className="text-blue-100 text-lg">
+          <h1
+            className="text-4xl font-bold mb-4"
+            style={{ color: "var(--primary)" }}
+          >
+            CareConnect
+          </h1>
+          <p className="text-lg" style={{ color: "var(--text-muted)" }}>
             Caraga State University PSG Referral System
           </p>
         </div>
-        <div className="text-blue-100 space-y-4">
+        <div className="space-y-4">
           <div className="flex items-start gap-3">
             <CheckCircle2 className="w-6 h-6 flex-shrink-0 mt-1" />
             <div>
-              <h3 className="font-semibold mb-1">Secure & Confidential</h3>
-              <p className="text-sm text-blue-200">
+              <h3
+                className="font-semibold mb-1"
+                style={{ color: "var(--text)" }}
+              >
+                Secure & Confidential
+              </h3>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
                 Your information is protected with RA 10173 compliance
               </p>
             </div>
@@ -73,8 +86,13 @@ export default function RegisterPage() {
           <div className="flex items-start gap-3">
             <CheckCircle2 className="w-6 h-6 flex-shrink-0 mt-1" />
             <div>
-              <h3 className="font-semibold mb-1">Easy Appointments</h3>
-              <p className="text-sm text-blue-200">
+              <h3
+                className="font-semibold mb-1"
+                style={{ color: "var(--text)" }}
+              >
+                Easy Appointments
+              </h3>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
                 Book sessions with PSG members in real-time
               </p>
             </div>
@@ -82,8 +100,13 @@ export default function RegisterPage() {
           <div className="flex items-start gap-3">
             <CheckCircle2 className="w-6 h-6 flex-shrink-0 mt-1" />
             <div>
-              <h3 className="font-semibold mb-1">Track Your Progress</h3>
-              <p className="text-sm text-blue-200">
+              <h3
+                className="font-semibold mb-1"
+                style={{ color: "var(--text)" }}
+              >
+                Track Your Progress
+              </h3>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
                 Monitor your mental health journey with personalized support
               </p>
             </div>
@@ -93,20 +116,41 @@ export default function RegisterPage() {
 
       {/* Right side - Registration Form */}
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
+        <div
+          className="w-full max-w-md"
+          style={{
+            background: "var(--bg-light)",
+            borderRadius: "1rem",
+            boxShadow: "0 2px 16px 0 var(--border-muted)",
+          }}
+        >
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <h2
+              className="text-3xl font-bold mb-2"
+              style={{ color: "var(--text)" }}
+            >
               Create Account
             </h2>
-            <p className="text-gray-600">
+            <p style={{ color: "var(--text-muted)" }}>
               Join CareConnect to access mental health support
             </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-800">{error}</p>
+            <div
+              className="mb-6 p-4 rounded-lg flex items-start gap-3"
+              style={{
+                background: "var(--danger)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <AlertCircle
+                className="w-5 h-5 flex-shrink-0 mt-0.5"
+                style={{ color: "var(--text)" }}
+              />
+              <p className="text-sm" style={{ color: "var(--text)" }}>
+                {error}
+              </p>
             </div>
           )}
 
@@ -115,7 +159,8 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="fullName"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--text)" }}
               >
                 Full Name
               </label>
@@ -124,11 +169,16 @@ export default function RegisterPage() {
                 type="text"
                 {...register("fullName")}
                 placeholder="Juan Dela Cruz"
-                className="w-full px-4 py-2 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition"
+                style={{
+                  background: "var(--bg)",
+                  color: "var(--text)",
+                  borderColor: "var(--border)",
+                }}
                 disabled={isLoading}
               />
               {errors.fullName && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
                   {errors.fullName.message}
                 </p>
               )}
@@ -138,7 +188,8 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--text)" }}
               >
                 Email
               </label>
@@ -147,11 +198,16 @@ export default function RegisterPage() {
                 type="email"
                 {...register("email")}
                 placeholder="your.name@carsu.edu.ph"
-                className="w-full px-4 py-2 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition"
+                style={{
+                  background: "var(--bg)",
+                  color: "var(--text)",
+                  borderColor: "var(--border)",
+                }}
                 disabled={isLoading}
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
                   {errors.email.message}
                 </p>
               )}
@@ -161,7 +217,8 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="schoolId"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--text)" }}
               >
                 School ID
               </label>
@@ -170,11 +227,16 @@ export default function RegisterPage() {
                 type="text"
                 {...register("schoolId")}
                 placeholder="2024-1234"
-                className="w-full px-4 py-2 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition"
+                style={{
+                  background: "var(--bg)",
+                  color: "var(--text)",
+                  borderColor: "var(--border)",
+                }}
                 disabled={isLoading}
               />
               {errors.schoolId && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
                   {errors.schoolId.message}
                 </p>
               )}
@@ -194,7 +256,10 @@ export default function RegisterPage() {
                     className="sr-only"
                     disabled={isLoading}
                   />
-                  <span className="text-sm font-medium text-gray-800">
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text)" }}
+                  >
                     Student
                   </span>
                 </label>
@@ -206,13 +271,16 @@ export default function RegisterPage() {
                     className="sr-only"
                     disabled={isLoading}
                   />
-                  <span className="text-sm font-medium text-gray-800">
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text)" }}
+                  >
                     PSG Member
                   </span>
                 </label>
               </div>
               {errors.role && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
                   {errors.role.message}
                 </p>
               )}
@@ -222,7 +290,8 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--text)" }}
               >
                 Password
               </label>
@@ -232,13 +301,19 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
                   placeholder="Create a strong password"
-                  className="w-full px-4 py-2 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition pr-12"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition pr-12"
+                  style={{
+                    background: "var(--bg)",
+                    color: "var(--text)",
+                    borderColor: "var(--border)",
+                  }}
                   disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  style={{ color: "var(--highlight)" }}
                   disabled={isLoading}
                 >
                   {showPassword ? (
@@ -308,7 +383,7 @@ export default function RegisterPage() {
                 </div>
               )}
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
                   {errors.password.message}
                 </p>
               )}
@@ -318,7 +393,8 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--text)" }}
               >
                 Confirm Password
               </label>
@@ -328,13 +404,19 @@ export default function RegisterPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   {...register("confirmPassword")}
                   placeholder="Re-enter your password"
-                  className="w-full px-4 py-2 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition pr-12"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition pr-12"
+                  style={{
+                    background: "var(--bg)",
+                    color: "var(--text)",
+                    borderColor: "var(--border)",
+                  }}
                   disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  style={{ color: "var(--highlight)" }}
                   disabled={isLoading}
                 >
                   {showConfirmPassword ? (
@@ -345,7 +427,7 @@ export default function RegisterPage() {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
                   {errors.confirmPassword.message}
                 </p>
               )}
@@ -355,7 +437,8 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ background: "var(--primary)", color: "var(--text)" }}
             >
               {isLoading ? (
                 <>
@@ -370,11 +453,12 @@ export default function RegisterPage() {
 
           {/* Login Link */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="font-medium"
+                style={{ color: "var(--secondary)" }}
               >
                 Sign in here
               </Link>

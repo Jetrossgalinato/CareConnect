@@ -38,17 +38,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen" style={{ background: "var(--bg)" }}>
       {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 p-12 flex-col justify-between">
+      <div
+        className="hidden lg:flex lg:w-1/2 p-12 flex-col justify-between"
+        style={{ background: "var(--bg-dark)" }}
+      >
         <div>
-          <h1 className="text-4xl font-bold text-white mb-4">CareConnect</h1>
-          <p className="text-blue-100 text-lg">
+          <h1
+            className="text-4xl font-bold mb-4"
+            style={{ color: "var(--primary)" }}
+          >
+            CareConnect
+          </h1>
+          <p className="text-lg" style={{ color: "var(--text-muted)" }}>
             Caraga State University PSG Referral System
           </p>
         </div>
-        <div className="text-blue-100">
-          <p className="text-sm">
+        <div>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             Streamlining mental health support for students through secure
             referrals and appointments.
           </p>
@@ -57,18 +65,41 @@ export default function LoginPage() {
 
       {/* Right side - Login Form */}
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
+        <div
+          className="w-full max-w-md"
+          style={{
+            background: "var(--bg-light)",
+            borderRadius: "1rem",
+            boxShadow: "0 2px 16px 0 var(--border-muted)",
+          }}
+        >
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <h2
+              className="text-3xl font-bold mb-2"
+              style={{ color: "var(--text)" }}
+            >
               Welcome Back
             </h2>
-            <p className="text-gray-600">Sign in to your CareConnect account</p>
+            <p style={{ color: "var(--text-muted)" }}>
+              Sign in to your CareConnect account
+            </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-800">{error}</p>
+            <div
+              className="mb-6 p-4 rounded-lg flex items-start gap-3"
+              style={{
+                background: "var(--danger)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <AlertCircle
+                className="w-5 h-5 flex-shrink-0 mt-0.5"
+                style={{ color: "var(--text)" }}
+              />
+              <p className="text-sm" style={{ color: "var(--text)" }}>
+                {error}
+              </p>
             </div>
           )}
 
@@ -77,7 +108,8 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--text)" }}
               >
                 Email
               </label>
@@ -86,11 +118,16 @@ export default function LoginPage() {
                 type="email"
                 {...register("email")}
                 placeholder="your.name@carsu.edu.ph"
-                className="w-full px-4 py-2 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition"
+                style={{
+                  background: "var(--bg)",
+                  color: "var(--text)",
+                  borderColor: "var(--border)",
+                }}
                 disabled={isLoading}
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
                   {errors.email.message}
                 </p>
               )}
@@ -100,7 +137,8 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--text)" }}
               >
                 Password
               </label>
@@ -110,13 +148,19 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
                   placeholder="Enter your password"
-                  className="w-full px-4 py-2 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition pr-12"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition pr-12"
+                  style={{
+                    background: "var(--bg)",
+                    color: "var(--text)",
+                    borderColor: "var(--border)",
+                  }}
                   disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  style={{ color: "var(--highlight)" }}
                   disabled={isLoading}
                 >
                   {showPassword ? (
@@ -127,7 +171,7 @@ export default function LoginPage() {
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
                   {errors.password.message}
                 </p>
               )}
@@ -137,7 +181,8 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ background: "var(--primary)", color: "var(--text)" }}
             >
               {isLoading ? (
                 <>
@@ -152,11 +197,12 @@ export default function LoginPage() {
 
           {/* Register Link */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
               Don&apos;t have an account?{" "}
               <Link
                 href="/register"
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="font-medium"
+                style={{ color: "var(--secondary)" }}
               >
                 Register here
               </Link>

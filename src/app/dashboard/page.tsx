@@ -11,13 +11,23 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
       {/* Header */}
-      <header className="bg-white shadow">
+      <header
+        style={{
+          background: "var(--bg-dark)",
+          boxShadow: "0 2px 16px 0 var(--border-muted)",
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">CareConnect</h1>
-            <p className="text-sm text-gray-600 mt-1">
+            <h1
+              className="text-2xl font-bold"
+              style={{ color: "var(--primary)" }}
+            >
+              CareConnect
+            </h1>
+            <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
               Welcome back, {user.full_name}
             </p>
           </div>
@@ -28,13 +38,19 @@ export default async function DashboardPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
+          <div
+            className="rounded-lg p-4"
+            style={{
+              background: "var(--bg-light)",
+              border: "1px solid var(--border-muted)",
+            }}
+          >
+            <p className="text-sm" style={{ color: "var(--info)" }}>
               <span className="font-semibold">Role:</span>{" "}
               {formatRole(user.role)}
             </p>
             {user.school_id && (
-              <p className="text-sm text-blue-800 mt-1">
+              <p className="text-sm mt-1" style={{ color: "var(--info)" }}>
                 <span className="font-semibold">School ID:</span>{" "}
                 {user.school_id}
               </p>
@@ -42,13 +58,24 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Dashboard</h2>
-          <p className="text-gray-600">
+        <div
+          className="rounded-lg p-6"
+          style={{
+            background: "var(--bg-light)",
+            boxShadow: "0 2px 16px 0 var(--border-muted)",
+          }}
+        >
+          <h2
+            className="text-xl font-semibold mb-4"
+            style={{ color: "var(--text)" }}
+          >
+            Dashboard
+          </h2>
+          <p style={{ color: "var(--text-muted)" }}>
             This is your {formatRole(user.role).toLowerCase()} dashboard. The
             following features will be available soon:
           </p>
-          <ul className="mt-4 space-y-2 text-gray-600">
+          <ul className="mt-4 space-y-2" style={{ color: "var(--text-muted)" }}>
             {user.role === "student" && (
               <>
                 <li>• Mental Health Screening</li>
