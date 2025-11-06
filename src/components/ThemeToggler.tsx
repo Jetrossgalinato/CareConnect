@@ -37,8 +37,8 @@ export function ThemeToggler() {
       className="theme-toggler"
       suppressHydrationWarning
       style={{
-        width: 56,
-        height: 56,
+        width: 36,
+        height: 36,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -52,8 +52,9 @@ export function ThemeToggler() {
         style={{
           color: "var(--text)",
           cursor: "pointer",
-          width: 50,
-          height: 50,
+          width: 24,
+          height: 24,
+          fontSize: 24,
         }}
       />
     </div>
