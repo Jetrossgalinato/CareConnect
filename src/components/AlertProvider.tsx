@@ -37,7 +37,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     }
     return null;
   });
-  // visible is derived from alert state
+  const [isVisible, setIsVisible] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [progress, setProgress] = useState(0);
 
@@ -45,6 +45,9 @@ export function AlertProvider({ children }: { children: ReactNode }) {
   const showAlert = (a: GlobalAlert) => {
     setAlert(a);
     setProgress(0);
+    // Trigger slide-in animation
+    setTimeout(() => setIsVisible(true), 10);
+
     if (timerRef.current) clearTimeout(timerRef.current);
     if (a.duration) {
       const start = Date.now();
@@ -56,7 +59,9 @@ export function AlertProvider({ children }: { children: ReactNode }) {
         if (pct < 100) {
           timerRef.current = setTimeout(tick, 50);
         } else {
-          setAlert(null);
+          // Slide out before removing
+          setIsVisible(false);
+          setTimeout(() => setAlert(null), 400); // Match transition duration
         }
       }
       tick();
@@ -65,8 +70,11 @@ export function AlertProvider({ children }: { children: ReactNode }) {
 
   // Close alert manually
   const closeAlert = () => {
-    setAlert(null);
-    setProgress(0);
+    setIsVisible(false);
+    setTimeout(() => {
+      setAlert(null);
+      setProgress(0);
+    }, 400); // Match transition duration
     if (timerRef.current) clearTimeout(timerRef.current);
   };
 
@@ -81,6 +89,12 @@ export function AlertProvider({ children }: { children: ReactNode }) {
 
   // Restore alert on mount
   // No effect needed for alert visibility or progress
+  useEffect(() => {
+    if (alert) {
+      // Trigger slide-in animation on mount if alert exists
+      setTimeout(() => setIsVisible(true), 10);
+    }
+  }, [alert]);
 
   return (
     <AlertContext.Provider value={{ showAlert, closeAlert }}>
@@ -93,8 +107,10 @@ export function AlertProvider({ children }: { children: ReactNode }) {
             right: "2rem",
             zIndex: 9999,
             maxWidth: "350px",
-            transition: "transform 0.4s cubic-bezier(.4,0,.2,1)",
-            transform: alert ? "translateX(0)" : "translateX(100%)",
+            transition:
+              "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease",
+            transform: isVisible ? "translateX(0)" : "translateX(120%)",
+            opacity: isVisible ? 1 : 0,
           }}
         >
           <Alert

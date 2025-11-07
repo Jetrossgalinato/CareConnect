@@ -27,8 +27,24 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
+
+    // Set loginSuccess flag BEFORE calling server action
+    // because redirect will interrupt execution
+    console.log("Setting loginSuccess flag before server action");
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("loginSuccess", "true");
+      console.log(
+        "loginSuccess flag set:",
+        sessionStorage.getItem("loginSuccess")
+      );
+    }
+
     const result = await login(data);
     if (result?.error) {
+      // Clear the flag if there's an error
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem("loginSuccess");
+      }
       showAlert({
         type: "error",
         message: result.error,
