@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { login } from "@/lib/actions/auth";
 import Link from "next/link";
-import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useAlert } from "@/components/AlertProvider";
 import { useSearchParams } from "next/navigation";
