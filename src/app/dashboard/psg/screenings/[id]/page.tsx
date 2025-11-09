@@ -154,10 +154,16 @@ export default function ScreeningDetailPage({
               </h2>
               <button
                 onClick={() => router.push("/dashboard/psg/screenings")}
-                className="mt-4 px-6 py-2 rounded-md font-medium text-sm transition"
+                className="mt-4 px-6 py-2 rounded-md font-medium text-sm transition hover:bg-primary"
                 style={{
                   background: "var(--primary)",
                   color: "var(--bg-dark)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "var(--success)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "var(--primary)";
                 }}
               >
                 Back to List
@@ -370,9 +376,15 @@ export default function ScreeningDetailPage({
 
                 <button
                   onClick={() => router.push("/dashboard/psg/screenings")}
-                  className="px-8 py-2.5 rounded-md font-medium text-sm transition hover:bg-accent w-full sm:w-auto"
+                  className="px-8 py-2.5 rounded-md font-medium text-sm transition hover:bg-primary w-full sm:w-auto"
                   style={{
                     color: "var(--text)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = "var(--bg-dark)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = "var(--text)";
                   }}
                 >
                   Back to List

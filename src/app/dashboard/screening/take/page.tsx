@@ -107,10 +107,16 @@ export default function TakeScreeningPage() {
               </p>
               <button
                 onClick={() => window.location.reload()}
-                className="px-6 py-2 rounded-md font-medium text-sm transition"
+                className="px-6 py-2 rounded-md font-medium text-sm transition hover:bg-success"
                 style={{
                   background: "var(--primary)",
                   color: "var(--bg-dark)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "var(--success)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "var(--primary)";
                 }}
               >
                 Retry

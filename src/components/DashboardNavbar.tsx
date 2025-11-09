@@ -48,9 +48,15 @@ export function DashboardNavbar({
               />
               <button
                 onClick={() => router.push("/dashboard")}
-                className="p-2 rounded-md transition hover:bg-accent flex items-center gap-2"
+                className="p-2 rounded-md transition hover:bg-primary flex items-center gap-2"
                 style={{ color: "var(--text)" }}
                 title="Back to Dashboard"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "var(--bg-dark)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "var(--text)";
+                }}
               >
                 <Home className="h-5 w-5" />
                 <span className="text-sm font-medium">Home</span>

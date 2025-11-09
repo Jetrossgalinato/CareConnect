@@ -275,11 +275,18 @@ export default function ScreeningResultsPage() {
                       router.push("/dashboard/appointments");
                     }}
                     disabled={!hasCaseAssessment}
-                    className="w-full sm:w-auto cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-2 rounded-md font-medium text-sm transition border hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-2 rounded-md font-medium text-sm transition border hover:bg-primary hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                       borderColor: "var(--border)",
                       background: "var(--bg)",
                       color: "var(--text)",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!hasCaseAssessment) return;
+                      e.currentTarget.style.color = "var(--bg-dark)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "var(--text)";
                     }}
                     title={
                       !hasCaseAssessment
@@ -292,9 +299,15 @@ export default function ScreeningResultsPage() {
                   </button>
                   <button
                     onClick={handleTakeAnother}
-                    className="w-full sm:w-auto cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-2 rounded-md font-medium text-sm transition hover:bg-accent"
+                    className="w-full sm:w-auto cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-2 rounded-md font-medium text-sm transition hover:bg-primary"
                     style={{
                       color: "var(--text)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "var(--bg-dark)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "var(--text)";
                     }}
                   >
                     <RotateCcw className="h-4 w-4" />

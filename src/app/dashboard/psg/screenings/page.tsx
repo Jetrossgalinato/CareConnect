@@ -425,10 +425,16 @@ export default function PSGScreeningsPage() {
                                 `/dashboard/psg/screenings/${screening.id}`
                               )
                             }
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition border hover:bg-accent"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition border hover:bg-primary hover:border-primary"
                             style={{
                               borderColor: "var(--border)",
                               color: "var(--text)",
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.color = "var(--bg-dark)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.color = "var(--text)";
                             }}
                           >
                             <Eye className="h-4 w-4" />
