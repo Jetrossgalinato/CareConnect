@@ -127,9 +127,9 @@ export default function ScreeningResultsPage() {
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-6">
+          <div className="max-w-3xl mx-auto space-y-6">
             {/* Centered Header Above Card */}
-            <div className="max-w-3xl mx-auto flex flex-col items-center mb-2">
+            <div className="flex flex-col items-center mb-2">
               <h1
                 className="text-2xl font-bold tracking-tight text-center"
                 style={{ color: "var(--text)" }}
@@ -147,7 +147,7 @@ export default function ScreeningResultsPage() {
             <ScreeningResultDisplay result={result} />
 
             {/* Next Steps and Info Cards Container */}
-            <div className="max-w-3xl mx-auto space-y-6">
+            <div className="space-y-6">
               <div
                 className="rounded-lg border p-6 space-y-4"
                 style={{
