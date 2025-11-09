@@ -20,6 +20,7 @@ export type ScreeningResponse = {
   answer: string | number | boolean;
   score: number;
   created_at: string;
+  question_text?: string; // Optional field added by getScreeningById
 };
 
 export type ScreeningResult = {

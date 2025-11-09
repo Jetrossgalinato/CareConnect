@@ -146,10 +146,64 @@ export async function getScreeningById(screeningId: string) {
       return { error: "Failed to fetch responses" };
     }
 
+    // Get questions to match with responses
+    const { data: questions, error: questionsError } = await supabase
+      .from("screening_questions")
+      .select("*")
+      .order("order", { ascending: true });
+
+    if (questionsError) {
+      console.error("Error fetching questions:", questionsError);
+    }
+
+    // Create maps for matching - both by ID and by index for legacy data
+    const questionMapById = new Map();
+    const questionsByOrder: Array<NonNullable<typeof questions>[number]> = [];
+
+    if (questions) {
+      questions.forEach((q, index) => {
+        questionMapById.set(q.id, q);
+        questionsByOrder[index] = q;
+      });
+    }
+
+    // Enhance responses with question text
+    const enhancedResponses = (responses || []).map((response, index) => {
+      let question;
+
+      // Try to match by question_id first (for new responses with UUID)
+      question = questionMapById.get(response.question_id);
+
+      // If no match and question_id looks like "preset-X" (legacy format),
+      // match by order/index instead
+      if (
+        !question &&
+        typeof response.question_id === "string" &&
+        response.question_id.startsWith("preset-")
+      ) {
+        const presetIndex = parseInt(
+          response.question_id.replace("preset-", "")
+        );
+        if (!isNaN(presetIndex) && questionsByOrder[presetIndex]) {
+          question = questionsByOrder[presetIndex];
+        }
+      }
+
+      // If still no match, try matching by response index
+      if (!question && questionsByOrder[index]) {
+        question = questionsByOrder[index];
+      }
+
+      return {
+        ...response,
+        question_text: question?.question_text || "Question text not available",
+      };
+    });
+
     return {
       data: {
         screening: result,
-        responses: responses || [],
+        responses: enhancedResponses,
       },
       success: true,
     };

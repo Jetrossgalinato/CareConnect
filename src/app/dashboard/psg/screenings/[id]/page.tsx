@@ -254,8 +254,8 @@ export default function ScreeningDetailPage({
                           className="text-sm mt-1"
                           style={{ color: "var(--text-muted)" }}
                         >
-                          {/* TODO: Fetch actual question text from questions array */}
-                          Question text would appear here
+                          {response.question_text ||
+                            "Question text not available"}
                         </p>
                       </div>
                       <span

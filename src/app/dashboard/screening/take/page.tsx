@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
@@ -8,22 +8,40 @@ import { ScreeningForm } from "@/components/screening/ScreeningForm";
 import {
   ScreeningQuestion,
   QuestionResponse,
-  PRESET_SCREENING_QUESTIONS,
 } from "@/lib/validations/screening";
-import { submitScreening } from "@/lib/actions/screening";
+import {
+  submitScreening,
+  getScreeningQuestions,
+} from "@/lib/actions/screening";
 import { Loader2 } from "lucide-react";
 
 export default function TakeScreeningPage() {
-  const [questions] = useState<ScreeningQuestion[]>(() => {
-    // Initialize questions with IDs on mount
-    return PRESET_SCREENING_QUESTIONS.map((q, index) => ({
-      ...q,
-      id: `preset-${index}`,
-    }));
-  });
-  // In production, this would be true while fetching from Supabase
-  const [isLoading] = useState(false);
+  const [questions, setQuestions] = useState<ScreeningQuestion[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    async function loadQuestions() {
+      try {
+        const response = await getScreeningQuestions();
+
+        if (response.error || !response.data) {
+          setError(response.error || "Failed to load questions");
+          return;
+        }
+
+        setQuestions(response.data);
+      } catch (err) {
+        console.error("Error loading questions:", err);
+        setError("An unexpected error occurred");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadQuestions();
+  }, []);
 
   const handleSubmit = async (responses: QuestionResponse[]) => {
     try {
@@ -57,6 +75,39 @@ export default function TakeScreeningPage() {
               className="w-8 h-8 animate-spin"
               style={{ color: "var(--primary)" }}
             />
+          </div>
+        </div>
+      </DashboardClientWrapper>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardClientWrapper>
+        <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+          <DashboardNavbar showHomeButton={true} />
+          <div className="flex items-center justify-center py-12">
+            <div
+              className="p-6 rounded-lg border text-center max-w-md"
+              style={{
+                background: "var(--bg-light)",
+                borderColor: "var(--border-muted)",
+              }}
+            >
+              <p style={{ color: "var(--error)" }} className="mb-4">
+                {error}
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-2 rounded-md font-medium text-sm transition"
+                style={{
+                  background: "var(--primary)",
+                  color: "var(--bg-dark)",
+                }}
+              >
+                Retry
+              </button>
+            </div>
           </div>
         </div>
       </DashboardClientWrapper>
