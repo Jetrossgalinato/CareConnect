@@ -11,8 +11,13 @@ import { getScreeningResults } from "@/lib/actions/screening";
 export default function PSGScreeningsPage() {
   const [screenings, setScreenings] = useState<ScreeningResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   const [filter, setFilter] = useState<"all" | "pending" | "reviewed">("all");
   const router = useRouter();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     async function fetchScreenings() {
@@ -56,14 +61,14 @@ export default function PSGScreeningsPage() {
 
   const pendingCount = screenings.filter((s) => !s.reviewed_at).length;
   const highRiskCount = screenings.filter(
-    (s) => s.severity_score >= 70 && !s.reviewed_at
+    (s) => s.color_code === "red" && !s.reviewed_at
   ).length;
   const reviewedCount = screenings.filter((s) => !!s.reviewed_at).length;
 
-  const getSeverityBadge = (severityScore: number, colorCode: string) => {
-    const getSeverityLabel = (score: number) => {
-      if (score >= 70) return "HIGH";
-      if (score >= 40) return "MODERATE";
+  const getSeverityBadge = (colorCode: string) => {
+    const getSeverityLabel = (code: string) => {
+      if (code === "red") return "HIGH";
+      if (code === "yellow") return "MODERATE";
       return "LOW";
     };
 
@@ -71,9 +76,9 @@ export default function PSGScreeningsPage() {
       switch (code) {
         case "red":
           return {
-            bg: "var(--error-20)",
-            color: "var(--error)",
-            border: "var(--error)",
+            bg: "var(--danger-20)",
+            color: "var(--danger)",
+            border: "var(--danger)",
           };
         case "yellow":
           return {
@@ -101,7 +106,7 @@ export default function PSGScreeningsPage() {
           border: `1px solid ${colors.border}`,
         }}
       >
-        {getSeverityLabel(severityScore)}
+        {getSeverityLabel(colorCode)}
       </span>
     );
   };
@@ -214,7 +219,7 @@ export default function PSGScreeningsPage() {
                   </h3>
                   <AlertCircle
                     className="h-4 w-4"
-                    style={{ color: "var(--error)" }}
+                    style={{ color: "var(--danger)" }}
                   />
                 </div>
                 <div>
@@ -354,7 +359,7 @@ export default function PSGScreeningsPage() {
                       No screenings found
                     </div>
                   ) : (
-                    sortedScreenings.map((screening) => (
+                    sortedScreenings.map((screening, index) => (
                       <div
                         key={screening.id}
                         className="rounded-lg p-4 border transition hover:bg-accent"
@@ -370,12 +375,9 @@ export default function PSGScreeningsPage() {
                                 className="font-medium"
                                 style={{ color: "var(--text)" }}
                               >
-                                Student #nt-{screening.user_id.slice(-1)}
+                                Student {index + 1}
                               </span>
-                              {getSeverityBadge(
-                                screening.severity_score,
-                                screening.color_code
-                              )}
+                              {getSeverityBadge(screening.color_code)}
                               {!screening.reviewed_at && (
                                 <span
                                   className="inline-block text-xs font-semibold px-2 py-1 rounded border"
@@ -394,8 +396,14 @@ export default function PSGScreeningsPage() {
                               style={{ color: "var(--text-muted)" }}
                             >
                               <span>Score: {screening.total_score}%</span>
-                              <span>•</span>
-                              <span>{formatTimeAgo(screening.created_at)}</span>
+                              {isMounted && (
+                                <>
+                                  <span>•</span>
+                                  <span>
+                                    {formatTimeAgo(screening.created_at)}
+                                  </span>
+                                </>
+                              )}
                               {screening.reviewed_at && (
                                 <>
                                   <span>•</span>
