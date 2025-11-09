@@ -279,6 +279,47 @@ export async function getScreeningQuestions() {
 }
 
 /**
+ * Get the latest screening result for the current user
+ */
+export async function getLatestScreeningResult() {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { error: "User not authenticated" };
+    }
+
+    // Get latest screening result
+    const { data, error } = await supabase
+      .from("screening_results")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        // No results found
+        return { error: "No screening results found" };
+      }
+      console.error("Error fetching latest screening:", error);
+      return { error: "Failed to fetch screening result" };
+    }
+
+    return { data, success: true };
+  } catch (error) {
+    console.error("Unexpected error in getLatestScreeningResult:", error);
+    return { error: "An unexpected error occurred" };
+  }
+}
+
+/**
  * Add a custom screening question (Admin/PSG only)
  */
 export async function addScreeningQuestion(

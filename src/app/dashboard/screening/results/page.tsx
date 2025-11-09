@@ -6,40 +6,48 @@ import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { ScreeningResultDisplay } from "@/components/screening/ScreeningResultDisplay";
 import { ScreeningResult } from "@/lib/types/screening";
+import { getLatestScreeningResult } from "@/lib/actions/screening";
 import { MessageSquare, Calendar, RotateCcw } from "lucide-react";
 
 export default function ScreeningResultsPage() {
   const [result, setResult] = useState<ScreeningResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasCaseAssessment, setHasCaseAssessment] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Load screening result from sessionStorage
-    const storedResult = sessionStorage.getItem("screeningResult");
-    const caseAssessmentStatus = sessionStorage.getItem("hasCaseAssessment");
+    async function fetchScreeningResult() {
+      try {
+        const response = await getLatestScreeningResult();
 
-    if (!storedResult) {
-      // No result found, redirect back to take screening
-      router.push("/dashboard/screening/take");
-      return;
-    }
+        if (response.error || !response.data) {
+          setError(response.error || "Failed to load screening result");
+          setIsLoading(false);
+          // Redirect to take screening if no results found
+          setTimeout(() => {
+            router.push("/dashboard/screening/take");
+          }, 2000);
+          return;
+        }
 
-    try {
-      const parsedResult = JSON.parse(storedResult) as ScreeningResult;
-      setResult(parsedResult);
+        setResult(response.data);
 
-      // Check if case assessment was already started
-      if (caseAssessmentStatus === "true") {
-        setHasCaseAssessment(true);
+        // Check if case assessment was already started (from sessionStorage for now)
+        const caseAssessmentStatus =
+          sessionStorage.getItem("hasCaseAssessment");
+        if (caseAssessmentStatus === "true") {
+          setHasCaseAssessment(true);
+        }
+      } catch (err) {
+        console.error("Error fetching screening result:", err);
+        setError("An unexpected error occurred");
+      } finally {
+        setIsLoading(false);
       }
-    } catch {
-      // Invalid result, redirect back
-      router.push("/dashboard/screening/take");
-      return;
-    } finally {
-      setIsLoading(false);
     }
+
+    fetchScreeningResult();
   }, [router]);
 
   const handleStartCaseAssessment = () => {
@@ -76,6 +84,30 @@ export default function ScreeningResultsPage() {
             >
               <p style={{ color: "var(--text-muted)" }}>
                 Loading your results...
+              </p>
+            </div>
+          </main>
+        </div>
+      </DashboardClientWrapper>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardClientWrapper>
+        <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+          <DashboardNavbar showHomeButton={true} />
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div
+              className="p-8 text-center rounded-xl border shadow"
+              style={{
+                background: "var(--bg-light)",
+                borderColor: "var(--border-muted)",
+              }}
+            >
+              <p style={{ color: "var(--error)" }}>{error}</p>
+              <p style={{ color: "var(--text-muted)", marginTop: "8px" }}>
+                Redirecting to screening form...
               </p>
             </div>
           </main>

@@ -9,9 +9,8 @@ import {
   ScreeningQuestion,
   QuestionResponse,
   PRESET_SCREENING_QUESTIONS,
-  calculateSeverity,
 } from "@/lib/validations/screening";
-import { ScreeningResult } from "@/lib/types/screening";
+import { submitScreening } from "@/lib/actions/screening";
 import { Loader2 } from "lucide-react";
 
 export default function TakeScreeningPage() {
@@ -28,30 +27,22 @@ export default function TakeScreeningPage() {
 
   const handleSubmit = async (responses: QuestionResponse[]) => {
     try {
-      // Calculate severity
-      const result = calculateSeverity(responses);
+      // Submit to Supabase
+      const response = await submitScreening(responses);
 
-      // TODO: In production, save to Supabase
-      // For now, store in sessionStorage and navigate to results
-      const fullResult: ScreeningResult = {
-        id: `temp-${Date.now()}`,
-        user_id: "current-user", // TODO: Get from auth context
-        total_score: result.totalScore,
-        severity_score: Math.round(result.percentage),
-        color_code: result.color,
-        recommendations: null,
-        requires_immediate_attention: result.requiresImmediateAttention,
-        reviewed_by: null,
-        reviewed_at: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+      if (response.error) {
+        alert(`Failed to submit screening: ${response.error}`);
+        return;
+      }
 
-      sessionStorage.setItem("screeningResult", JSON.stringify(fullResult));
+      // Clear any old sessionStorage data
+      sessionStorage.removeItem("screeningResult");
+      sessionStorage.removeItem("hasCaseAssessment");
 
       // Navigate to results page
       router.push("/dashboard/screening/results");
-    } catch {
+    } catch (error) {
+      console.error("Error submitting screening:", error);
       alert("Failed to submit screening. Please try again.");
     }
   };
