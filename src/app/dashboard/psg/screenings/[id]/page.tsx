@@ -171,54 +171,56 @@ export default function ScreeningDetailPage({
         <DashboardNavbar subtitle="PSG Member Portal" showHomeButton={true} />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-6">
-            {/* Header */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1
-                    className="text-3xl font-bold tracking-tight"
-                    style={{ color: "var(--text)" }}
-                  >
-                    Screening Review
-                  </h1>
-                  <p style={{ color: "var(--text-muted)" }}>
-                    {getStudentDisplay()} • {formatDate(screening.created_at)}
-                  </p>
-                </div>
-                {screening.reviewed_at ? (
-                  <span
-                    className="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold"
-                    style={{
-                      background: "var(--bg-secondary)",
-                      color: "var(--text)",
-                    }}
-                  >
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Reviewed
-                  </span>
-                ) : (
-                  <span
-                    className="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold border"
-                    style={{
-                      background: "rgba(59, 130, 246, 0.1)",
-                      color: "rgb(59, 130, 246)",
-                      borderColor: "rgba(59, 130, 246, 0.2)",
-                    }}
-                  >
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    Pending Review
-                  </span>
-                )}
+          {/* Header */}
+          <div className="space-y-2 mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1
+                  className="text-3xl font-bold tracking-tight"
+                  style={{ color: "var(--text)" }}
+                >
+                  Screening Review
+                </h1>
+                <p style={{ color: "var(--text-muted)" }}>
+                  {getStudentDisplay()} • {formatDate(screening.created_at)}
+                </p>
               </div>
+              {screening.reviewed_at ? (
+                <span
+                  className="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold"
+                  style={{
+                    background: "var(--bg-secondary)",
+                    color: "var(--text)",
+                  }}
+                >
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Reviewed
+                </span>
+              ) : (
+                <span
+                  className="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold border"
+                  style={{
+                    background: "rgba(59, 130, 246, 0.1)",
+                    color: "rgb(59, 130, 246)",
+                    borderColor: "rgba(59, 130, 246, 0.2)",
+                  }}
+                >
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  Pending Review
+                </span>
+              )}
             </div>
+          </div>
 
+          <div className="max-w-4xl w-full mx-auto space-y-6 flex flex-col">
             {/* Screening Results */}
-            <ScreeningResultDisplay result={screening} />
+            <div className="w-full">
+              <ScreeningResultDisplay result={screening} />
+            </div>
 
             {/* Response Details */}
             <div
-              className="rounded-lg border p-6 space-y-4"
+              className="rounded-lg border p-6 space-y-4 w-full"
               style={{
                 background: "var(--bg-light)",
                 borderColor: "var(--border-muted)",
@@ -291,7 +293,7 @@ export default function ScreeningDetailPage({
             {/* Review Notes */}
             {!screening.reviewed_at && (
               <div
-                className="rounded-lg border p-6"
+                className="rounded-lg border p-6 w-full"
                 style={{
                   background: "var(--bg-light)",
                   borderColor: "var(--border-muted)",
@@ -329,7 +331,7 @@ export default function ScreeningDetailPage({
 
             {/* Action Buttons */}
             <div
-              className="rounded-lg border p-6 space-y-4"
+              className="rounded-lg border p-6 space-y-4 w-full"
               style={{
                 background: "var(--bg-light)",
                 borderColor: "var(--border-muted)",

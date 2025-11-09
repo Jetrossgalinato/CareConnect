@@ -61,7 +61,7 @@ export function ScreeningResultDisplay({
   const Icon = config.icon;
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full">
       {/* Result Card */}
       <div
         className="p-8 rounded-lg mb-6"
