@@ -10,11 +10,13 @@ import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
 export default function ScreeningResultsPage() {
   const [result, setResult] = useState<ScreeningResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasCaseAssessment, setHasCaseAssessment] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     // Load screening result from sessionStorage
     const storedResult = sessionStorage.getItem("screeningResult");
+    const caseAssessmentStatus = sessionStorage.getItem("hasCaseAssessment");
 
     if (!storedResult) {
       // No result found, redirect back to take screening
@@ -25,6 +27,11 @@ export default function ScreeningResultsPage() {
     try {
       const parsedResult = JSON.parse(storedResult) as ScreeningResult;
       setResult(parsedResult);
+
+      // Check if case assessment was already started
+      if (caseAssessmentStatus === "true") {
+        setHasCaseAssessment(true);
+      }
     } catch {
       // Invalid result, redirect back
       router.push("/dashboard/screening/take");
@@ -35,14 +42,21 @@ export default function ScreeningResultsPage() {
   }, [router]);
 
   const handleStartCaseAssessment = () => {
+    // Mark that user has started case assessment
+    setHasCaseAssessment(true);
+    sessionStorage.setItem("hasCaseAssessment", "true");
+
     // TODO: Navigate to case assessment chat when implemented
-    // For now, navigate back to dashboard
-    router.push("/dashboard");
+    // For now, show alert that case assessment has been initiated
+    alert(
+      "Case assessment initiated. A PSG member will reach out to you soon."
+    );
   };
 
   const handleTakeAnother = () => {
-    // Clear the stored result and go back to take screening
+    // Clear the stored result and case assessment flag
     sessionStorage.removeItem("screeningResult");
+    sessionStorage.removeItem("hasCaseAssessment");
     router.push("/dashboard/screening/take");
   };
 
@@ -127,7 +141,7 @@ export default function ScreeningResultsPage() {
 
                 <div className="space-y-3">
                   <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                    Based on your screening results, you can:
+                    Based on your screening results, you must:
                   </p>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
@@ -135,29 +149,30 @@ export default function ScreeningResultsPage() {
                         style={{ color: "var(--primary)" }}
                         className="mt-0.5"
                       >
-                        •
+                        1.
                       </span>
                       <span style={{ color: "var(--text)" }}>
                         <strong>Start a case assessment</strong> - Connect with
                         a PSG member who can provide personalized support and
-                        guidance
+                        guidance (Required first)
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span
-                        style={{ color: "var(--primary)" }}
+                        style={{ color: "var(--text-muted)" }}
                         className="mt-0.5"
                       >
-                        •
+                        2.
                       </span>
                       <span style={{ color: "var(--text)" }}>
                         <strong>Book an appointment</strong> - Schedule a
                         one-on-one session with a peer support specialist
+                        (Available after case assessment)
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span
-                        style={{ color: "var(--primary)" }}
+                        style={{ color: "var(--text-muted)" }}
                         className="mt-0.5"
                       >
                         •
@@ -173,30 +188,51 @@ export default function ScreeningResultsPage() {
                 <div className="flex flex-col sm:flex-row gap-3 pt-2">
                   <button
                     onClick={handleStartCaseAssessment}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2 rounded-md font-medium text-sm transition hover:opacity-90"
+                    disabled={hasCaseAssessment}
+                    className="w-full sm:w-auto cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-2 rounded-md font-medium text-sm transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
-                      background: "var(--primary)",
-                      color: "var(--bg-dark)",
+                      background: hasCaseAssessment
+                        ? "var(--bg-secondary)"
+                        : "var(--primary)",
+                      color: hasCaseAssessment
+                        ? "var(--text-muted)"
+                        : "var(--bg-dark)",
                     }}
                   >
                     <MessageSquare className="h-4 w-4" />
-                    Start Case Assessment
+                    {hasCaseAssessment
+                      ? "Case Assessment Started"
+                      : "Start Case Assessment"}
                   </button>
                   <button
-                    onClick={() => router.push("/dashboard/appointments")}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2 rounded-md font-medium text-sm transition border hover:bg-accent"
+                    onClick={() => {
+                      if (!hasCaseAssessment) {
+                        alert(
+                          "Please start a case assessment first before booking an appointment."
+                        );
+                        return;
+                      }
+                      router.push("/dashboard/appointments");
+                    }}
+                    disabled={!hasCaseAssessment}
+                    className="w-full sm:w-auto cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-2 rounded-md font-medium text-sm transition border hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                       borderColor: "var(--border)",
                       background: "var(--bg)",
                       color: "var(--text)",
                     }}
+                    title={
+                      !hasCaseAssessment
+                        ? "Please start a case assessment first"
+                        : ""
+                    }
                   >
                     <Calendar className="h-4 w-4" />
                     Book Appointment
                   </button>
                   <button
                     onClick={handleTakeAnother}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2 rounded-md font-medium text-sm transition hover:bg-accent"
+                    className="w-full sm:w-auto cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-2 rounded-md font-medium text-sm transition hover:bg-accent"
                     style={{
                       color: "var(--text)",
                     }}
