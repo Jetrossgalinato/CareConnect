@@ -2,16 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
 import { AlertCircle, CheckCircle, Clock, Eye } from "lucide-react";
 import { ScreeningResult } from "@/lib/types/screening";
 
@@ -85,24 +76,51 @@ export default function PSGScreeningsPage() {
   const highRiskCount = screenings.filter(
     (s) => s.severity_score >= 70 && !s.reviewed_at
   ).length;
+  const reviewedCount = screenings.filter((s) => !!s.reviewed_at).length;
 
   const getSeverityBadge = (severityScore: number, colorCode: string) => {
-    const variants: Record<string, "destructive" | "default" | "secondary"> = {
-      red: "destructive",
-      yellow: "default",
-      green: "secondary",
-    };
-
     const getSeverityLabel = (score: number) => {
       if (score >= 70) return "HIGH";
       if (score >= 40) return "MODERATE";
       return "LOW";
     };
 
+    const getBadgeColor = (code: string) => {
+      switch (code) {
+        case "red":
+          return {
+            bg: "var(--error-20)",
+            color: "var(--error)",
+            border: "var(--error)",
+          };
+        case "yellow":
+          return {
+            bg: "var(--warning-20)",
+            color: "var(--warning)",
+            border: "var(--warning)",
+          };
+        default:
+          return {
+            bg: "var(--success-20)",
+            color: "var(--success)",
+            border: "var(--success)",
+          };
+      }
+    };
+
+    const colors = getBadgeColor(colorCode);
+
     return (
-      <Badge variant={variants[colorCode] || "default"}>
+      <span
+        className="inline-block text-xs font-semibold px-2 py-1 rounded"
+        style={{
+          background: colors.bg,
+          color: colors.color,
+          border: `1px solid ${colors.border}`,
+        }}
+      >
         {getSeverityLabel(severityScore)}
-      </Badge>
+      </span>
     );
   };
 
@@ -120,155 +138,294 @@ export default function PSGScreeningsPage() {
   };
 
   return (
-    <div className="container max-w-7xl py-8 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Student Screenings
-        </h1>
-        <p className="text-muted-foreground">
-          Review and manage student mental health screening results
-        </p>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Reviews
-            </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Awaiting your review
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              High Risk Cases
-            </CardTitle>
-            <AlertCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{highRiskCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Require immediate attention
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Reviewed
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {screenings.filter((s) => !!s.reviewed_at).length}
+    <DashboardClientWrapper>
+      <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="space-y-2">
+              <h1
+                className="text-3xl font-bold tracking-tight"
+                style={{ color: "var(--text)" }}
+              >
+                Student Screenings
+              </h1>
+              <p style={{ color: "var(--text-muted)" }}>
+                Review and manage student mental health screening results
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">Completed reviews</p>
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* Screenings List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Screening Results</CardTitle>
-          <CardDescription>
-            Click on a screening to view details and take action
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs
-            value={filter}
-            onValueChange={(v: string) => setFilter(v as typeof filter)}
-          >
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">All ({screenings.length})</TabsTrigger>
-              <TabsTrigger value="pending">
-                Pending ({pendingCount})
-              </TabsTrigger>
-              <TabsTrigger value="reviewed">
-                Reviewed ({screenings.filter((s) => !!s.reviewed_at).length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value={filter} className="space-y-3">
-              {sortedScreenings.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  No screenings found
-                </div>
-              ) : (
-                sortedScreenings.map((screening) => (
-                  <Card
-                    key={screening.id}
-                    className="hover:bg-accent/50 transition-colors"
+            {/* Summary Cards */}
+            <div className="grid gap-4 md:grid-cols-3">
+              <div
+                className="rounded-lg p-6"
+                style={{
+                  background: "var(--bg-light)",
+                  border: "1px solid var(--border-muted)",
+                  boxShadow: "0 2px 16px 0 var(--border-muted)",
+                }}
+              >
+                <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <h3
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text)" }}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">
-                              Student #{screening.user_id.slice(-4)}
-                            </span>
-                            {getSeverityBadge(
-                              screening.severity_score,
-                              screening.color_code
-                            )}
-                            {!screening.reviewed_at && (
-                              <Badge
-                                variant="outline"
-                                className="bg-blue-500/10 text-blue-500 border-blue-500/20"
-                              >
-                                NEW
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>Score: {screening.total_score}%</span>
-                            <span>•</span>
-                            <span>{formatTimeAgo(screening.created_at)}</span>
-                            {screening.reviewed_at && (
-                              <>
-                                <span>•</span>
-                                <span className="flex items-center gap-1">
-                                  <CheckCircle className="h-3 w-3" />
-                                  Reviewed
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </div>
+                    Pending Reviews
+                  </h3>
+                  <Clock
+                    className="h-4 w-4"
+                    style={{ color: "var(--text-muted)" }}
+                  />
+                </div>
+                <div>
+                  <div
+                    className="text-2xl font-bold"
+                    style={{ color: "var(--text)" }}
+                  >
+                    {pendingCount}
+                  </div>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    Awaiting your review
+                  </p>
+                </div>
+              </div>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/psg/screenings/${screening.id}`
-                            )
-                          }
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Details
-                        </Button>
+              <div
+                className="rounded-lg p-6"
+                style={{
+                  background: "var(--bg-light)",
+                  border: "1px solid var(--border-muted)",
+                  boxShadow: "0 2px 16px 0 var(--border-muted)",
+                }}
+              >
+                <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <h3
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text)" }}
+                  >
+                    High Risk Cases
+                  </h3>
+                  <AlertCircle
+                    className="h-4 w-4"
+                    style={{ color: "var(--error)" }}
+                  />
+                </div>
+                <div>
+                  <div
+                    className="text-2xl font-bold"
+                    style={{ color: "var(--text)" }}
+                  >
+                    {highRiskCount}
+                  </div>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    Require immediate attention
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className="rounded-lg p-6"
+                style={{
+                  background: "var(--bg-light)",
+                  border: "1px solid var(--border-muted)",
+                  boxShadow: "0 2px 16px 0 var(--border-muted)",
+                }}
+              >
+                <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <h3
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text)" }}
+                  >
+                    Total Reviewed
+                  </h3>
+                  <CheckCircle
+                    className="h-4 w-4"
+                    style={{ color: "var(--text-muted)" }}
+                  />
+                </div>
+                <div>
+                  <div
+                    className="text-2xl font-bold"
+                    style={{ color: "var(--text)" }}
+                  >
+                    {reviewedCount}
+                  </div>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    Completed reviews
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Screenings List */}
+            <div
+              className="rounded-lg"
+              style={{
+                background: "var(--bg-light)",
+                border: "1px solid var(--border-muted)",
+                boxShadow: "0 2px 16px 0 var(--border-muted)",
+              }}
+            >
+              <div
+                className="p-6 border-b"
+                style={{ borderColor: "var(--border-muted)" }}
+              >
+                <h2
+                  className="text-lg font-semibold"
+                  style={{ color: "var(--text)" }}
+                >
+                  Screening Results
+                </h2>
+                <p
+                  className="text-sm mt-1"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Click on a screening to view details and take action
+                </p>
+              </div>
+
+              <div className="p-6">
+                {/* Filter Tabs */}
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={() => setFilter("all")}
+                    className="px-4 py-2 rounded-md text-sm font-medium transition"
+                    style={{
+                      background:
+                        filter === "all"
+                          ? "var(--primary)"
+                          : "var(--bg-secondary)",
+                      color:
+                        filter === "all"
+                          ? "var(--bg-dark)"
+                          : "var(--text-muted)",
+                    }}
+                  >
+                    All ({screenings.length})
+                  </button>
+                  <button
+                    onClick={() => setFilter("pending")}
+                    className="px-4 py-2 rounded-md text-sm font-medium transition"
+                    style={{
+                      background:
+                        filter === "pending"
+                          ? "var(--primary)"
+                          : "var(--bg-secondary)",
+                      color:
+                        filter === "pending"
+                          ? "var(--bg-dark)"
+                          : "var(--text-muted)",
+                    }}
+                  >
+                    Pending ({pendingCount})
+                  </button>
+                  <button
+                    onClick={() => setFilter("reviewed")}
+                    className="px-4 py-2 rounded-md text-sm font-medium transition"
+                    style={{
+                      background:
+                        filter === "reviewed"
+                          ? "var(--primary)"
+                          : "var(--bg-secondary)",
+                      color:
+                        filter === "reviewed"
+                          ? "var(--bg-dark)"
+                          : "var(--text-muted)",
+                    }}
+                  >
+                    Reviewed ({reviewedCount})
+                  </button>
+                </div>
+
+                {/* Screenings List */}
+                <div className="space-y-3">
+                  {sortedScreenings.length === 0 ? (
+                    <div
+                      className="text-center py-12"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      No screenings found
+                    </div>
+                  ) : (
+                    sortedScreenings.map((screening) => (
+                      <div
+                        key={screening.id}
+                        className="rounded-lg p-4 border transition hover:bg-accent"
+                        style={{
+                          background: "var(--bg)",
+                          borderColor: "var(--border-muted)",
+                        }}
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span
+                                className="font-medium"
+                                style={{ color: "var(--text)" }}
+                              >
+                                Student #nt-{screening.user_id.slice(-1)}
+                              </span>
+                              {getSeverityBadge(
+                                screening.severity_score,
+                                screening.color_code
+                              )}
+                              {!screening.reviewed_at && (
+                                <span
+                                  className="inline-block text-xs font-semibold px-2 py-1 rounded border"
+                                  style={{
+                                    background: "var(--primary-20)",
+                                    color: "var(--primary)",
+                                    borderColor: "var(--primary)",
+                                  }}
+                                >
+                                  NEW
+                                </span>
+                              )}
+                            </div>
+                            <div
+                              className="flex items-center gap-4 text-sm flex-wrap"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              <span>Score: {screening.total_score}%</span>
+                              <span>•</span>
+                              <span>{formatTimeAgo(screening.created_at)}</span>
+                              {screening.reviewed_at && (
+                                <>
+                                  <span>•</span>
+                                  <span className="flex items-center gap-1">
+                                    <CheckCircle className="h-3 w-3" />
+                                    Reviewed
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/psg/screenings/${screening.id}`
+                              )
+                            }
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition border hover:bg-accent"
+                            style={{
+                              borderColor: "var(--border)",
+                              color: "var(--text)",
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                            View Details
+                          </button>
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </DashboardClientWrapper>
   );
 }
