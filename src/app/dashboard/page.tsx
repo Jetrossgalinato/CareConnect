@@ -1,6 +1,7 @@
 import { getUser } from "@/lib/actions/auth";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/LogoutButton";
+import { ThemeToggler } from "@/components/ThemeToggler";
 import { formatRole } from "@/lib/utils/auth";
 import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
 import Link from "next/link";
@@ -49,7 +50,10 @@ export default async function DashboardPage() {
                 Welcome back, {user.full_name}
               </p>
             </div>
-            <LogoutButton />
+            <div className="flex items-center gap-3">
+              <ThemeToggler />
+              <LogoutButton />
+            </div>
           </div>
         </header>
 
