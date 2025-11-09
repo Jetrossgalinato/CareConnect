@@ -263,7 +263,7 @@ export async function createCaseAssessment(screeningId: string) {
   try {
     const supabase = await createClient();
 
-    // Get current user (PSG member)
+    // Get current user (student initiating the assessment)
     const {
       data: { user },
       error: userError,
@@ -272,7 +272,7 @@ export async function createCaseAssessment(screeningId: string) {
       return { error: "User not authenticated" };
     }
 
-    // Get screening to get user_id
+    // Get screening to verify it belongs to the user
     const { data: screening, error: screeningError } = await supabase
       .from("screening_results")
       .select("user_id")
@@ -283,14 +283,19 @@ export async function createCaseAssessment(screeningId: string) {
       return { error: "Screening not found" };
     }
 
-    // Create case assessment
+    // Verify the screening belongs to the current user
+    if (screening.user_id !== user.id) {
+      return { error: "Unauthorized access" };
+    }
+
+    // Create case assessment (no PSG member assigned yet)
     const { data, error } = await supabase
       .from("case_assessments")
       .insert({
         screening_result_id: screeningId,
-        user_id: screening.user_id,
-        psg_member_id: user.id,
-        status: "in_progress",
+        user_id: user.id,
+        psg_member_id: null, // Will be assigned later by PSG member
+        status: "pending",
       })
       .select()
       .single();

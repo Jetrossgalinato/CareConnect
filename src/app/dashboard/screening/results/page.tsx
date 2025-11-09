@@ -6,13 +6,17 @@ import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { ScreeningResultDisplay } from "@/components/screening/ScreeningResultDisplay";
 import { ScreeningResult } from "@/lib/types/screening";
-import { getLatestScreeningResult } from "@/lib/actions/screening";
+import {
+  getLatestScreeningResult,
+  createCaseAssessment,
+} from "@/lib/actions/screening";
 import { MessageSquare, Calendar, RotateCcw } from "lucide-react";
 
 export default function ScreeningResultsPage() {
   const [result, setResult] = useState<ScreeningResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasCaseAssessment, setHasCaseAssessment] = useState(false);
+  const [isCreatingAssessment, setIsCreatingAssessment] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -50,16 +54,31 @@ export default function ScreeningResultsPage() {
     fetchScreeningResult();
   }, [router]);
 
-  const handleStartCaseAssessment = () => {
-    // Mark that user has started case assessment
-    setHasCaseAssessment(true);
-    sessionStorage.setItem("hasCaseAssessment", "true");
+  const handleStartCaseAssessment = async () => {
+    if (!result?.id) return;
 
-    // TODO: Navigate to case assessment chat when implemented
-    // For now, show alert that case assessment has been initiated
-    alert(
-      "Case assessment initiated. A PSG member will reach out to you soon."
-    );
+    setIsCreatingAssessment(true);
+    try {
+      const response = await createCaseAssessment(result.id);
+
+      if (response.error) {
+        alert(`Error: ${response.error}`);
+        return;
+      }
+
+      // Mark that user has started case assessment
+      setHasCaseAssessment(true);
+      sessionStorage.setItem("hasCaseAssessment", "true");
+
+      alert(
+        "Case assessment initiated. A PSG member will reach out to you soon."
+      );
+    } catch (error) {
+      console.error("Error creating case assessment:", error);
+      alert("Failed to start case assessment. Please try again.");
+    } finally {
+      setIsCreatingAssessment(false);
+    }
   };
 
   const handleTakeAnother = () => {
@@ -216,7 +235,7 @@ export default function ScreeningResultsPage() {
                 <div className="flex flex-col sm:flex-row gap-3 pt-2">
                   <button
                     onClick={handleStartCaseAssessment}
-                    disabled={hasCaseAssessment}
+                    disabled={hasCaseAssessment || isCreatingAssessment}
                     className="w-full sm:w-auto cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-2 rounded-md font-medium text-sm transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                       background: hasCaseAssessment
@@ -228,7 +247,9 @@ export default function ScreeningResultsPage() {
                     }}
                   >
                     <MessageSquare className="h-4 w-4" />
-                    {hasCaseAssessment
+                    {isCreatingAssessment
+                      ? "Starting..."
+                      : hasCaseAssessment
                       ? "Case Assessment Started"
                       : "Start Case Assessment"}
                   </button>
