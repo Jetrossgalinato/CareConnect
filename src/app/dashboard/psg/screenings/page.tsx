@@ -47,15 +47,18 @@ export default function PSGScreeningsPage() {
     return true;
   });
 
+  // Create a map of screening ID to student number (based on creation date, oldest = 1)
+  const screeningNumbers = new Map<string, number>();
+  const allScreeningsSortedByDate = [...screenings].sort(
+    (a, b) =>
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+  allScreeningsSortedByDate.forEach((screening, index) => {
+    screeningNumbers.set(screening.id, index + 1);
+  });
+
   const sortedScreenings = [...filteredScreenings].sort((a, b) => {
-    // Sort by: unreviewed first, then by severity (high to low), then by date (newest first)
-    if (!a.reviewed_at && b.reviewed_at) return -1;
-    if (a.reviewed_at && !b.reviewed_at) return 1;
-
-    // Sort by severity_score (higher scores first)
-    const severityDiff = b.severity_score - a.severity_score;
-    if (severityDiff !== 0) return severityDiff;
-
+    // Sort by: date (newest first) - most recent at the top
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
@@ -359,7 +362,7 @@ export default function PSGScreeningsPage() {
                       No screenings found
                     </div>
                   ) : (
-                    sortedScreenings.map((screening, index) => (
+                    sortedScreenings.map((screening) => (
                       <div
                         key={screening.id}
                         className="rounded-lg p-4 border transition hover:bg-accent"
@@ -375,7 +378,7 @@ export default function PSGScreeningsPage() {
                                 className="font-medium"
                                 style={{ color: "var(--text)" }}
                               >
-                                Student {index + 1}
+                                Student {screeningNumbers.get(screening.id)}
                               </span>
                               {getSeverityBadge(screening.color_code)}
                               {!screening.reviewed_at && (
