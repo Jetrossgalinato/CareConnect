@@ -46,10 +46,13 @@ export function ScreeningForm({ questions, onSubmit }: ScreeningFormProps) {
       score = 0;
     }
 
+    // Apply weight and round to avoid floating-point precision issues
+    const weightedScore = Number(((score * question.weight) / 10).toFixed(2));
+
     const response: QuestionResponse = {
       question_id: questionId,
       answer,
-      score: score * (question.weight / 10), // Weight the score
+      score: weightedScore,
     };
 
     setResponses((prev) => new Map(prev).set(questionId, response));
