@@ -219,7 +219,7 @@ export default function PSGAppointmentsPage() {
             <button
               key={tab.key}
               onClick={() => setFilter(tab.key)}
-              className="px-4 py-2 font-medium transition-all relative hover:bg-opacity-10 hover:bg-primary"
+              className="px-4 py-2 font-medium transition-all relative hover:opacity-80"
               style={{
                 borderBottom:
                   filter === tab.key ? "2px solid var(--primary)" : "none",
