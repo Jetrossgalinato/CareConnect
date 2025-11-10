@@ -12,6 +12,7 @@ import { useAlert } from "@/components/AlertProvider";
 import type { PSGAvailability, DayOfWeek } from "@/types/appointments";
 import { DAY_NAMES } from "@/types/appointments";
 import { createClient } from "@/lib/supabase/client";
+import { DashboardNavbar } from "@/components/DashboardNavbar";
 
 export default function PSGAvailabilityPage() {
   const router = useRouter();
@@ -215,7 +216,12 @@ export default function PSGAvailabilityPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+      <DashboardNavbar
+        subtitle="Manage your weekly availability schedule"
+        showHomeButton={true}
+      />
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">My Availability</h1>
         {!showForm && (
@@ -350,6 +356,7 @@ export default function PSGAvailabilityPage() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }

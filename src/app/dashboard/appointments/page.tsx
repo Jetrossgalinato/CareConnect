@@ -14,6 +14,7 @@ import {
   APPOINTMENT_STATUS_COLORS,
 } from "@/types/appointments";
 import { createClient } from "@/lib/supabase/client";
+import { DashboardNavbar } from "@/components/DashboardNavbar";
 
 export default function StudentAppointmentsPage() {
   const router = useRouter();
@@ -119,7 +120,12 @@ export default function StudentAppointmentsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+      <DashboardNavbar
+        subtitle="View and manage your appointments"
+        showHomeButton={true}
+      />
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">My Appointments</h1>
         <Link
@@ -278,6 +284,7 @@ export default function StudentAppointmentsPage() {
           ))
         )}
       </div>
+    </div>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { createAppointment } from "@/actions/appointments";
 import { useAlert } from "@/components/AlertProvider";
 import type { AvailableTimeSlot } from "@/types/appointments";
 import { createClient } from "@/lib/supabase/client";
+import { DashboardNavbar } from "@/components/DashboardNavbar";
 
 export default function BookAppointmentPage() {
   const router = useRouter();
@@ -170,7 +171,12 @@ export default function BookAppointmentPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+      <DashboardNavbar
+        subtitle="Schedule a new appointment with a PSG member"
+        showHomeButton={true}
+      />
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
       <h1 className="text-3xl font-bold mb-6">Book an Appointment</h1>
 
       {/* Date Range Selection */}
@@ -330,6 +336,7 @@ export default function BookAppointmentPage() {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }

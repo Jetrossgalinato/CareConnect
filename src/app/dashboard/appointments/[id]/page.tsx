@@ -10,6 +10,7 @@ import {
   APPOINTMENT_STATUS_LABELS,
   APPOINTMENT_STATUS_COLORS,
 } from "@/types/appointments";
+import { DashboardNavbar } from "@/components/DashboardNavbar";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -140,7 +141,12 @@ export default function AppointmentDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+      <DashboardNavbar
+        subtitle="Appointment details and actions"
+        showHomeButton={true}
+      />
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-6">
         <Link
           href="/dashboard/appointments"
@@ -422,6 +428,7 @@ export default function AppointmentDetailPage({ params }: PageProps) {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }
