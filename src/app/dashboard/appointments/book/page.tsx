@@ -8,6 +8,7 @@ import { useAlert } from "@/components/AlertProvider";
 import type { AvailableTimeSlot } from "@/types/appointments";
 import { createClient } from "@/lib/supabase/client";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
+import { Loader } from "@/components/Loader";
 
 export default function BookAppointmentPage() {
   const router = useRouter();
@@ -273,12 +274,8 @@ export default function BookAppointmentPage() {
             </h2>
 
             {loading && slots.length === 0 ? (
-              <div className="text-center py-8">
-                <div
-                  className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
-                  style={{ borderColor: "var(--primary)" }}
-                ></div>
-                <p style={{ color: "var(--text-muted)" }}>Loading slots...</p>
+              <div className="py-8">
+                <Loader text="Loading slots..." />
               </div>
             ) : Object.keys(slotsByDate).length === 0 ? (
               <div

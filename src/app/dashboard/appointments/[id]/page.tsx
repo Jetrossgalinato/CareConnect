@@ -8,6 +8,7 @@ import { useAlert } from "@/components/AlertProvider";
 import type { AppointmentWithProfiles } from "@/types/appointments";
 import { APPOINTMENT_STATUS_LABELS } from "@/types/appointments";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
+import { Loader } from "@/components/Loader";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -123,22 +124,7 @@ export default function AppointmentDetailPage({ params }: PageProps) {
     new Date(appointment.appointment_date) > new Date();
 
   if (loading) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: "var(--bg)" }}
-      >
-        <div className="text-center">
-          <div
-            className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
-            style={{ borderColor: "var(--primary)" }}
-          ></div>
-          <p style={{ color: "var(--text-muted)" }}>
-            Loading appointment details...
-          </p>
-        </div>
-      </div>
-    );
+    return <Loader fullScreen text="Loading appointment details..." />;
   }
 
   if (!appointment) {

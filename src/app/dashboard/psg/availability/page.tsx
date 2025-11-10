@@ -13,6 +13,7 @@ import type { PSGAvailability, DayOfWeek } from "@/types/appointments";
 import { DAY_NAMES } from "@/types/appointments";
 import { createClient } from "@/lib/supabase/client";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
+import { Loader } from "@/components/Loader";
 
 export default function PSGAvailabilityPage() {
   const router = useRouter();
@@ -205,14 +206,7 @@ export default function PSGAvailabilityPage() {
   };
 
   if (loading && availabilities.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading availability...</p>
-        </div>
-      </div>
-    );
+    return <Loader fullScreen text="Loading availability..." />;
   }
 
   return (
