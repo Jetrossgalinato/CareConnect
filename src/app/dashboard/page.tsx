@@ -155,7 +155,53 @@ export default async function DashboardPage() {
                   </div>
                 </Link>
 
-                {/* Coming Soon Cards */}
+                {/* My Appointments - Active */}
+                <Link
+                  href="/dashboard/appointments"
+                  className="group rounded-lg p-6 transition-all hover:scale-105"
+                  style={{
+                    background: "var(--bg-light)",
+                    border: "2px solid var(--primary)",
+                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                  }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="p-3 rounded-lg"
+                      style={{ background: "var(--primary-20)" }}
+                    >
+                      <Calendar
+                        className="w-6 h-6"
+                        style={{ color: "var(--primary)" }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3
+                        className="font-semibold text-lg mb-1"
+                        style={{ color: "var(--text)" }}
+                      >
+                        My Appointments
+                      </h3>
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        Schedule sessions with PSG members
+                      </p>
+                      <span
+                        className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
+                        style={{
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
+                        }}
+                      >
+                        Available Now
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* Coming Soon Cards - Last */}
                 <div
                   className="rounded-lg p-6 opacity-60"
                   style={{
@@ -199,52 +245,6 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Book Appointments - Active */}
-                <Link
-                  href="/dashboard/appointments"
-                  className="group rounded-lg p-6 transition-all hover:scale-105"
-                  style={{
-                    background: "var(--bg-light)",
-                    border: "2px solid var(--info)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
-                  }}
-                >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className="p-3 rounded-lg"
-                      style={{ background: "var(--info-bg)" }}
-                    >
-                      <Calendar
-                        className="w-6 h-6"
-                        style={{ color: "var(--info)" }}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3
-                        className="font-semibold text-lg mb-1"
-                        style={{ color: "var(--text)" }}
-                      >
-                        My Appointments
-                      </h3>
-                      <p
-                        className="text-sm"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Schedule sessions with PSG members
-                      </p>
-                      <span
-                        className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
-                        style={{
-                          background: "var(--info-bg)",
-                          color: "var(--info)",
-                        }}
-                      >
-                        Available Now
-                      </span>
-                    </div>
-                  </div>
-                </Link>
 
                 <div
                   className="rounded-lg p-6 opacity-60"
@@ -347,18 +347,18 @@ export default async function DashboardPage() {
                   className="group rounded-lg p-6 transition-all hover:scale-105"
                   style={{
                     background: "var(--bg-light)",
-                    border: "2px solid var(--info)",
+                    border: "2px solid var(--primary)",
                     boxShadow: "0 2px 16px 0 var(--border-muted)",
                   }}
                 >
                   <div className="flex items-start gap-4">
                     <div
                       className="p-3 rounded-lg"
-                      style={{ background: "var(--info-bg)" }}
+                      style={{ background: "var(--primary-20)" }}
                     >
                       <Calendar
                         className="w-6 h-6"
-                        style={{ color: "var(--info)" }}
+                        style={{ color: "var(--primary)" }}
                       />
                     </div>
                     <div className="flex-1">
@@ -377,8 +377,8 @@ export default async function DashboardPage() {
                       <span
                         className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
                         style={{
-                          background: "var(--info-bg)",
-                          color: "var(--info)",
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
                         }}
                       >
                         Available Now
@@ -387,7 +387,53 @@ export default async function DashboardPage() {
                   </div>
                 </Link>
 
-                {/* Coming Soon for PSG */}
+                {/* Manage Availability - Active */}
+                <Link
+                  href="/dashboard/psg/availability"
+                  className="group rounded-lg p-6 transition-all hover:scale-105"
+                  style={{
+                    background: "var(--bg-light)",
+                    border: "2px solid var(--primary)",
+                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                  }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="p-3 rounded-lg"
+                      style={{ background: "var(--primary-20)" }}
+                    >
+                      <Calendar
+                        className="w-6 h-6"
+                        style={{ color: "var(--primary)" }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3
+                        className="font-semibold text-lg mb-1"
+                        style={{ color: "var(--text)" }}
+                      >
+                        Manage Availability
+                      </h3>
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        Set your weekly schedule
+                      </p>
+                      <span
+                        className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
+                        style={{
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
+                        }}
+                      >
+                        Available Now
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* Coming Soon for PSG - Last */}
                 <div
                   className="rounded-lg p-6 opacity-60"
                   style={{
@@ -431,51 +477,6 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                 </div>
-
-                <Link
-                  href="/dashboard/psg/availability"
-                  className="block rounded-lg p-6 transition-all duration-200 hover:scale-[1.02]"
-                  style={{
-                    background: "var(--bg-light)",
-                    border: "1px solid var(--border-muted)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
-                  }}
-                >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className="p-3 rounded-lg"
-                      style={{ background: "var(--bg-secondary)" }}
-                    >
-                      <Calendar
-                        className="w-6 h-6"
-                        style={{ color: "var(--primary)" }}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3
-                        className="font-semibold text-lg mb-1"
-                        style={{ color: "var(--text)" }}
-                      >
-                        Manage Availability
-                      </h3>
-                      <p
-                        className="text-sm"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Set your weekly schedule
-                      </p>
-                      <span
-                        className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
-                        style={{
-                          background: "var(--primary-20)",
-                          color: "var(--primary)",
-                        }}
-                      >
-                        Available Now
-                      </span>
-                    </div>
-                  </div>
-                </Link>
               </div>
             )}
 
