@@ -30,7 +30,11 @@ export default function BookAppointmentPage() {
   const searchSlots = async () => {
     if (!startDate || !endDate) return;
     if (new Date(startDate) > new Date(endDate)) {
-      showAlert("Start date must be before end date", "error");
+      showAlert({
+        message: "Start date must be before end date",
+        type: "error",
+        duration: 5000,
+      });
       return;
     }
 
@@ -41,13 +45,25 @@ export default function BookAppointmentPage() {
       if (result.success && result.data) {
         setSlots(result.data);
         if (result.data.length === 0) {
-          showAlert("No available slots found in this date range", "warning");
+          showAlert({
+            message: "No available slots found in this date range",
+            type: "warning",
+            duration: 5000,
+          });
         }
       } else {
-        showAlert(result.error || "Failed to load available slots", "error");
+        showAlert({
+          message: result.error || "Failed to load available slots",
+          type: "error",
+          duration: 5000,
+        });
       }
     } catch {
-      showAlert("An unexpected error occurred", "error");
+      showAlert({
+        message: "An unexpected error occurred",
+        type: "error",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -56,7 +72,11 @@ export default function BookAppointmentPage() {
   useEffect(() => {
     const user = localStorage.getItem("userId");
     if (!user) {
-      showAlert("Please login first", "error");
+      showAlert({
+        message: "Please login first",
+        type: "error",
+        duration: 5000,
+      });
       router.push("/login");
       return;
     }
@@ -72,7 +92,11 @@ export default function BookAppointmentPage() {
 
   const handleBookAppointment = async () => {
     if (!selectedSlot) {
-      showAlert("Please select a time slot", "error");
+      showAlert({
+        message: "Please select a time slot",
+        type: "error",
+        duration: 5000,
+      });
       return;
     }
 
@@ -93,13 +117,25 @@ export default function BookAppointmentPage() {
       });
 
       if (result.success) {
-        showAlert("Appointment booked successfully!", "success");
+        showAlert({
+          message: "Appointment booked successfully!",
+          type: "success",
+          duration: 5000,
+        });
         router.push("/dashboard/appointments");
       } else {
-        showAlert(result.error || "Failed to book appointment", "error");
+        showAlert({
+          message: result.error || "Failed to book appointment",
+          type: "error",
+          duration: 5000,
+        });
       }
     } catch {
-      showAlert("An unexpected error occurred", "error");
+      showAlert({
+        message: "An unexpected error occurred",
+        type: "error",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
