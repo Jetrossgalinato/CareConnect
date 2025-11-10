@@ -49,6 +49,14 @@ export default function PSGAppointmentsPage() {
 
       if (result.success && result.data) {
         setAppointments(result.data);
+
+        // Auto-switch to upcoming tab if no pending appointments
+        const hasPending = result.data.some(
+          (apt) => apt.status === "scheduled"
+        );
+        if (!hasPending && filter === "pending") {
+          setFilter("upcoming");
+        }
       } else {
         showAlert({
           message: result.error || "Failed to load appointments",
