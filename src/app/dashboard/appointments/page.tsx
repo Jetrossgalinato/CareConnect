@@ -158,7 +158,7 @@ export default function StudentAppointmentsPage() {
         <div className="space-y-4">
           {filteredAppointments.length === 0 ? (
             <div
-              className="rounded-lg shadow-lg p-8 text-center"
+              className="rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)] p-8 text-center"
               style={{
                 background: "var(--bg-light)",
                 border: "1px solid var(--border-muted)",
@@ -182,7 +182,7 @@ export default function StudentAppointmentsPage() {
             filteredAppointments.map((apt) => (
               <div
                 key={apt.id}
-                className="rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
+                className="rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)] p-6 hover:shadow-[0_2px_4px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.03),0_4px_8px_rgba(0,0,0,0.02)] transition-shadow"
                 style={{
                   background: "var(--bg-light)",
                   border: "1px solid var(--border-muted)",
@@ -198,7 +198,7 @@ export default function StudentAppointmentsPage() {
                         {apt.psg_member.full_name}
                       </h3>
                       <span
-                        className="px-3 py-1 rounded-full text-xs font-medium"
+                        className="px-3 py-1 rounded-full text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
                         style={{
                           background:
                             apt.status === "scheduled"
@@ -331,7 +331,7 @@ export default function StudentAppointmentsPage() {
 
                   <Link
                     href={`/dashboard/appointments/${apt.id}`}
-                    className="px-4 py-2 rounded-lg hover:opacity-90 transition-all"
+                    className="px-4 py-2 rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.2),0_1px_2px_rgba(0,0,0,0.06)] hover:shadow-[0_2px_6px_rgba(0,0,0,0.25),0_2px_4px_rgba(0,0,0,0.08)] hover:opacity-90 transition-all"
                     style={{
                       background: "var(--info)",
                       color: "var(--bg-dark)",

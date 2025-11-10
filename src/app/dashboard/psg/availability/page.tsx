@@ -237,7 +237,7 @@ export default function PSGAvailabilityPage() {
         {/* Add/Edit Form */}
         {showForm && (
           <div
-            className="rounded-lg shadow-lg p-6 mb-6"
+            className="rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)] p-6 mb-6"
             style={{
               background: "var(--bg-light)",
               border: "1px solid var(--border-muted)",
@@ -351,7 +351,7 @@ export default function PSGAvailabilityPage() {
 
         {/* Availability List */}
         <div
-          className="rounded-lg shadow-lg p-6"
+          className="rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)] p-6"
           style={{
             background: "var(--bg-light)",
             border: "1px solid var(--border-muted)",
@@ -379,7 +379,7 @@ export default function PSGAvailabilityPage() {
               {availabilities.map((availability) => (
                 <div
                   key={availability.id}
-                  className="flex justify-between items-center p-4 rounded-lg hover:bg-opacity-80 transition-colors"
+                  className="flex justify-between items-center p-4 rounded-lg hover:bg-opacity-80 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.1)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.15)]"
                   style={{
                     border: "1px solid var(--border-muted)",
                     background: "var(--bg)",

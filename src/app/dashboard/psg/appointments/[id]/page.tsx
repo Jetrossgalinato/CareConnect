@@ -213,7 +213,7 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
 
         {/* Main Card */}
         <div
-          className="rounded-lg shadow-lg p-8"
+          className="rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)] p-8"
           style={{
             background: "var(--bg-light)",
             border: "1px solid var(--border-muted)",
@@ -536,7 +536,7 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
                     setCancelReason("");
                   }}
                   disabled={processing}
-                  className="px-6 py-2 rounded-lg hover:opacity-90 transition-all"
+                  className="px-6 py-2 rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.2),0_1px_2px_rgba(0,0,0,0.06)] hover:shadow-[0_2px_6px_rgba(0,0,0,0.25),0_2px_4px_rgba(0,0,0,0.08)] hover:opacity-90 transition-all"
                   style={{
                     background: "var(--bg-secondary)",
                     color: "var(--text)",

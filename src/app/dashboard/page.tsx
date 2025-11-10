@@ -66,11 +66,12 @@ export default async function DashboardPage() {
                 {/* Mental Health Screening - Active */}
                 <Link
                   href="/dashboard/screening/take"
-                  className="group rounded-lg p-6 transition-all hover:scale-105"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
                     border: "2px solid var(--primary)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -112,11 +113,12 @@ export default async function DashboardPage() {
                 {/* View Results - Active */}
                 <Link
                   href="/dashboard/screening/results"
-                  className="group rounded-lg p-6 transition-all hover:scale-105"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
                     border: "2px solid var(--primary)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -158,11 +160,12 @@ export default async function DashboardPage() {
                 {/* My Appointments - Active */}
                 <Link
                   href="/dashboard/appointments"
-                  className="group rounded-lg p-6 transition-all hover:scale-105"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
                     border: "2px solid var(--primary)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -207,7 +210,8 @@ export default async function DashboardPage() {
                   style={{
                     background: "var(--bg-light)",
                     border: "1px solid var(--border-muted)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -251,7 +255,8 @@ export default async function DashboardPage() {
                   style={{
                     background: "var(--bg-light)",
                     border: "1px solid var(--border-muted)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -298,11 +303,12 @@ export default async function DashboardPage() {
                 {/* Review Screenings - Active */}
                 <Link
                   href="/dashboard/psg/screenings"
-                  className="group rounded-lg p-6 transition-all hover:scale-105"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
                     border: "2px solid var(--primary)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -344,11 +350,12 @@ export default async function DashboardPage() {
                 {/* My Appointments - Active */}
                 <Link
                   href="/dashboard/psg/appointments"
-                  className="group rounded-lg p-6 transition-all hover:scale-105"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
                     border: "2px solid var(--primary)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -390,11 +397,12 @@ export default async function DashboardPage() {
                 {/* Manage Availability - Active */}
                 <Link
                   href="/dashboard/psg/availability"
-                  className="group rounded-lg p-6 transition-all hover:scale-105"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
                     border: "2px solid var(--primary)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -439,7 +447,8 @@ export default async function DashboardPage() {
                   style={{
                     background: "var(--bg-light)",
                     border: "1px solid var(--border-muted)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -488,7 +497,8 @@ export default async function DashboardPage() {
                   style={{
                     background: "var(--bg-light)",
                     border: "1px solid var(--border-muted)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -532,7 +542,8 @@ export default async function DashboardPage() {
                   style={{
                     background: "var(--bg-light)",
                     border: "1px solid var(--border-muted)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -576,7 +587,8 @@ export default async function DashboardPage() {
                   style={{
                     background: "var(--bg-light)",
                     border: "1px solid var(--border-muted)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -620,7 +632,8 @@ export default async function DashboardPage() {
                   style={{
                     background: "var(--bg-light)",
                     border: "1px solid var(--border-muted)",
-                    boxShadow: "0 2px 16px 0 var(--border-muted)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
                 >
                   <div className="flex items-start gap-4">

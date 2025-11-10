@@ -173,11 +173,12 @@ export default function PSGScreeningsPage() {
             {/* Summary Cards */}
             <div className="grid gap-4 md:grid-cols-3">
               <div
-                className="rounded-lg p-6"
+                className="rounded-lg p-6 transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                 style={{
                   background: "var(--bg-light)",
                   border: "1px solid var(--border-muted)",
-                  boxShadow: "0 2px 16px 0 var(--border-muted)",
+                  boxShadow:
+                    "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                 }}
               >
                 <div className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -206,11 +207,12 @@ export default function PSGScreeningsPage() {
               </div>
 
               <div
-                className="rounded-lg p-6"
+                className="rounded-lg p-6 transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                 style={{
                   background: "var(--bg-light)",
                   border: "1px solid var(--border-muted)",
-                  boxShadow: "0 2px 16px 0 var(--border-muted)",
+                  boxShadow:
+                    "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                 }}
               >
                 <div className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -239,11 +241,12 @@ export default function PSGScreeningsPage() {
               </div>
 
               <div
-                className="rounded-lg p-6"
+                className="rounded-lg p-6 transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                 style={{
                   background: "var(--bg-light)",
                   border: "1px solid var(--border-muted)",
-                  boxShadow: "0 2px 16px 0 var(--border-muted)",
+                  boxShadow:
+                    "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                 }}
               >
                 <div className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -278,7 +281,8 @@ export default function PSGScreeningsPage() {
               style={{
                 background: "var(--bg-light)",
                 border: "1px solid var(--border-muted)",
-                boxShadow: "0 2px 16px 0 var(--border-muted)",
+                boxShadow:
+                  "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
               }}
             >
               <div
