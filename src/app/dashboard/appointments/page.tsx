@@ -13,6 +13,7 @@ import {
   APPOINTMENT_STATUS_LABELS,
   APPOINTMENT_STATUS_COLORS,
 } from "@/types/appointments";
+import { createClient } from "@/lib/supabase/client";
 
 export default function StudentAppointmentsPage() {
   const router = useRouter();
@@ -25,8 +26,13 @@ export default function StudentAppointmentsPage() {
 
   const loadAppointments = async () => {
     try {
-      const user = localStorage.getItem("userId");
-      if (!user) {
+      const supabase = createClient();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
         showAlert({
           message: "Please login first",
           type: "error",
@@ -36,7 +42,7 @@ export default function StudentAppointmentsPage() {
         return;
       }
 
-      const result = await getStudentAppointments(user);
+      const result = await getStudentAppointments(user.id);
 
       if (result.success && result.data) {
         setAppointments(result.data);

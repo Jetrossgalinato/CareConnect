@@ -6,6 +6,7 @@ import { getAvailableTimeSlots } from "@/actions/psg-availability";
 import { createAppointment } from "@/actions/appointments";
 import { useAlert } from "@/components/AlertProvider";
 import type { AvailableTimeSlot } from "@/types/appointments";
+import { createClient } from "@/lib/supabase/client";
 
 export default function BookAppointmentPage() {
   const router = useRouter();
@@ -70,17 +71,25 @@ export default function BookAppointmentPage() {
   };
 
   useEffect(() => {
-    const user = localStorage.getItem("userId");
-    if (!user) {
-      showAlert({
-        message: "Please login first",
-        type: "error",
-        duration: 5000,
-      });
-      router.push("/login");
-      return;
+    async function checkAuth() {
+      const supabase = createClient();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        showAlert({
+          message: "Please login first",
+          type: "error",
+          duration: 5000,
+        });
+        router.push("/login");
+        return;
+      }
+      setUserId(user.id);
     }
-    setUserId(user);
+    checkAuth();
   }, [showAlert, router]);
 
   useEffect(() => {

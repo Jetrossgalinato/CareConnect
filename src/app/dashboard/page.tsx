@@ -384,8 +384,9 @@ export default async function DashboardPage() {
                   </div>
                 </div>
 
-                <div
-                  className="rounded-lg p-6 opacity-60"
+                <Link
+                  href="/dashboard/psg/availability"
+                  className="block rounded-lg p-6 transition-all duration-200 hover:scale-[1.02]"
                   style={{
                     background: "var(--bg-light)",
                     border: "1px solid var(--border-muted)",
@@ -399,7 +400,7 @@ export default async function DashboardPage() {
                     >
                       <Calendar
                         className="w-6 h-6"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--primary)" }}
                       />
                     </div>
                     <div className="flex-1">
@@ -418,15 +419,15 @@ export default async function DashboardPage() {
                       <span
                         className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
                         style={{
-                          background: "var(--bg-secondary)",
-                          color: "var(--text-muted)",
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
                         }}
                       >
-                        Coming Soon
+                        Available Now
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               </div>
             )}
 

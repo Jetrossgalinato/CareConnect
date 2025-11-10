@@ -11,6 +11,7 @@ import {
 import { useAlert } from "@/components/AlertProvider";
 import type { PSGAvailability, DayOfWeek } from "@/types/appointments";
 import { DAY_NAMES } from "@/types/appointments";
+import { createClient } from "@/lib/supabase/client";
 
 export default function PSGAvailabilityPage() {
   const router = useRouter();
@@ -28,9 +29,14 @@ export default function PSGAvailabilityPage() {
 
   const loadAvailability = async () => {
     try {
-      // Get current user from localStorage or API
-      const user = localStorage.getItem("userId");
-      if (!user) {
+      // Get current user from Supabase
+      const supabase = createClient();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
         showAlert({
           message: "Please login first",
           type: "error",
@@ -40,8 +46,8 @@ export default function PSGAvailabilityPage() {
         return;
       }
 
-      setUserId(user);
-      const result = await getPSGAvailability(user);
+      setUserId(user.id);
+      const result = await getPSGAvailability(user.id);
 
       if (result.success && result.data) {
         setAvailabilities(result.data);
