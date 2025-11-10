@@ -177,166 +177,166 @@ export default function BookAppointmentPage() {
         showHomeButton={true}
       />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-6">Book an Appointment</h1>
+        <h1 className="text-3xl font-bold mb-6">Book an Appointment</h1>
 
-      {/* Date Range Selection */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Select Date Range</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block mb-2 font-medium">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              min={today}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-            />
-          </div>
-          <div>
-            <label className="block mb-2 font-medium">End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              min={startDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-            />
-          </div>
-          <div className="flex items-end">
-            <button
-              onClick={searchSlots}
-              disabled={loading}
-              className="w-full px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50"
-            >
-              {loading ? "Searching..." : "Search Slots"}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Available Slots */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Slots List */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Available Time Slots</h2>
-
-          {loading && slots.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p>Loading slots...</p>
+        {/* Date Range Selection */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">Select Date Range</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block mb-2 font-medium">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                min={today}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+              />
             </div>
-          ) : Object.keys(slotsByDate).length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>No available slots found. Try a different date range.</p>
+            <div>
+              <label className="block mb-2 font-medium">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                min={startDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+              />
             </div>
-          ) : (
-            <div className="space-y-4 max-h-[600px] overflow-y-auto">
-              {Object.entries(slotsByDate).map(([date, dateSlots]) => (
-                <div key={date}>
-                  <h3 className="font-semibold text-lg mb-2 sticky top-0 bg-white dark:bg-gray-800 py-2">
-                    {formatDate(date)}
-                  </h3>
-                  <div className="space-y-2">
-                    {dateSlots.map((slot, idx) => (
-                      <button
-                        key={`${slot.psg_member_id}-${slot.start_time}-${idx}`}
-                        onClick={() => setSelectedSlot(slot)}
-                        className={`w-full text-left p-4 border rounded-lg transition-colors ${
-                          selectedSlot === slot
-                            ? "border-primary bg-green-50 dark:bg-green-900 dark:bg-opacity-20"
-                            : "border-gray-300 dark:border-gray-600 hover:border-primary hover:bg-gray-50 dark:hover:bg-gray-700"
-                        }`}
-                      >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">
-                              {slot.psg_member_name}
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {slot.start_time} - {slot.end_time}
-                            </p>
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {slot.duration_minutes} min
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Booking Summary */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 h-fit sticky top-4">
-          <h2 className="text-xl font-semibold mb-4">Booking Summary</h2>
-
-          {selectedSlot ? (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                  PSG Member
-                </label>
-                <p className="font-medium">{selectedSlot.psg_member_name}</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                  Date
-                </label>
-                <p className="font-medium">{formatDate(selectedSlot.date)}</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                  Time
-                </label>
-                <p className="font-medium">
-                  {selectedSlot.start_time} - {selectedSlot.end_time}
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                  Duration
-                </label>
-                <p className="font-medium">
-                  {selectedSlot.duration_minutes} minutes
-                </p>
-              </div>
-
-              <div>
-                <label className="block mb-2 font-medium">
-                  Notes (Optional)
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add any notes or concerns..."
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 resize-none"
-                />
-              </div>
-
+            <div className="flex items-end">
               <button
-                onClick={handleBookAppointment}
+                onClick={searchSlots}
                 disabled={loading}
-                className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 font-medium"
+                className="w-full px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50"
               >
-                {loading ? "Booking..." : "Confirm Booking"}
+                {loading ? "Searching..." : "Search Slots"}
               </button>
             </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>Select a time slot to see booking details</p>
-            </div>
-          )}
+          </div>
+        </div>
+
+        {/* Available Slots */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Slots List */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Available Time Slots</h2>
+
+            {loading && slots.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p>Loading slots...</p>
+              </div>
+            ) : Object.keys(slotsByDate).length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <p>No available slots found. Try a different date range.</p>
+              </div>
+            ) : (
+              <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                {Object.entries(slotsByDate).map(([date, dateSlots]) => (
+                  <div key={date}>
+                    <h3 className="font-semibold text-lg mb-2 sticky top-0 bg-white dark:bg-gray-800 py-2">
+                      {formatDate(date)}
+                    </h3>
+                    <div className="space-y-2">
+                      {dateSlots.map((slot, idx) => (
+                        <button
+                          key={`${slot.psg_member_id}-${slot.start_time}-${idx}`}
+                          onClick={() => setSelectedSlot(slot)}
+                          className={`w-full text-left p-4 border rounded-lg transition-colors ${
+                            selectedSlot === slot
+                              ? "border-primary bg-green-50 dark:bg-green-900 dark:bg-opacity-20"
+                              : "border-gray-300 dark:border-gray-600 hover:border-primary hover:bg-gray-50 dark:hover:bg-gray-700"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium">
+                                {slot.psg_member_name}
+                              </p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {slot.start_time} - {slot.end_time}
+                              </p>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {slot.duration_minutes} min
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Booking Summary */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 h-fit sticky top-4">
+            <h2 className="text-xl font-semibold mb-4">Booking Summary</h2>
+
+            {selectedSlot ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    PSG Member
+                  </label>
+                  <p className="font-medium">{selectedSlot.psg_member_name}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    Date
+                  </label>
+                  <p className="font-medium">{formatDate(selectedSlot.date)}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    Time
+                  </label>
+                  <p className="font-medium">
+                    {selectedSlot.start_time} - {selectedSlot.end_time}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    Duration
+                  </label>
+                  <p className="font-medium">
+                    {selectedSlot.duration_minutes} minutes
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block mb-2 font-medium">
+                    Notes (Optional)
+                  </label>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Add any notes or concerns..."
+                    rows={4}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 resize-none"
+                  />
+                </div>
+
+                <button
+                  onClick={handleBookAppointment}
+                  disabled={loading}
+                  className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 font-medium"
+                >
+                  {loading ? "Booking..." : "Confirm Booking"}
+                </button>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>Select a time slot to see booking details</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 }

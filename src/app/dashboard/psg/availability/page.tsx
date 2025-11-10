@@ -222,141 +222,142 @@ export default function PSGAvailabilityPage() {
         showHomeButton={true}
       />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">My Availability</h1>
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors"
-          >
-            Add Availability
-          </button>
-        )}
-      </div>
-
-      {/* Add/Edit Form */}
-      {showForm && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">
-            {editingId ? "Edit Availability" : "Add Availability"}
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block mb-2 font-medium">Day of Week</label>
-              <select
-                value={selectedDay}
-                onChange={(e) =>
-                  setSelectedDay(Number(e.target.value) as DayOfWeek)
-                }
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-                required
-              >
-                {Object.entries(DAY_NAMES).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-2 font-medium">Start Time</label>
-                <input
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block mb-2 font-medium">End Time</label>
-                <input
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50"
-              >
-                {loading ? "Saving..." : editingId ? "Update" : "Add"}
-              </button>
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="px-6 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">My Availability</h1>
+          {!showForm && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors"
+            >
+              Add Availability
+            </button>
+          )}
         </div>
-      )}
 
-      {/* Availability List */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Current Schedule</h2>
+        {/* Add/Edit Form */}
+        {showForm && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">
+              {editingId ? "Edit Availability" : "Add Availability"}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block mb-2 font-medium">Day of Week</label>
+                <select
+                  value={selectedDay}
+                  onChange={(e) =>
+                    setSelectedDay(Number(e.target.value) as DayOfWeek)
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                  required
+                >
+                  {Object.entries(DAY_NAMES).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        {availabilities.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <p>
-              No availability set yet. Add your first time slot to get started!
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {availabilities.map((availability) => (
-              <div
-                key={availability.id}
-                className="flex justify-between items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="font-medium text-lg">
-                    {DAY_NAMES[availability.day_of_week]}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {availability.start_time.substring(0, 5)} -{" "}
-                    {availability.end_time.substring(0, 5)}
-                  </p>
-                  <span
-                    className={`inline-block mt-1 px-2 py-1 text-xs rounded ${
-                      availability.is_active
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                    }`}
-                  >
-                    {availability.is_active ? "Active" : "Inactive"}
-                  </span>
+                  <label className="block mb-2 font-medium">Start Time</label>
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                    required
+                  />
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(availability)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(availability.id)}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                  >
-                    Delete
-                  </button>
+                <div>
+                  <label className="block mb-2 font-medium">End Time</label>
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                    required
+                  />
                 </div>
               </div>
-            ))}
+
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50"
+                >
+                  {loading ? "Saving..." : editingId ? "Update" : "Add"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="px-6 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         )}
+
+        {/* Availability List */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Current Schedule</h2>
+
+          {availabilities.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>
+                No availability set yet. Add your first time slot to get
+                started!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {availabilities.map((availability) => (
+                <div
+                  key={availability.id}
+                  className="flex justify-between items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <div>
+                    <p className="font-medium text-lg">
+                      {DAY_NAMES[availability.day_of_week]}
+                    </p>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {availability.start_time.substring(0, 5)} -{" "}
+                      {availability.end_time.substring(0, 5)}
+                    </p>
+                    <span
+                      className={`inline-block mt-1 px-2 py-1 text-xs rounded ${
+                        availability.is_active
+                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      {availability.is_active ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(availability)}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(availability.id)}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </div>
   );
 }
