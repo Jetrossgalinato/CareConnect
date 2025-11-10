@@ -6,10 +6,7 @@ import Link from "next/link";
 import { getAppointmentById, cancelAppointment } from "@/actions/appointments";
 import { useAlert } from "@/components/AlertProvider";
 import type { AppointmentWithProfiles } from "@/types/appointments";
-import {
-  APPOINTMENT_STATUS_LABELS,
-  APPOINTMENT_STATUS_COLORS,
-} from "@/types/appointments";
+import { APPOINTMENT_STATUS_LABELS } from "@/types/appointments";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
 
 interface PageProps {
@@ -127,10 +124,18 @@ export default function AppointmentDetailPage({ params }: PageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "var(--bg)" }}
+      >
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading appointment details...</p>
+          <div
+            className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
+            style={{ borderColor: "var(--primary)" }}
+          ></div>
+          <p style={{ color: "var(--text-muted)" }}>
+            Loading appointment details...
+          </p>
         </div>
       </div>
     );
@@ -150,7 +155,8 @@ export default function AppointmentDetailPage({ params }: PageProps) {
         <div className="mb-6">
           <Link
             href="/dashboard/appointments"
-            className="text-primary hover:underline flex items-center gap-2"
+            className="flex items-center gap-2 hover:underline"
+            style={{ color: "var(--primary)" }}
           >
             <svg
               className="w-5 h-5"
@@ -169,13 +175,30 @@ export default function AppointmentDetailPage({ params }: PageProps) {
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+        <div
+          className="rounded-lg shadow-lg p-8"
+          style={{
+            background: "var(--bg-light)",
+            border: "1px solid var(--border-muted)",
+          }}
+        >
           <div className="flex justify-between items-start mb-6">
-            <h1 className="text-3xl font-bold">Appointment Details</h1>
+            <h1 className="text-3xl font-bold" style={{ color: "var(--text)" }}>
+              Appointment Details
+            </h1>
             <span
-              className={`px-4 py-2 rounded-full text-sm font-medium text-white ${
-                APPOINTMENT_STATUS_COLORS[appointment.status]
-              }`}
+              className="px-4 py-2 rounded-full text-sm font-medium"
+              style={{
+                background:
+                  appointment.status === "scheduled"
+                    ? "var(--warning)"
+                    : appointment.status === "confirmed"
+                    ? "var(--info)"
+                    : appointment.status === "completed"
+                    ? "var(--success)"
+                    : "var(--error)",
+                color: "var(--bg-dark)",
+              }}
             >
               {APPOINTMENT_STATUS_LABELS[appointment.status]}
             </span>
@@ -183,10 +206,19 @@ export default function AppointmentDetailPage({ params }: PageProps) {
 
           {/* PSG Member Info */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+            <h2
+              className="text-xl font-semibold mb-4"
+              style={{ color: "var(--text)" }}
+            >
               PSG Member
             </h2>
-            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div
+              className="flex items-center gap-4 p-4 rounded-lg"
+              style={{
+                background: "var(--bg)",
+                border: "1px solid var(--border-muted)",
+              }}
+            >
               {appointment.psg_member.avatar_url && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -196,7 +228,10 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                 />
               )}
               <div>
-                <p className="font-semibold text-lg">
+                <p
+                  className="font-semibold text-lg"
+                  style={{ color: "var(--text)" }}
+                >
                   {appointment.psg_member.full_name}
                 </p>
               </div>
@@ -205,16 +240,20 @@ export default function AppointmentDetailPage({ params }: PageProps) {
 
           {/* Appointment Info */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+            <h2
+              className="text-xl font-semibold mb-4"
+              style={{ color: "var(--text)" }}
+            >
               Appointment Information
             </h2>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <svg
-                  className="w-6 h-6 text-gray-600 dark:text-gray-400 mt-1"
+                  className="w-6 h-6 mt-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "var(--text-muted)" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -224,10 +263,16 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                   />
                 </svg>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text-muted)" }}
+                  >
                     Date
                   </p>
-                  <p className="text-lg font-medium">
+                  <p
+                    className="text-lg font-medium"
+                    style={{ color: "var(--text)" }}
+                  >
                     {formatDate(appointment.appointment_date)}
                   </p>
                 </div>
@@ -235,10 +280,11 @@ export default function AppointmentDetailPage({ params }: PageProps) {
 
               <div className="flex items-start gap-3">
                 <svg
-                  className="w-6 h-6 text-gray-600 dark:text-gray-400 mt-1"
+                  className="w-6 h-6 mt-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "var(--text-muted)" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -248,10 +294,16 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                   />
                 </svg>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text-muted)" }}
+                  >
                     Time
                   </p>
-                  <p className="text-lg font-medium">
+                  <p
+                    className="text-lg font-medium"
+                    style={{ color: "var(--text)" }}
+                  >
                     {formatTime(appointment.appointment_date)}
                   </p>
                 </div>
@@ -259,10 +311,11 @@ export default function AppointmentDetailPage({ params }: PageProps) {
 
               <div className="flex items-start gap-3">
                 <svg
-                  className="w-6 h-6 text-gray-600 dark:text-gray-400 mt-1"
+                  className="w-6 h-6 mt-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "var(--text-muted)" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -272,10 +325,16 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                   />
                 </svg>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text-muted)" }}
+                  >
                     Duration
                   </p>
-                  <p className="text-lg font-medium">
+                  <p
+                    className="text-lg font-medium"
+                    style={{ color: "var(--text)" }}
+                  >
                     {appointment.duration_minutes} minutes
                   </p>
                 </div>
@@ -283,10 +342,11 @@ export default function AppointmentDetailPage({ params }: PageProps) {
 
               <div className="flex items-start gap-3">
                 <svg
-                  className="w-6 h-6 text-gray-600 dark:text-gray-400 mt-1"
+                  className="w-6 h-6 mt-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  style={{ color: "var(--text-muted)" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -302,10 +362,16 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                   />
                 </svg>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text-muted)" }}
+                  >
                     Location
                   </p>
-                  <p className="text-lg font-medium capitalize">
+                  <p
+                    className="text-lg font-medium capitalize"
+                    style={{ color: "var(--text)" }}
+                  >
                     {appointment.location_type}
                   </p>
                 </div>
@@ -314,10 +380,11 @@ export default function AppointmentDetailPage({ params }: PageProps) {
               {appointment.meeting_link && (
                 <div className="flex items-start gap-3">
                   <svg
-                    className="w-6 h-6 text-gray-600 dark:text-gray-400 mt-1"
+                    className="w-6 h-6 mt-1"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    style={{ color: "var(--text-muted)" }}
                   >
                     <path
                       strokeLinecap="round"
@@ -327,14 +394,18 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                     />
                   </svg>
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-muted)" }}
+                    >
                       Meeting Link
                     </p>
                     <a
                       href={appointment.meeting_link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-lg text-primary hover:underline"
+                      className="text-lg hover:underline"
+                      style={{ color: "var(--primary)" }}
                     >
                       Join Meeting
                     </a>
@@ -347,13 +418,20 @@ export default function AppointmentDetailPage({ params }: PageProps) {
           {/* Notes */}
           {appointment.notes && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+              <h2
+                className="text-xl font-semibold mb-4"
+                style={{ color: "var(--text)" }}
+              >
                 Notes
               </h2>
-              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <p className="text-gray-700 dark:text-gray-300">
-                  {appointment.notes}
-                </p>
+              <div
+                className="p-4 rounded-lg"
+                style={{
+                  background: "var(--bg)",
+                  border: "1px solid var(--border-muted)",
+                }}
+              >
+                <p style={{ color: "var(--text)" }}>{appointment.notes}</p>
               </div>
             </div>
           )}
@@ -361,17 +439,29 @@ export default function AppointmentDetailPage({ params }: PageProps) {
           {/* Cancellation Info */}
           {appointment.cancellation_reason && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+              <h2
+                className="text-xl font-semibold mb-4"
+                style={{ color: "var(--text)" }}
+              >
                 Cancellation Details
               </h2>
-              <div className="p-4 bg-red-50 dark:bg-red-900 dark:bg-opacity-20 rounded-lg">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+              <div
+                className="p-4 rounded-lg"
+                style={{
+                  background: "var(--error-bg)",
+                  border: "1px solid var(--error)",
+                }}
+              >
+                <p
+                  className="text-sm font-medium mb-2"
+                  style={{ color: "var(--text-muted)" }}
+                >
                   Cancelled on:{" "}
                   {appointment.cancelled_at
                     ? formatDate(appointment.cancelled_at)
                     : "N/A"}
                 </p>
-                <p className="text-red-700 dark:text-red-300">
+                <p style={{ color: "var(--error)" }}>
                   {appointment.cancellation_reason}
                 </p>
               </div>
@@ -383,7 +473,8 @@ export default function AppointmentDetailPage({ params }: PageProps) {
             <div className="flex gap-4">
               <button
                 onClick={() => setShowCancelDialog(true)}
-                className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                className="px-6 py-3 rounded-lg hover:opacity-90 transition-all"
+                style={{ background: "var(--error)", color: "var(--bg-dark)" }}
               >
                 Cancel Appointment
               </button>
@@ -393,10 +484,24 @@ export default function AppointmentDetailPage({ params }: PageProps) {
 
         {/* Cancel Dialog */}
         {showCancelDialog && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
-              <h3 className="text-xl font-semibold mb-4">Cancel Appointment</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <div
+            className="fixed inset-0 flex items-center justify-center p-4 z-50"
+            style={{ background: "rgba(0, 0, 0, 0.5)" }}
+          >
+            <div
+              className="rounded-lg p-6 max-w-md w-full"
+              style={{
+                background: "var(--bg-light)",
+                border: "1px solid var(--border-muted)",
+              }}
+            >
+              <h3
+                className="text-xl font-semibold mb-4"
+                style={{ color: "var(--text)" }}
+              >
+                Cancel Appointment
+              </h3>
+              <p className="mb-4" style={{ color: "var(--text-muted)" }}>
                 Please provide a reason for cancelling this appointment:
               </p>
               <textarea
@@ -404,13 +509,22 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder="Enter cancellation reason..."
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 resize-none mb-4"
+                className="w-full px-4 py-2 rounded-lg resize-none mb-4"
+                style={{
+                  border: "1px solid var(--border-muted)",
+                  background: "var(--bg)",
+                  color: "var(--text)",
+                }}
               />
               <div className="flex gap-3">
                 <button
                   onClick={handleCancelAppointment}
                   disabled={cancelling}
-                  className="flex-1 px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                  className="flex-1 px-6 py-2 rounded-lg hover:opacity-90 transition-all disabled:opacity-50"
+                  style={{
+                    background: "var(--error)",
+                    color: "var(--bg-dark)",
+                  }}
                 >
                   {cancelling ? "Cancelling..." : "Confirm Cancel"}
                 </button>
@@ -420,7 +534,11 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                     setCancelReason("");
                   }}
                   disabled={cancelling}
-                  className="px-6 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+                  className="px-6 py-2 rounded-lg hover:opacity-90 transition-all"
+                  style={{
+                    background: "var(--bg-secondary)",
+                    color: "var(--text)",
+                  }}
                 >
                   Keep Appointment
                 </button>

@@ -177,37 +177,77 @@ export default function BookAppointmentPage() {
         showHomeButton={true}
       />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <h1 className="text-3xl font-bold mb-6">Book an Appointment</h1>
+        <h1
+          className="text-3xl font-bold mb-6"
+          style={{ color: "var(--text)" }}
+        >
+          Book an Appointment
+        </h1>
 
         {/* Date Range Selection */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Select Date Range</h2>
+        <div
+          className="rounded-lg shadow-lg p-6 mb-6"
+          style={{
+            background: "var(--bg-light)",
+            border: "1px solid var(--border-muted)",
+          }}
+        >
+          <h2
+            className="text-xl font-semibold mb-4"
+            style={{ color: "var(--text)" }}
+          >
+            Select Date Range
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block mb-2 font-medium">Start Date</label>
+              <label
+                className="block mb-2 font-medium"
+                style={{ color: "var(--text)" }}
+              >
+                Start Date
+              </label>
               <input
                 type="date"
                 value={startDate}
                 min={today}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                className="w-full px-4 py-2 rounded-lg"
+                style={{
+                  border: "1px solid var(--border-muted)",
+                  background: "var(--bg)",
+                  color: "var(--text)",
+                }}
               />
             </div>
             <div>
-              <label className="block mb-2 font-medium">End Date</label>
+              <label
+                className="block mb-2 font-medium"
+                style={{ color: "var(--text)" }}
+              >
+                End Date
+              </label>
               <input
                 type="date"
                 value={endDate}
                 min={startDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                className="w-full px-4 py-2 rounded-lg"
+                style={{
+                  border: "1px solid var(--border-muted)",
+                  background: "var(--bg)",
+                  color: "var(--text)",
+                }}
               />
             </div>
             <div className="flex items-end">
               <button
                 onClick={searchSlots}
                 disabled={loading}
-                className="w-full px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50"
+                className="w-full px-6 py-2 rounded-lg hover:opacity-90 transition-all disabled:opacity-50"
+                style={{
+                  background: "var(--primary)",
+                  color: "var(--bg-dark)",
+                }}
               >
                 {loading ? "Searching..." : "Search Slots"}
               </button>
@@ -218,23 +258,46 @@ export default function BookAppointmentPage() {
         {/* Available Slots */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Slots List */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Available Time Slots</h2>
+          <div
+            className="rounded-lg shadow-lg p-6"
+            style={{
+              background: "var(--bg-light)",
+              border: "1px solid var(--border-muted)",
+            }}
+          >
+            <h2
+              className="text-xl font-semibold mb-4"
+              style={{ color: "var(--text)" }}
+            >
+              Available Time Slots
+            </h2>
 
             {loading && slots.length === 0 ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                <p>Loading slots...</p>
+                <div
+                  className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
+                  style={{ borderColor: "var(--primary)" }}
+                ></div>
+                <p style={{ color: "var(--text-muted)" }}>Loading slots...</p>
               </div>
             ) : Object.keys(slotsByDate).length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div
+                className="text-center py-8"
+                style={{ color: "var(--text-muted)" }}
+              >
                 <p>No available slots found. Try a different date range.</p>
               </div>
             ) : (
               <div className="space-y-4 max-h-[600px] overflow-y-auto">
                 {Object.entries(slotsByDate).map(([date, dateSlots]) => (
                   <div key={date}>
-                    <h3 className="font-semibold text-lg mb-2 sticky top-0 bg-white dark:bg-gray-800 py-2">
+                    <h3
+                      className="font-semibold text-lg mb-2 sticky top-0 py-2"
+                      style={{
+                        background: "var(--bg-light)",
+                        color: "var(--text)",
+                      }}
+                    >
                       {formatDate(date)}
                     </h3>
                     <div className="space-y-2">
@@ -242,22 +305,38 @@ export default function BookAppointmentPage() {
                         <button
                           key={`${slot.psg_member_id}-${slot.start_time}-${idx}`}
                           onClick={() => setSelectedSlot(slot)}
-                          className={`w-full text-left p-4 border rounded-lg transition-colors ${
-                            selectedSlot === slot
-                              ? "border-primary bg-green-50 dark:bg-green-900 dark:bg-opacity-20"
-                              : "border-gray-300 dark:border-gray-600 hover:border-primary hover:bg-gray-50 dark:hover:bg-gray-700"
-                          }`}
+                          className="w-full text-left p-4 rounded-lg transition-all"
+                          style={{
+                            border:
+                              selectedSlot === slot
+                                ? "2px solid var(--primary)"
+                                : "1px solid var(--border-muted)",
+                            background:
+                              selectedSlot === slot
+                                ? "var(--success-bg)"
+                                : "var(--bg)",
+                            color: "var(--text)",
+                          }}
                         >
                           <div className="flex justify-between items-center">
                             <div>
-                              <p className="font-medium">
+                              <p
+                                className="font-medium"
+                                style={{ color: "var(--text)" }}
+                              >
                                 {slot.psg_member_name}
                               </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                              <p
+                                className="text-sm"
+                                style={{ color: "var(--text-muted)" }}
+                              >
                                 {slot.start_time} - {slot.end_time}
                               </p>
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div
+                              className="text-sm"
+                              style={{ color: "var(--text-muted)" }}
+                            >
                               {slot.duration_minutes} min
                             </div>
                           </div>
@@ -271,45 +350,75 @@ export default function BookAppointmentPage() {
           </div>
 
           {/* Booking Summary */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 h-fit sticky top-4">
-            <h2 className="text-xl font-semibold mb-4">Booking Summary</h2>
+          <div
+            className="rounded-lg shadow-lg p-6 h-fit sticky top-4"
+            style={{
+              background: "var(--bg-light)",
+              border: "1px solid var(--border-muted)",
+            }}
+          >
+            <h2
+              className="text-xl font-semibold mb-4"
+              style={{ color: "var(--text)" }}
+            >
+              Booking Summary
+            </h2>
 
             {selectedSlot ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: "var(--text-muted)" }}
+                  >
                     PSG Member
                   </label>
-                  <p className="font-medium">{selectedSlot.psg_member_name}</p>
+                  <p className="font-medium" style={{ color: "var(--text)" }}>
+                    {selectedSlot.psg_member_name}
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: "var(--text-muted)" }}
+                  >
                     Date
                   </label>
-                  <p className="font-medium">{formatDate(selectedSlot.date)}</p>
+                  <p className="font-medium" style={{ color: "var(--text)" }}>
+                    {formatDate(selectedSlot.date)}
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: "var(--text-muted)" }}
+                  >
                     Time
                   </label>
-                  <p className="font-medium">
+                  <p className="font-medium" style={{ color: "var(--text)" }}>
                     {selectedSlot.start_time} - {selectedSlot.end_time}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: "var(--text-muted)" }}
+                  >
                     Duration
                   </label>
-                  <p className="font-medium">
+                  <p className="font-medium" style={{ color: "var(--text)" }}>
                     {selectedSlot.duration_minutes} minutes
                   </p>
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-medium">
+                  <label
+                    className="block mb-2 font-medium"
+                    style={{ color: "var(--text)" }}
+                  >
                     Notes (Optional)
                   </label>
                   <textarea
@@ -317,20 +426,32 @@ export default function BookAppointmentPage() {
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Add any notes or concerns..."
                     rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 resize-none"
+                    className="w-full px-4 py-2 rounded-lg resize-none"
+                    style={{
+                      border: "1px solid var(--border-muted)",
+                      background: "var(--bg)",
+                      color: "var(--text)",
+                    }}
                   />
                 </div>
 
                 <button
                   onClick={handleBookAppointment}
                   disabled={loading}
-                  className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 font-medium"
+                  className="w-full px-6 py-3 rounded-lg hover:opacity-90 transition-all disabled:opacity-50 font-medium"
+                  style={{
+                    background: "var(--primary)",
+                    color: "var(--bg-dark)",
+                  }}
                 >
                   {loading ? "Booking..." : "Confirm Booking"}
                 </button>
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div
+                className="text-center py-8"
+                style={{ color: "var(--text-muted)" }}
+              >
                 <p>Select a time slot to see booking details</p>
               </div>
             )}
