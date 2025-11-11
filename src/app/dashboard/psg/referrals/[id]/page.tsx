@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Button } from "@/components/ui/button";
 import { useAlert } from "@/components/AlertProvider";
@@ -23,22 +23,20 @@ import {
 import { ArrowLeft, User } from "lucide-react";
 import Link from "next/link";
 
-export default function ReferralDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function ReferralDetailPage() {
   const router = useRouter();
+  const params = useParams();
+  const referralId = params.id as string;
   const { showAlert } = useAlert();
   const [referral, setReferral] = useState<ReferralWithProfiles | null>(null);
   const [updates, setUpdates] = useState<ReferralUpdateWithProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadReferralData = useCallback(async () => {
+  const loadReferralData = async () => {
     setIsLoading(true);
     try {
       // Load referral details
-      const referralResult = await getReferralById(params.id);
+      const referralResult = await getReferralById(referralId);
       if (referralResult.success && referralResult.data) {
         setReferral(referralResult.data);
       } else {
@@ -52,13 +50,13 @@ export default function ReferralDetailPage({
       }
 
       // Load updates
-      const updatesResult = await getReferralUpdates(params.id);
+      const updatesResult = await getReferralUpdates(referralId);
       if (updatesResult.success && updatesResult.data) {
         setUpdates(updatesResult.data);
       }
 
       // Load assessment if exists
-      const assessmentResult = await getReferralAssessment(params.id);
+      const assessmentResult = await getReferralAssessment(referralId);
       if (assessmentResult.success && assessmentResult.data) {
         // Assessment loaded but not displayed yet - for future use
         console.log("Assessment:", assessmentResult.data);
@@ -73,11 +71,12 @@ export default function ReferralDetailPage({
     } finally {
       setIsLoading(false);
     }
-  }, [params.id, router, showAlert]);
+  };
 
   useEffect(() => {
     loadReferralData();
-  }, [loadReferralData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [referralId]);
 
   const handleStatusChange = async (newStatus: ReferralStatus) => {
     if (!referral) return;

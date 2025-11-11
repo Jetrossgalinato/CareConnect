@@ -246,7 +246,7 @@ export default function PSGReferralsPage() {
                   onClick={() =>
                     router.push(`/dashboard/psg/referrals/${referral.id}`)
                   }
-                  className="rounded-lg p-6 shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.03),0_4px_8px_rgba(0,0,0,0.02)] transition-all cursor-pointer"
+                  className="rounded-lg p-6 shadow-[0_2px_4px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.5),0_4px_12px_rgba(0,0,0,0.08),0_8px_16px_rgba(0,0,0,0.04)] transition-all cursor-pointer"
                   style={{
                     background: "var(--bg-light)",
                     border: "1px solid var(--border-muted)",
