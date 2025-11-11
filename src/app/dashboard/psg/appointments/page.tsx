@@ -323,7 +323,13 @@ export default function PSGAppointmentsPage() {
                     border: "1px solid var(--border-muted)",
                   }}
                 >
-                  <div className="flex items-center gap-2">
+                  <div
+                    className="flex items-center gap-2 p-3 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)]"
+                    style={{
+                      background: "var(--bg-light)",
+                      border: "1px solid var(--border-muted)",
+                    }}
+                  >
                     <Calendar
                       size={16}
                       style={{ color: "var(--primary)", flexShrink: 0 }}
@@ -343,7 +349,13 @@ export default function PSGAppointmentsPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div
+                    className="flex items-center gap-2 p-3 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)]"
+                    style={{
+                      background: "var(--bg-light)",
+                      border: "1px solid var(--border-muted)",
+                    }}
+                  >
                     <Clock
                       size={16}
                       style={{ color: "var(--primary)", flexShrink: 0 }}
@@ -364,7 +376,13 @@ export default function PSGAppointmentsPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div
+                    className="flex items-center gap-2 p-3 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)]"
+                    style={{
+                      background: "var(--bg-light)",
+                      border: "1px solid var(--border-muted)",
+                    }}
+                  >
                     <MapPin
                       size={16}
                       style={{ color: "var(--primary)", flexShrink: 0 }}
