@@ -241,7 +241,7 @@ export default function PSGAppointmentsPage() {
                   className="ml-2 px-2 py-0.5 text-xs rounded-full"
                   style={{
                     background: "var(--error)",
-                    color: "#ffffff",
+                    color: "#000000",
                   }}
                 >
                   {tab.count}
@@ -316,7 +316,7 @@ export default function PSGAppointmentsPage() {
                     className="px-3 py-1 rounded-full text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
                     style={{
                       background: getStatusColor(apt.status),
-                      color: "#ffffff",
+                      color: "#000000",
                     }}
                   >
                     {APPOINTMENT_STATUS_LABELS[apt.status]}
