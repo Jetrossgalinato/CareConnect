@@ -83,7 +83,7 @@ export default function LoginPage() {
       >
         <div>
           <h1
-            className="text-4xl font-bold mb-4"
+            className="text-3xl font-bold mb-4"
             style={{ color: "var(--primary)" }}
           >
             CareConnect
@@ -96,8 +96,8 @@ export default function LoginPage() {
           <img
             src="/authlogo.png"
             alt="CareConnect Logo"
-            width={700}
-            height={700}
+            width={600}
+            height={600}
             style={{ objectFit: "contain" }}
           />
         </div>
@@ -121,12 +121,12 @@ export default function LoginPage() {
           }}
         >
           <div className="text-center mb-8">
-            <h2
-              className="text-base font-bold mb-2"
+            <h1
+              className="text-2xl font-bold mb-2"
               style={{ color: "var(--text)" }}
             >
               Welcome Back
-            </h2>
+            </h1>
             <p style={{ color: "var(--text-muted)" }}>
               Sign in to your CareConnect account
             </p>

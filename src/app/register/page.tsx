@@ -19,7 +19,7 @@ export default function RegisterPage() {
       >
         <div>
           <h1
-            className="text-4xl font-bold mb-4"
+            className="text-3xl font-bold mb-4"
             style={{ color: "var(--primary)" }}
           >
             CareConnect
@@ -32,8 +32,8 @@ export default function RegisterPage() {
           <img
             src="/authlogo.png"
             alt="CareConnect Logo"
-            width={700}
-            height={700}
+            width={600}
+            height={600}
             style={{ objectFit: "contain" }}
           />
         </div>
