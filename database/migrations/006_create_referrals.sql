@@ -4,22 +4,28 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Create referrals table
 CREATE TABLE IF NOT EXISTS referrals (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  student_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL,
   source TEXT NOT NULL CHECK (source IN ('self', 'peer', 'faculty', 'screening')),
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'reviewed', 'assigned', 'in_progress', 'completed', 'escalated')),
   severity TEXT CHECK (severity IN ('low', 'moderate', 'high', 'critical')),
-  assigned_psg_member_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  assigned_psg_member_id UUID,
   notes TEXT,
   reason TEXT,
-  screening_result_id UUID REFERENCES screening_results(id) ON DELETE SET NULL,
-  reviewed_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  screening_result_id UUID,
+  reviewed_by UUID,
   reviewed_at TIMESTAMP WITH TIME ZONE,
   assigned_at TIMESTAMP WITH TIME ZONE,
   completed_at TIMESTAMP WITH TIME ZONE,
   escalated_to TEXT, -- OCCS staff email or external resource
   escalation_reason TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Add named foreign key constraints
+  CONSTRAINT referrals_student_id_fkey FOREIGN KEY (student_id) REFERENCES profiles(id) ON DELETE CASCADE,
+  CONSTRAINT referrals_assigned_psg_member_id_fkey FOREIGN KEY (assigned_psg_member_id) REFERENCES profiles(id) ON DELETE SET NULL,
+  CONSTRAINT referrals_reviewed_by_fkey FOREIGN KEY (reviewed_by) REFERENCES profiles(id) ON DELETE SET NULL,
+  CONSTRAINT referrals_screening_result_id_fkey FOREIGN KEY (screening_result_id) REFERENCES screening_results(id) ON DELETE SET NULL
 );
 
 -- Create referral_assessments table for structured assessment
