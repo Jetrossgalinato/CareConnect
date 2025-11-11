@@ -294,7 +294,10 @@ export default function PSGReferralsPage() {
                         className="px-3 py-1 rounded-full text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
                         style={{
                           background: getStatusColor(referral.status),
-                          color: "var(--bg-dark)",
+                          color:
+                            referral.status === "pending"
+                              ? "#000000"
+                              : "var(--bg-dark)",
                         }}
                       >
                         {REFERRAL_STATUS_LABELS[referral.status]}
@@ -304,7 +307,13 @@ export default function PSGReferralsPage() {
 
                   {/* Details Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                    <div className="flex items-center gap-2">
+                    <div
+                      className="flex items-center gap-2 p-3 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)]"
+                      style={{
+                        background: "var(--bg-dark)",
+                        border: "1px solid var(--border-muted)",
+                      }}
+                    >
                       <Calendar
                         size={16}
                         style={{ color: "var(--text-muted)" }}
@@ -324,7 +333,13 @@ export default function PSGReferralsPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div
+                      className="flex items-center gap-2 p-3 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)]"
+                      style={{
+                        background: "var(--bg-dark)",
+                        border: "1px solid var(--border-muted)",
+                      }}
+                    >
                       <FileText
                         size={16}
                         style={{ color: "var(--text-muted)" }}
@@ -345,7 +360,13 @@ export default function PSGReferralsPage() {
                       </div>
                     </div>
                     {referral.assigned_psg_member && (
-                      <div className="flex items-center gap-2">
+                      <div
+                        className="flex items-center gap-2 p-3 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)]"
+                        style={{
+                          background: "var(--bg-dark)",
+                          border: "1px solid var(--border-muted)",
+                        }}
+                      >
                         <User
                           size={16}
                           style={{ color: "var(--text-muted)" }}
