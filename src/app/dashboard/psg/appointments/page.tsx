@@ -118,10 +118,7 @@ export default function PSGAppointmentsPage() {
       if (filter === "pending") {
         return apt.status === "scheduled";
       } else if (filter === "upcoming") {
-        return (
-          aptDate >= now &&
-          (apt.status === "confirmed" || apt.status === "scheduled")
-        );
+        return aptDate >= now && apt.status === "confirmed";
       } else if (filter === "past") {
         return (
           aptDate < now ||
@@ -241,7 +238,7 @@ export default function PSGAppointmentsPage() {
                   className="ml-2 px-2 py-0.5 text-xs rounded-full"
                   style={{
                     background: "var(--error)",
-                    color: "#ffffff",
+                    color: "var(--bg-dark)",
                   }}
                 >
                   {tab.count}
@@ -316,7 +313,7 @@ export default function PSGAppointmentsPage() {
                     className="px-3 py-1 rounded-full text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
                     style={{
                       background: getStatusColor(apt.status),
-                      color: "#ffffff",
+                      color: "var(--bg-dark)",
                     }}
                   >
                     {APPOINTMENT_STATUS_LABELS[apt.status]}

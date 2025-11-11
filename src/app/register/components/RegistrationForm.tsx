@@ -52,18 +52,19 @@ export default function RegistrationForm() {
       style={{
         background: "var(--bg-light)",
         borderRadius: "1rem",
-        boxShadow: "0 2px 16px 0 var(--border-muted)",
+        boxShadow:
+          "0 2px 16px 0 var(--border-muted), 0 1px 3px 0 rgba(0,0,0,0.08)",
         transition: "box-shadow 0.3s, background 0.3s, border-radius 0.3s",
       }}
     >
       <div className="text-center mb-8">
         <h2
-          className="text-3xl font-bold mb-2"
+          className="text-2xl font-bold mb-2"
           style={{ color: "var(--text)" }}
         >
           Create Account
         </h2>
-        <p style={{ color: "var(--text-muted)" }}>
+        <p className="text-base" style={{ color: "var(--text-muted)" }}>
           Join CareConnect to access mental health support
         </p>
       </div>
