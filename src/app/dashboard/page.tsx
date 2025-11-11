@@ -204,12 +204,13 @@ export default async function DashboardPage() {
                   </div>
                 </Link>
 
-                {/* Coming Soon Cards - Last */}
-                <div
-                  className="rounded-lg p-6 opacity-60"
+                {/* Self-Referral Form - Active */}
+                <Link
+                  href="/dashboard/referrals/create"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
-                    border: "1px solid var(--border-muted)",
+                    border: "2px solid var(--primary)",
                     boxShadow:
                       "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
@@ -217,11 +218,11 @@ export default async function DashboardPage() {
                   <div className="flex items-start gap-4">
                     <div
                       className="p-3 rounded-lg"
-                      style={{ background: "var(--bg-secondary)" }}
+                      style={{ background: "var(--primary-20)" }}
                     >
                       <FileText
                         className="w-6 h-6"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--primary)" }}
                       />
                     </div>
                     <div className="flex-1">
@@ -240,16 +241,17 @@ export default async function DashboardPage() {
                       <span
                         className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
                         style={{
-                          background: "var(--bg-secondary)",
-                          color: "var(--text-muted)",
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
                         }}
                       >
-                        Coming Soon
+                        Available Now
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
 
+                {/* Coming Soon Cards - Last */}
                 <div
                   className="rounded-lg p-6 opacity-60"
                   style={{
@@ -441,12 +443,13 @@ export default async function DashboardPage() {
                   </div>
                 </Link>
 
-                {/* Coming Soon for PSG - Last */}
-                <div
-                  className="rounded-lg p-6 opacity-60"
+                {/* View Referrals - Active */}
+                <Link
+                  href="/dashboard/psg/referrals"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
-                    border: "1px solid var(--border-muted)",
+                    border: "2px solid var(--primary)",
                     boxShadow:
                       "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
@@ -454,11 +457,11 @@ export default async function DashboardPage() {
                   <div className="flex items-start gap-4">
                     <div
                       className="p-3 rounded-lg"
-                      style={{ background: "var(--bg-secondary)" }}
+                      style={{ background: "var(--primary-20)" }}
                     >
                       <Users
                         className="w-6 h-6"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--primary)" }}
                       />
                     </div>
                     <div className="flex-1">
@@ -477,15 +480,15 @@ export default async function DashboardPage() {
                       <span
                         className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
                         style={{
-                          background: "var(--bg-secondary)",
-                          color: "var(--text-muted)",
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
                         }}
                       >
-                        Coming Soon
+                        Available Now
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               </div>
             )}
 
