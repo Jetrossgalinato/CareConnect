@@ -92,7 +92,23 @@ export async function getConversations(): Promise<
       return { success: false, error: "Failed to load conversations" };
     }
 
-    return { success: true, data: conversations };
+    // Filter out conversations with no messages
+    const conversationsWithMessages = await Promise.all(
+      conversations.map(async (conv) => {
+        const { count } = await supabase
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .eq("conversation_id", conv.id);
+
+        return count && count > 0 ? conv : null;
+      })
+    );
+
+    const filteredConversations = conversationsWithMessages.filter(
+      (conv) => conv !== null
+    ) as ConversationWithProfiles[];
+
+    return { success: true, data: filteredConversations };
   } catch (error) {
     console.error("Unexpected error:", error);
     return { success: false, error: "An unexpected error occurred" };
