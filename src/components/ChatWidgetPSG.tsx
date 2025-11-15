@@ -366,7 +366,7 @@ export function ChatWidgetPSG() {
                     </p>
                   </div>
                 ) : (
-                  filteredConversations.map((conv) => (
+                  filteredConversations.map((conv, index) => (
                     <button
                       key={conv.id}
                       onClick={() => handleSelectConversation(conv)}
@@ -395,7 +395,7 @@ export function ChatWidgetPSG() {
                               className="font-medium text-sm truncate"
                               style={{ color: "var(--text)" }}
                             >
-                              {conv.student.full_name}
+                              Student {index + 1}
                             </p>
                             {conv.unread_count! > 0 && (
                               <span
@@ -409,12 +409,6 @@ export function ChatWidgetPSG() {
                               </span>
                             )}
                           </div>
-                          <p
-                            className="text-xs mb-1"
-                            style={{ color: "var(--text-muted)" }}
-                          >
-                            ID: {conv.student.school_id}
-                          </p>
                           <p
                             className="text-xs truncate"
                             style={{ color: "var(--text-muted)" }}
@@ -450,7 +444,11 @@ export function ChatWidgetPSG() {
                   style={{ color: "var(--bg-dark)" }}
                 >
                   {selectedConversation
-                    ? selectedConversation.student.full_name
+                    ? `Student ${
+                        conversations.findIndex(
+                          (c) => c.id === selectedConversation.id
+                        ) + 1
+                      }`
                     : "Support Chat"}
                 </h3>
               </div>
