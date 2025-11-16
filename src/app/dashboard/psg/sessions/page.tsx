@@ -247,7 +247,13 @@ export default async function PSGSessionsPage() {
                             className="font-semibold"
                             style={{ color: "var(--text)" }}
                           >
-                            Student #{student.school_id || "Unknown"}
+                            {student.full_name}
+                          </p>
+                          <p
+                            className="text-sm"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            Student ID: {student.school_id || "N/A"}
                           </p>
                           <p
                             className="text-sm"
