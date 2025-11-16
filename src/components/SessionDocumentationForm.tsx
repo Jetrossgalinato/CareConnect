@@ -75,7 +75,6 @@ export function SessionDocumentationForm({
       if (result.success) {
         showAlert({
           type: "success",
-          title: existingSession ? "Session Updated" : "Session Documented",
           message: existingSession
             ? "Session documentation has been updated successfully."
             : "Session has been documented successfully.",
@@ -84,14 +83,12 @@ export function SessionDocumentationForm({
       } else {
         showAlert({
           type: "error",
-          title: "Error",
           message: result.error || "Failed to save session documentation",
         });
       }
-    } catch (error) {
+    } catch {
       showAlert({
         type: "error",
-        title: "Error",
         message: "An unexpected error occurred",
       });
     } finally {
