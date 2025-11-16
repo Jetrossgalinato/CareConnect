@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAlert } from "@/components/AlertProvider";
+import { decryptMessage } from "@/lib/encryption";
 import {
   getConversations,
   getMessages,
@@ -570,7 +571,12 @@ export function ChatWidgetPSG() {
                               }}
                             >
                               <p className="text-sm whitespace-pre-wrap break-words">
-                                {message.content}
+                                {selectedConversation
+                                  ? decryptMessage(
+                                      message.content,
+                                      selectedConversation.id
+                                    )
+                                  : message.content}
                               </p>
                             </div>
                             <p
