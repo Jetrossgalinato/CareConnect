@@ -8,11 +8,14 @@ import {
   confirmAppointment,
   cancelAppointment,
 } from "@/actions/appointments";
+import { getSessionByAppointmentId } from "@/actions/sessions";
 import { useAlert } from "@/components/AlertProvider";
 import type { AppointmentWithProfiles } from "@/types/appointments";
+import type { SessionWithAppointment } from "@/types/sessions";
 import { APPOINTMENT_STATUS_LABELS } from "@/types/appointments";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
+import { SessionDocumentationForm } from "@/components/SessionDocumentationForm";
 import {
   ArrowLeft,
   Calendar,
@@ -21,6 +24,8 @@ import {
   User,
   CheckCircle,
   XCircle,
+  FileText,
+  Plus,
 } from "lucide-react";
 
 interface PageProps {
@@ -33,9 +38,11 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
   const { showAlert } = useAlert();
   const [appointment, setAppointment] =
     useState<AppointmentWithProfiles | null>(null);
+  const [session, setSession] = useState<SessionWithAppointment | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showSessionForm, setShowSessionForm] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
   useEffect(() => {
@@ -48,17 +55,24 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
 
   const loadAppointment = async () => {
     try {
-      const result = await getAppointmentById(resolvedParams.id);
+      const [appointmentResult, sessionResult] = await Promise.all([
+        getAppointmentById(resolvedParams.id),
+        getSessionByAppointmentId(resolvedParams.id),
+      ]);
 
-      if (result.success && result.data) {
-        setAppointment(result.data);
+      if (appointmentResult.success && appointmentResult.data) {
+        setAppointment(appointmentResult.data);
       } else {
         showAlert({
-          message: result.error || "Failed to load appointment",
+          message: appointmentResult.error || "Failed to load appointment",
           type: "error",
           duration: 5000,
         });
         router.push("/dashboard/psg/appointments");
+      }
+
+      if (sessionResult.success && sessionResult.data) {
+        setSession(sessionResult.data);
       }
     } catch {
       showAlert({
@@ -183,6 +197,13 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
     appointment.status !== "cancelled" &&
     appointment.status !== "completed" &&
     new Date(appointment.appointment_date) > new Date();
+
+  const canDocumentSession =
+    appointment &&
+    (appointment.status === "completed" ||
+      new Date(appointment.appointment_date) < new Date());
+
+  const hasSession = session !== null;
 
   if (loading) {
     return <Loader fullScreen text="Loading appointment details..." />;
@@ -451,6 +472,156 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
                   {appointment.cancellation_reason}
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Session Documentation Section */}
+          {canDocumentSession && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2
+                  className="text-base font-bold flex items-center gap-2"
+                  style={{ color: "var(--text)" }}
+                >
+                  <FileText size={20} />
+                  Session Documentation
+                </h2>
+                {!hasSession && !showSessionForm && (
+                  <button
+                    onClick={() => setShowSessionForm(true)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all"
+                    style={{
+                      background: "var(--primary-20)",
+                      color: "var(--primary)",
+                    }}
+                  >
+                    <Plus size={16} />
+                    Add Documentation
+                  </button>
+                )}
+              </div>
+
+              {hasSession && !showSessionForm ? (
+                <div
+                  className="p-4 rounded-lg"
+                  style={{
+                    background: "var(--bg)",
+                    border: "1px solid var(--border-muted)",
+                  }}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <Clock size={20} style={{ color: "var(--text-muted)" }} />
+                    <p style={{ color: "var(--text)" }}>
+                      <span className="font-semibold">Duration:</span>{" "}
+                      {session.duration_minutes || 0} minutes
+                    </p>
+                  </div>
+                  <div className="mb-3">
+                    <p
+                      className="text-sm font-semibold mb-1"
+                      style={{ color: "var(--text)" }}
+                    >
+                      Notes:
+                    </p>
+                    <p
+                      className="text-sm line-clamp-3"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {session.notes || "No notes available"}
+                    </p>
+                  </div>
+                  {session.feedback && (
+                    <div className="mb-3">
+                      <p
+                        className="text-sm font-semibold mb-1"
+                        style={{ color: "var(--text)" }}
+                      >
+                        Feedback:
+                      </p>
+                      <p
+                        className="text-sm line-clamp-2"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        {session.feedback}
+                      </p>
+                    </div>
+                  )}
+                  <div
+                    className="flex gap-2 pt-3 border-t"
+                    style={{ borderColor: "var(--border-muted)" }}
+                  >
+                    <Link
+                      href={`/dashboard/psg/sessions/${session.id}`}
+                      className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                      style={{
+                        background: "var(--primary-20)",
+                        color: "var(--primary)",
+                      }}
+                    >
+                      View Full Details
+                    </Link>
+                    <button
+                      onClick={() => setShowSessionForm(true)}
+                      className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                      style={{
+                        background: "var(--bg-light)",
+                        border: "1px solid var(--border-muted)",
+                        color: "var(--text)",
+                      }}
+                    >
+                      Edit Documentation
+                    </button>
+                  </div>
+                </div>
+              ) : showSessionForm ? (
+                <div
+                  className="p-6 rounded-lg"
+                  style={{
+                    background: "var(--bg)",
+                    border: "1px solid var(--border-muted)",
+                  }}
+                >
+                  <SessionDocumentationForm
+                    appointmentId={resolvedParams.id}
+                    existingSession={session || undefined}
+                    onSuccess={() => {
+                      setShowSessionForm(false);
+                      loadAppointment();
+                    }}
+                    onCancel={() => setShowSessionForm(false)}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="p-8 rounded-lg text-center"
+                  style={{
+                    background: "var(--bg)",
+                    border: "1px solid var(--border-muted)",
+                  }}
+                >
+                  <FileText
+                    size={48}
+                    className="mx-auto mb-3"
+                    style={{ color: "var(--text-muted)" }}
+                  />
+                  <p
+                    className="text-sm mb-3"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    No session documentation yet
+                  </p>
+                  <button
+                    onClick={() => setShowSessionForm(true)}
+                    className="px-6 py-2 rounded-lg font-semibold transition-all"
+                    style={{
+                      background: "var(--primary)",
+                      color: "var(--text-inverse)",
+                    }}
+                  >
+                    Add Documentation
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
