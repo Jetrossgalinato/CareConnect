@@ -7,6 +7,7 @@ import {
   getAppointmentById,
   confirmAppointment,
   cancelAppointment,
+  completeAppointment,
 } from "@/actions/appointments";
 import { getSessionByAppointmentId } from "@/actions/sessions";
 import { useAlert } from "@/components/AlertProvider";
@@ -42,8 +43,10 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [showSessionForm, setShowSessionForm] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [completionNotes, setCompletionNotes] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -100,6 +103,41 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
       } else {
         showAlert({
           message: result.error || "Failed to confirm appointment",
+          type: "error",
+          duration: 5000,
+        });
+      }
+    } catch {
+      showAlert({
+        message: "An unexpected error occurred",
+        type: "error",
+        duration: 5000,
+      });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleComplete = async () => {
+    try {
+      setProcessing(true);
+      const result = await completeAppointment(
+        resolvedParams.id,
+        completionNotes.trim() || undefined
+      );
+
+      if (result.success) {
+        showAlert({
+          message: "Appointment marked as completed successfully!",
+          type: "success",
+          duration: 5000,
+        });
+        await loadAppointment();
+        setShowCompleteDialog(false);
+        setCompletionNotes("");
+      } else {
+        showAlert({
+          message: result.error || "Failed to complete appointment",
           type: "error",
           duration: 5000,
         });
@@ -191,6 +229,12 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
     appointment &&
     appointment.status === "scheduled" &&
     new Date(appointment.appointment_date) > new Date();
+
+  const canComplete =
+    appointment &&
+    appointment.status === "confirmed" &&
+    appointment.status !== "completed" &&
+    appointment.status !== "cancelled";
 
   const canCancel =
     appointment &&
@@ -641,6 +685,20 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
                 {processing ? "Confirming..." : "Confirm Appointment"}
               </button>
             )}
+            {canComplete && (
+              <button
+                onClick={() => setShowCompleteDialog(true)}
+                disabled={processing}
+                className="flex items-center gap-2 px-6 py-3 rounded-lg hover:opacity-90 transition-all disabled:opacity-50 font-medium"
+                style={{
+                  background: "var(--success)",
+                  color: "var(--bg-dark)",
+                }}
+              >
+                <CheckCircle size={20} />
+                Mark as Completed
+              </button>
+            )}
             {canCancel && (
               <button
                 onClick={() => setShowCancelDialog(true)}
@@ -654,6 +712,71 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
             )}
           </div>
         </div>
+
+        {/* Complete Dialog */}
+        {showCompleteDialog && (
+          <div
+            className="fixed inset-0 flex items-center justify-center p-4 z-50"
+            style={{ background: "rgba(0, 0, 0, 0.5)" }}
+          >
+            <div
+              className="rounded-lg p-6 max-w-md w-full"
+              style={{
+                background: "var(--bg-light)",
+                border: "1px solid var(--border-muted)",
+              }}
+            >
+              <h3
+                className="text-base font-bold mb-4"
+                style={{ color: "var(--text)" }}
+              >
+                Mark Appointment as Completed
+              </h3>
+              <p className="mb-4" style={{ color: "var(--text-muted)" }}>
+                You can optionally add completion notes:
+              </p>
+              <textarea
+                value={completionNotes}
+                onChange={(e) => setCompletionNotes(e.target.value)}
+                placeholder="Add any notes about the appointment... (optional)"
+                rows={4}
+                className="w-full px-4 py-2 rounded-lg resize-none mb-4"
+                style={{
+                  border: "1px solid var(--border-muted)",
+                  background: "var(--bg)",
+                  color: "var(--text)",
+                }}
+              />
+              <div className="flex gap-3">
+                <button
+                  onClick={handleComplete}
+                  disabled={processing}
+                  className="flex-1 px-6 py-2 rounded-lg hover:opacity-90 transition-all disabled:opacity-50"
+                  style={{
+                    background: "var(--success)",
+                    color: "var(--bg-dark)",
+                  }}
+                >
+                  {processing ? "Processing..." : "Mark as Completed"}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCompleteDialog(false);
+                    setCompletionNotes("");
+                  }}
+                  disabled={processing}
+                  className="px-6 py-2 rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.2),0_1px_2px_rgba(0,0,0,0.06)] hover:shadow-[0_2px_6px_rgba(0,0,0,0.25),0_2px_4px_rgba(0,0,0,0.08)] hover:opacity-90 transition-all"
+                  style={{
+                    background: "var(--bg-secondary)",
+                    color: "var(--text)",
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Cancel Dialog */}
         {showCancelDialog && (
