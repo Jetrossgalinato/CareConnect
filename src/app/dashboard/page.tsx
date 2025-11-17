@@ -496,11 +496,13 @@ export default async function DashboardPage() {
             {/* Admin Dashboard */}
             {user.role === "admin" && (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div
-                  className="rounded-lg p-6 opacity-60"
+                {/* User Management - Active */}
+                <Link
+                  href="/dashboard/admin/users"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
-                    border: "1px solid var(--border-muted)",
+                    border: "2px solid var(--primary)",
                     boxShadow:
                       "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
@@ -508,11 +510,11 @@ export default async function DashboardPage() {
                   <div className="flex items-start gap-4">
                     <div
                       className="p-3 rounded-lg"
-                      style={{ background: "var(--bg-secondary)" }}
+                      style={{ background: "var(--primary-20)" }}
                     >
                       <Users
                         className="w-6 h-6"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--primary)" }}
                       />
                     </div>
                     <div className="flex-1">
@@ -526,26 +528,28 @@ export default async function DashboardPage() {
                         className="text-sm"
                         style={{ color: "var(--text-muted)" }}
                       >
-                        Manage users and permissions
+                        Manage users, roles, and permissions
                       </p>
                       <span
                         className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
                         style={{
-                          background: "var(--bg-secondary)",
-                          color: "var(--text-muted)",
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
                         }}
                       >
-                        Coming Soon
+                        Available Now
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
 
-                <div
-                  className="rounded-lg p-6 opacity-60"
+                {/* Reports & Analytics - Active */}
+                <Link
+                  href="/dashboard/admin/reports"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
-                    border: "1px solid var(--border-muted)",
+                    border: "2px solid var(--primary)",
                     boxShadow:
                       "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
@@ -553,11 +557,11 @@ export default async function DashboardPage() {
                   <div className="flex items-start gap-4">
                     <div
                       className="p-3 rounded-lg"
-                      style={{ background: "var(--bg-secondary)" }}
+                      style={{ background: "var(--primary-20)" }}
                     >
                       <BarChart3
                         className="w-6 h-6"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--primary)" }}
                       />
                     </div>
                     <div className="flex-1">
@@ -565,7 +569,7 @@ export default async function DashboardPage() {
                         className="font-semibold text-lg mb-1"
                         style={{ color: "var(--text)" }}
                       >
-                        Analytics Dashboard
+                        Reports & Analytics
                       </h3>
                       <p
                         className="text-sm"
@@ -576,21 +580,23 @@ export default async function DashboardPage() {
                       <span
                         className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
                         style={{
-                          background: "var(--bg-secondary)",
-                          color: "var(--text-muted)",
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
                         }}
                       >
-                        Coming Soon
+                        Available Now
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
 
-                <div
-                  className="rounded-lg p-6 opacity-60"
+                {/* Audit Logs - Active */}
+                <Link
+                  href="/dashboard/admin/audit"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
-                    border: "1px solid var(--border-muted)",
+                    border: "2px solid var(--primary)",
                     boxShadow:
                       "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
@@ -598,11 +604,11 @@ export default async function DashboardPage() {
                   <div className="flex items-start gap-4">
                     <div
                       className="p-3 rounded-lg"
-                      style={{ background: "var(--bg-secondary)" }}
+                      style={{ background: "var(--primary-20)" }}
                     >
                       <Shield
                         className="w-6 h-6"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--primary)" }}
                       />
                     </div>
                     <div className="flex-1">
@@ -621,21 +627,23 @@ export default async function DashboardPage() {
                       <span
                         className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
                         style={{
-                          background: "var(--bg-secondary)",
-                          color: "var(--text-muted)",
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
                         }}
                       >
-                        Coming Soon
+                        Available Now
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
 
-                <div
-                  className="rounded-lg p-6 opacity-60"
+                {/* Review Screenings - Active */}
+                <Link
+                  href="/dashboard/psg/screenings"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
                   style={{
                     background: "var(--bg-light)",
-                    border: "1px solid var(--border-muted)",
+                    border: "2px solid var(--primary)",
                     boxShadow:
                       "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
                   }}
@@ -643,11 +651,11 @@ export default async function DashboardPage() {
                   <div className="flex items-start gap-4">
                     <div
                       className="p-3 rounded-lg"
-                      style={{ background: "var(--bg-secondary)" }}
+                      style={{ background: "var(--primary-20)" }}
                     >
-                      <Settings
+                      <ClipboardList
                         className="w-6 h-6"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--primary)" }}
                       />
                     </div>
                     <div className="flex-1">
@@ -655,26 +663,214 @@ export default async function DashboardPage() {
                         className="font-semibold text-lg mb-1"
                         style={{ color: "var(--text)" }}
                       >
-                        System Settings
+                        Review Screenings
                       </h3>
                       <p
                         className="text-sm"
                         style={{ color: "var(--text-muted)" }}
                       >
-                        Configure system preferences
+                        Review student mental health screenings
                       </p>
                       <span
                         className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
                         style={{
-                          background: "var(--bg-secondary)",
-                          color: "var(--text-muted)",
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
                         }}
                       >
-                        Coming Soon
+                        Available Now
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
+
+                {/* All Appointments - Active */}
+                <Link
+                  href="/dashboard/psg/appointments"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
+                  style={{
+                    background: "var(--bg-light)",
+                    border: "2px solid var(--primary)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
+                  }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="p-3 rounded-lg"
+                      style={{ background: "var(--primary-20)" }}
+                    >
+                      <Calendar
+                        className="w-6 h-6"
+                        style={{ color: "var(--primary)" }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3
+                        className="font-semibold text-lg mb-1"
+                        style={{ color: "var(--text)" }}
+                      >
+                        All Appointments
+                      </h3>
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        View and manage all appointments
+                      </p>
+                      <span
+                        className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
+                        style={{
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
+                        }}
+                      >
+                        Available Now
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* All Referrals - Active */}
+                <Link
+                  href="/dashboard/psg/referrals"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
+                  style={{
+                    background: "var(--bg-light)",
+                    border: "2px solid var(--primary)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
+                  }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="p-3 rounded-lg"
+                      style={{ background: "var(--primary-20)" }}
+                    >
+                      <Users
+                        className="w-6 h-6"
+                        style={{ color: "var(--primary)" }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3
+                        className="font-semibold text-lg mb-1"
+                        style={{ color: "var(--text)" }}
+                      >
+                        All Referrals
+                      </h3>
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        View and manage all referrals
+                      </p>
+                      <span
+                        className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
+                        style={{
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
+                        }}
+                      >
+                        Available Now
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* All Sessions - Active */}
+                <Link
+                  href="/dashboard/psg/sessions"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
+                  style={{
+                    background: "var(--bg-light)",
+                    border: "2px solid var(--primary)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
+                  }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="p-3 rounded-lg"
+                      style={{ background: "var(--primary-20)" }}
+                    >
+                      <FileText
+                        className="w-6 h-6"
+                        style={{ color: "var(--primary)" }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3
+                        className="font-semibold text-lg mb-1"
+                        style={{ color: "var(--text)" }}
+                      >
+                        All Sessions
+                      </h3>
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        View all session documentation
+                      </p>
+                      <span
+                        className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
+                        style={{
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
+                        }}
+                      >
+                        Available Now
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* My Availability - Active */}
+                <Link
+                  href="/dashboard/psg/availability"
+                  className="group rounded-lg p-6 transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)]"
+                  style={{
+                    background: "var(--bg-light)",
+                    border: "2px solid var(--primary)",
+                    boxShadow:
+                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
+                  }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="p-3 rounded-lg"
+                      style={{ background: "var(--primary-20)" }}
+                    >
+                      <Calendar
+                        className="w-6 h-6"
+                        style={{ color: "var(--primary)" }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3
+                        className="font-semibold text-lg mb-1"
+                        style={{ color: "var(--text)" }}
+                      >
+                        My Availability
+                      </h3>
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        Set your weekly schedule
+                      </p>
+                      <span
+                        className="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded"
+                        style={{
+                          background: "var(--primary-20)",
+                          color: "var(--primary)",
+                        }}
+                      >
+                        Available Now
+                      </span>
+                    </div>
+                  </div>
+                </Link>
               </div>
             )}
           </div>
