@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   getAppointmentReports,
   getReferralReports,
@@ -161,6 +163,241 @@ export default function ReportsPage() {
 
     showAlert({
       message: "Report exported successfully!",
+      type: "success",
+      duration: 5000,
+    });
+  };
+
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Add header
+    doc.setFontSize(20);
+    doc.setTextColor(40, 150, 80);
+    doc.text("CareConnect", 14, 15);
+
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Mental Health Referral System", 14, 22);
+
+    // Add title
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    const reportTitle = `${
+      activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
+    } Report`;
+    doc.text(reportTitle, 14, 35);
+
+    // Add date range
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(
+      `Period: ${new Date(
+        dateRange.startDate
+      ).toLocaleDateString()} - ${new Date(
+        dateRange.endDate
+      ).toLocaleDateString()}`,
+      14,
+      42
+    );
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 48);
+
+    let startY = 55;
+
+    if (activeTab === "appointments" && appointmentReports.length > 0) {
+      // Summary stats
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Summary", 14, startY);
+      startY += 7;
+
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Total: ${appointmentReports.length}`, 14, startY);
+      doc.text(
+        `Completed: ${
+          appointmentReports.filter((a) => a.status === "completed").length
+        }`,
+        60,
+        startY
+      );
+      doc.text(
+        `Scheduled: ${
+          appointmentReports.filter((a) => a.status === "scheduled").length
+        }`,
+        110,
+        startY
+      );
+      doc.text(
+        `Cancelled: ${
+          appointmentReports.filter((a) => a.status === "cancelled").length
+        }`,
+        160,
+        startY
+      );
+      startY += 10;
+
+      // Table
+      autoTable(doc, {
+        startY,
+        head: [["Date", "Student", "PSG Member", "Status"]],
+        body: appointmentReports.map((apt) => [
+          new Date(apt.appointment_date).toLocaleString(),
+          apt.student_name,
+          apt.psg_member_name,
+          apt.status.toUpperCase(),
+        ]),
+        theme: "grid",
+        headStyles: { fillColor: [40, 150, 80] },
+        styles: { fontSize: 9 },
+      });
+    } else if (activeTab === "referrals" && referralReports.length > 0) {
+      // Summary stats
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Summary", 14, startY);
+      startY += 7;
+
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Total: ${referralReports.length}`, 14, startY);
+      doc.text(
+        `Completed: ${
+          referralReports.filter((r) => r.status === "completed").length
+        }`,
+        60,
+        startY
+      );
+      doc.text(
+        `In Progress: ${
+          referralReports.filter((r) => r.status === "in_progress").length
+        }`,
+        110,
+        startY
+      );
+      doc.text(
+        `Escalated: ${
+          referralReports.filter((r) => r.status === "escalated").length
+        }`,
+        160,
+        startY
+      );
+      startY += 10;
+
+      // Table
+      autoTable(doc, {
+        startY,
+        head: [["Date", "Student", "Source", "Severity", "Status"]],
+        body: referralReports.map((ref) => [
+          new Date(ref.created_at).toLocaleDateString(),
+          ref.student_name,
+          ref.source.replace("_", " ").toUpperCase(),
+          ref.severity.toUpperCase(),
+          ref.status.replace("_", " ").toUpperCase(),
+        ]),
+        theme: "grid",
+        headStyles: { fillColor: [40, 150, 80] },
+        styles: { fontSize: 9 },
+      });
+    } else if (activeTab === "sessions" && sessionReports.length > 0) {
+      // Summary stats
+      const totalDuration = sessionReports.reduce(
+        (sum, s) => sum + (s.duration_minutes || 0),
+        0
+      );
+      const avgDuration =
+        sessionReports.length > 0
+          ? Math.round(totalDuration / sessionReports.length)
+          : 0;
+
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Summary", 14, startY);
+      startY += 7;
+
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Total Sessions: ${sessionReports.length}`, 14, startY);
+      doc.text(`Total Duration: ${totalDuration} min`, 80, startY);
+      doc.text(`Avg Duration: ${avgDuration} min`, 150, startY);
+      startY += 10;
+
+      // Table
+      autoTable(doc, {
+        startY,
+        head: [["Date", "Student", "PSG Member", "Duration (min)"]],
+        body: sessionReports.map((session) => [
+          new Date(session.created_at).toLocaleDateString(),
+          session.student_name,
+          session.psg_member_name,
+          (session.duration_minutes || "N/A").toString(),
+        ]),
+        theme: "grid",
+        headStyles: { fillColor: [40, 150, 80] },
+        styles: { fontSize: 9 },
+      });
+    } else if (activeTab === "usage" && usageReport) {
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Usage Statistics", 14, startY);
+      startY += 10;
+
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+
+      const stats = [
+        ["Active Students", usageReport.active_students.toString()],
+        ["Active PSG Members", usageReport.active_psg_members.toString()],
+        ["Total Appointments", usageReport.total_appointments.toString()],
+        [
+          "Completed Appointments",
+          usageReport.completed_appointments.toString(),
+        ],
+        [
+          "Cancelled Appointments",
+          usageReport.cancelled_appointments.toString(),
+        ],
+        ["Total Referrals", usageReport.total_referrals.toString()],
+        ["Total Sessions", usageReport.total_sessions.toString()],
+        ["Total Users (New)", usageReport.total_users.toString()],
+      ];
+
+      autoTable(doc, {
+        startY,
+        head: [["Metric", "Value"]],
+        body: stats,
+        theme: "grid",
+        headStyles: { fillColor: [40, 150, 80] },
+        styles: { fontSize: 10 },
+      });
+    }
+
+    // Add footer
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `Page ${i} of ${pageCount}`,
+        pageWidth / 2,
+        doc.internal.pageSize.getHeight() - 10,
+        { align: "center" }
+      );
+      doc.text(
+        "CareConnect - Confidential Report",
+        14,
+        doc.internal.pageSize.getHeight() - 10
+      );
+    }
+
+    // Save PDF
+    const filename = `${activeTab}_report_${dateRange.startDate}_to_${dateRange.endDate}.pdf`;
+    doc.save(filename);
+
+    showAlert({
+      message: "PDF downloaded successfully!",
       type: "success",
       duration: 5000,
     });
@@ -370,17 +607,30 @@ export default function ReportsPage() {
               <h3 className="font-semibold" style={{ color: "var(--text)" }}>
                 Report Results
               </h3>
-              <button
-                onClick={handleExport}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg hover:opacity-90 transition-all"
-                style={{
-                  background: "var(--success-20)",
-                  color: "var(--success)",
-                }}
-              >
-                <Download className="w-4 h-4" />
-                Export JSON
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={downloadPDF}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg hover:opacity-90 transition-all"
+                  style={{
+                    background: "var(--primary-20)",
+                    color: "var(--primary)",
+                  }}
+                >
+                  <Download className="w-4 h-4" />
+                  Download PDF
+                </button>
+                <button
+                  onClick={handleExport}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg hover:opacity-90 transition-all"
+                  style={{
+                    background: "var(--success-20)",
+                    color: "var(--success)",
+                  }}
+                >
+                  <Download className="w-4 h-4" />
+                  Export JSON
+                </button>
+              </div>
             </div>
 
             <div className="p-6">
