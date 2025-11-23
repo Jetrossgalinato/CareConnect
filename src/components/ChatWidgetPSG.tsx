@@ -532,18 +532,21 @@ export function ChatWidgetPSG() {
                     </div>
                   ) : (
                     messages.map((message) => {
-                      const isOwn = message.sender_id === currentUserId;
+                      // Check if sender is PSG member or admin (all team messages go to right side)
+                      const isTeamMessage =
+                        message.sender?.role === "psg_member" ||
+                        message.sender?.role === "admin";
                       return (
                         <div
                           key={message.id}
                           className={`flex gap-2 ${
-                            isOwn ? "flex-row-reverse" : ""
+                            isTeamMessage ? "flex-row-reverse" : ""
                           }`}
                         >
                           <div
                             className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                             style={{
-                              background: isOwn
+                              background: isTeamMessage
                                 ? "var(--primary-20)"
                                 : "var(--bg-secondary)",
                             }}
@@ -551,21 +554,23 @@ export function ChatWidgetPSG() {
                             <User
                               className="w-4 h-4"
                               style={{
-                                color: isOwn
+                                color: isTeamMessage
                                   ? "var(--primary)"
                                   : "var(--text-muted)",
                               }}
                             />
                           </div>
                           <div
-                            className={`flex-1 ${isOwn ? "text-right" : ""}`}
+                            className={`flex-1 ${
+                              isTeamMessage ? "text-right" : ""
+                            }`}
                           >
                             <p
                               className="text-xs mb-1"
                               style={{ color: "var(--text-muted)" }}
                             >
-                              {isOwn
-                                ? message.sender?.full_name || "Unknown"
+                              {isTeamMessage
+                                ? "PSG"
                                 : `Student ${
                                     conversations.findIndex(
                                       (c) => c.id === selectedConversation?.id
@@ -574,13 +579,17 @@ export function ChatWidgetPSG() {
                             </p>
                             <div
                               className={`inline-block p-3 rounded-lg max-w-[80%] shadow-[0_1px_2px_rgba(0,0,0,0.1)] ${
-                                isOwn ? "rounded-tr-none" : "rounded-tl-none"
+                                isTeamMessage
+                                  ? "rounded-tr-none"
+                                  : "rounded-tl-none"
                               }`}
                               style={{
-                                background: isOwn
+                                background: isTeamMessage
                                   ? "var(--primary)"
                                   : "var(--bg-light)",
-                                color: isOwn ? "var(--bg-dark)" : "var(--text)",
+                                color: isTeamMessage
+                                  ? "var(--bg-dark)"
+                                  : "var(--text)",
                               }}
                             >
                               <p className="text-sm whitespace-pre-wrap break-words">
