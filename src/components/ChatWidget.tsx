@@ -14,7 +14,11 @@ import {
 import type { MessageWithSender } from "@/types/messages";
 import { MessageCircle, X, Send, Minimize2, User, Loader2 } from "lucide-react";
 
-export function ChatWidget() {
+interface ChatWidgetProps {
+  disabled?: boolean;
+}
+
+export function ChatWidget({ disabled = false }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -244,27 +248,37 @@ export function ChatWidget() {
     <>
       {/* Floating Chat Button */}
       {!isOpen && (
-        <button
-          onClick={handleOpen}
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.3),0_2px_6px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.4),0_3px_8px_rgba(0,0,0,0.2)] transition-all z-50"
-          style={{ background: "var(--primary)" }}
-        >
-          <MessageCircle
-            className="w-6 h-6"
-            style={{ color: "var(--bg-dark)" }}
-          />
-          {unreadCount > 0 && (
-            <span
-              className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{ background: "var(--error)", color: "#ffffff" }}
-            >
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          )}
-        </button>
+        <div className="relative">
+          <button
+            onClick={disabled ? undefined : handleOpen}
+            disabled={disabled}
+            className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.3),0_2px_6px_rgba(0,0,0,0.15)] transition-all z-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: disabled ? "var(--bg-secondary)" : "var(--primary)",
+              boxShadow: disabled ? "none" : undefined,
+            }}
+            title={
+              disabled
+                ? "Please start a case assessment first to use chat"
+                : "Chat with PSG"
+            }
+          >
+            <MessageCircle
+              className="w-6 h-6"
+              style={{ color: "var(--bg-dark)" }}
+            />
+            {unreadCount > 0 && (
+              <span
+                className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ background: "var(--error)", color: "#ffffff" }}
+              >
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
+        </div>
       )}
 
-      {/* Chat Box */}
       {isOpen && (
         <div
           className={`fixed bottom-6 right-6 w-96 flex flex-col shadow-[0_4px_20px_rgba(0,0,0,0.4),0_2px_10px_rgba(0,0,0,0.2)] rounded-lg overflow-hidden z-50 transition-all ${

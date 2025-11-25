@@ -11,6 +11,13 @@ export function DashboardClientWrapper({
   children: React.ReactNode;
 }) {
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [hasCaseAssessment, setHasCaseAssessment] = useState(() => {
+    // Initialize from sessionStorage
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("hasCaseAssessment") === "true";
+    }
+    return false;
+  });
 
   useEffect(() => {
     const getUserRole = async () => {
@@ -35,11 +42,28 @@ export function DashboardClientWrapper({
     getUserRole();
   }, []);
 
+  useEffect(() => {
+    // Check if student has started case assessment and listen for changes
+    const handleStorageChange = () => {
+      const status = sessionStorage.getItem("hasCaseAssessment");
+      setHasCaseAssessment(status === "true");
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    // Also listen for custom event from same page
+    window.addEventListener("caseAssessmentChanged", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("caseAssessmentChanged", handleStorageChange);
+    };
+  }, []);
+
   return (
     <>
       <DashboardLoginAlert />
       {children}
-      {userRole === "student" && <ChatWidget />}
+      {userRole === "student" && <ChatWidget disabled={!hasCaseAssessment} />}
       {(userRole === "psg_member" || userRole === "admin") && <ChatWidgetPSG />}
     </>
   );

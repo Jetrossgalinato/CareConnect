@@ -73,6 +73,8 @@ export default function ScreeningResultsPage() {
       // Mark that user has started case assessment
       setHasCaseAssessment(true);
       sessionStorage.setItem("hasCaseAssessment", "true");
+      // Dispatch event to update chat widget
+      window.dispatchEvent(new Event("caseAssessmentChanged"));
 
       showAlert({
         type: "success",
