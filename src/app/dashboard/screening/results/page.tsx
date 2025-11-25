@@ -60,27 +60,26 @@ export default function ScreeningResultsPage() {
 
     setIsCreatingAssessment(true);
     try {
-      const response = await createCaseAssessment(result.id);
-
-      if (response.error) {
-        showAlert({
-          type: "error",
-          message: `Error: ${response.error}`,
-        });
-        return;
-      }
-
       // Mark that user has started case assessment
       setHasCaseAssessment(true);
       sessionStorage.setItem("hasCaseAssessment", "true");
+      sessionStorage.setItem("startAssessmentFlow", "true");
+      // Dispatch event to update chat widget
+      window.dispatchEvent(new Event("caseAssessmentChanged"));
 
       showAlert({
         type: "success",
         message:
-          "Case assessment initiated. A PSG member will reach out to you soon.",
+          "Opening chat for case assessment. Please answer the questions to help us understand your situation better.",
+        duration: 5000,
       });
+
+      // Small delay to ensure chat widget is enabled before opening
+      setTimeout(() => {
+        window.dispatchEvent(new Event("openChatForAssessment"));
+      }, 100);
     } catch (error) {
-      console.error("Error creating case assessment:", error);
+      console.error("Error starting case assessment:", error);
       showAlert({
         type: "error",
         message: "Failed to start case assessment. Please try again.",

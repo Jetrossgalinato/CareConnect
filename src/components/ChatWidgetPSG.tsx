@@ -425,16 +425,32 @@ export function ChatWidgetPSG() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2 mb-1">
                             <p
                               className="font-medium text-sm truncate"
                               style={{ color: "var(--text)" }}
                             >
                               Student {index + 1}
                             </p>
+                            {conv.assessment_severity && (
+                              <span
+                                className="px-2 py-0.5 rounded text-xs font-bold flex-shrink-0"
+                                style={{
+                                  background:
+                                    conv.assessment_color === "red"
+                                      ? "var(--error)"
+                                      : conv.assessment_color === "yellow"
+                                      ? "var(--warning)"
+                                      : "var(--success)",
+                                  color: "#ffffff",
+                                }}
+                              >
+                                {conv.assessment_severity.toUpperCase()}
+                              </span>
+                            )}
                             {conv.unread_count! > 0 && (
                               <span
-                                className="ml-2 px-1.5 py-0.5 rounded-full text-xs font-bold flex-shrink-0"
+                                className="ml-auto px-1.5 py-0.5 rounded-full text-xs font-bold flex-shrink-0"
                                 style={{
                                   background: "var(--primary)",
                                   color: "var(--bg-dark)",
@@ -553,8 +569,9 @@ export function ChatWidgetPSG() {
                     </div>
                   ) : (
                     messages.map((message) => {
-                      // Check if sender is PSG member or admin (all team messages go to right side)
+                      // Check if sender is PSG member, admin, or system (all team messages go to right side)
                       const isTeamMessage =
+                        message.sender_id === null || // System messages
                         message.sender?.role === "psg_member" ||
                         message.sender?.role === "admin";
                       return (
@@ -614,7 +631,9 @@ export function ChatWidgetPSG() {
                               }}
                             >
                               <p className="text-sm whitespace-pre-wrap break-words">
-                                {selectedConversation
+                                {message.sender_id === null
+                                  ? message.content
+                                  : selectedConversation
                                   ? decryptMessage(
                                       message.content,
                                       selectedConversation.id

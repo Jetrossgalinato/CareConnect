@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAlert } from "@/components/AlertProvider";
 import { decryptMessage } from "@/lib/encryption";
@@ -8,13 +8,23 @@ import {
   getOrCreateConversation,
   getMessages,
   sendMessage,
+  sendSystemMessage,
   markMessagesAsRead,
   getUnreadCount,
 } from "@/actions/messages";
+import { submitCaseAssessment } from "@/actions/caseAssessment";
+import {
+  CASE_ASSESSMENT_QUESTIONS,
+  type AssessmentResponse,
+} from "@/lib/constants/caseAssessment";
 import type { MessageWithSender } from "@/types/messages";
 import { MessageCircle, X, Send, Minimize2, User, Loader2 } from "lucide-react";
 
-export function ChatWidget() {
+interface ChatWidgetProps {
+  disabled?: boolean;
+}
+
+export function ChatWidget({ disabled = false }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -25,7 +35,18 @@ export function ChatWidget() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const assessmentStartedRef = useRef(false);
+  const sentQuestionsRef = useRef<Set<number>>(new Set());
   const { showAlert } = useAlert();
+
+  // Assessment flow state
+  const [isAssessmentActive, setIsAssessmentActive] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [assessmentResponses, setAssessmentResponses] = useState<
+    AssessmentResponse[]
+  >([]);
+  const [waitingForAnswer, setWaitingForAnswer] = useState(false);
+  const [shouldStartAssessment, setShouldStartAssessment] = useState(false);
 
   // Get current user
   useEffect(() => {
@@ -46,6 +67,7 @@ export function ChatWidget() {
     if (isOpen && !conversationId) {
       loadConversation();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   // Subscribe to real-time messages
@@ -122,6 +144,216 @@ export function ChatWidget() {
     return () => clearInterval(interval);
   }, []);
 
+  const sendNextQuestion = useCallback(
+    async (questionIndex?: number) => {
+      const indexToUse = questionIndex ?? currentQuestionIndex;
+
+      if (!conversationId || indexToUse >= CASE_ASSESSMENT_QUESTIONS.length) {
+        // Will handle completion separately
+        console.log("sendNextQuestion called but conditions not met:", {
+          conversationId,
+          currentQuestionIndex: indexToUse,
+          totalQuestions: CASE_ASSESSMENT_QUESTIONS.length,
+        });
+        return;
+      }
+
+      const question = CASE_ASSESSMENT_QUESTIONS[indexToUse];
+
+      console.log(`Sending question ${indexToUse + 1}:`, question.question);
+
+      // Check if this question index was already sent using ref
+      if (sentQuestionsRef.current.has(indexToUse)) {
+        console.log(`Question ${indexToUse} already sent, skipping...`);
+        return;
+      }
+
+      // Mark this question as sent
+      sentQuestionsRef.current.add(indexToUse);
+
+      // Send question as system message to database so PSG members can see it
+      const result = await sendSystemMessage(conversationId, question.question);
+
+      if (!result.success) {
+        console.error("Failed to send question:", result.error);
+        // Remove from sent set if failed
+        sentQuestionsRef.current.delete(indexToUse);
+        return;
+      }
+
+      setWaitingForAnswer(true);
+    },
+    [conversationId, currentQuestionIndex]
+  );
+
+  const completeAssessment = useCallback(async () => {
+    if (!conversationId) return;
+
+    setWaitingForAnswer(false);
+    setIsAssessmentActive(false);
+    assessmentStartedRef.current = false; // Reset for future assessments
+    sentQuestionsRef.current.clear(); // Clear sent questions tracking
+
+    // Submit assessment
+    const result = await submitCaseAssessment(
+      conversationId,
+      assessmentResponses
+    );
+
+    if (result.success) {
+      const completionMsg = result.data?.requiresImmediateAttention
+        ? "Thank you for completing the assessment. Based on your responses, we recommend immediate support. A PSG member will reach out to you shortly. If you're in crisis, please contact emergency services (911) or the National Mental Health Crisis Hotline (1553)."
+        : "Thank you for completing the assessment. A PSG member will review your responses and reach out to you soon. You can continue to message us here if you need support.";
+
+      await sendSystemMessage(conversationId, completionMsg);
+
+      showAlert({
+        type: "success",
+        message: "Assessment completed successfully.",
+        duration: 5000,
+      });
+    } else {
+      showAlert({
+        type: "error",
+        message: "Failed to submit assessment. Please try again.",
+        duration: 5000,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, assessmentResponses]);
+
+  const handleAssessmentAnswer = useCallback(
+    async (answer: string) => {
+      if (!waitingForAnswer || !conversationId) return;
+
+      const currentQuestion = CASE_ASSESSMENT_QUESTIONS[currentQuestionIndex];
+      const normalizedAnswer = answer.trim().toLowerCase();
+
+      // Validate yes/no answer
+      if (!["yes", "no"].includes(normalizedAnswer)) {
+        await sendSystemMessage(
+          conversationId,
+          "Please answer with 'yes' or 'no'."
+        );
+        return;
+      } // Store response
+      const response: AssessmentResponse = {
+        questionId: currentQuestion.id,
+        answer: normalizedAnswer,
+        timestamp: new Date().toISOString(),
+      };
+
+      const newResponses = [...assessmentResponses, response];
+      setAssessmentResponses(newResponses);
+      setWaitingForAnswer(false);
+
+      // Check skip logic
+      if (
+        currentQuestion.skipLogic &&
+        normalizedAnswer === currentQuestion.skipLogic.answer
+      ) {
+        const skipToIndex = CASE_ASSESSMENT_QUESTIONS.findIndex(
+          (q) => q.id === currentQuestion.skipLogic!.skipTo
+        );
+        if (skipToIndex !== -1) {
+          setCurrentQuestionIndex(skipToIndex);
+          setTimeout(() => sendNextQuestion(skipToIndex), 1000);
+          return;
+        }
+      }
+
+      // Move to next question
+      const nextIndex = currentQuestionIndex + 1;
+      setCurrentQuestionIndex(nextIndex);
+
+      // Send next question after brief delay, passing the next index directly
+      setTimeout(() => {
+        if (nextIndex < CASE_ASSESSMENT_QUESTIONS.length) {
+          sendNextQuestion(nextIndex);
+        } else {
+          completeAssessment();
+        }
+      }, 1000);
+    },
+    [
+      waitingForAnswer,
+      conversationId,
+      currentQuestionIndex,
+      assessmentResponses,
+      sendNextQuestion,
+      completeAssessment,
+    ]
+  );
+
+  const startAssessmentFlow = useCallback(async () => {
+    if (!conversationId) {
+      // Wait for conversation to be created
+      setTimeout(startAssessmentFlow, 500);
+      return;
+    }
+
+    console.log("Starting assessment flow for conversation:", conversationId);
+
+    setIsAssessmentActive(true);
+    setCurrentQuestionIndex(0);
+    setAssessmentResponses([]);
+    sentQuestionsRef.current.clear(); // Clear tracking for new assessment
+
+    // Send welcome message as system message
+    const welcomeMsg =
+      "Thank you for starting the case assessment. I'll ask you a few questions to better understand how we can support you. Please answer honestly - your responses are confidential.\n\nYou can answer with 'yes' or 'no' to each question.";
+
+    console.log("Sending welcome message...");
+    await sendSystemMessage(conversationId, welcomeMsg);
+    console.log("Welcome message sent");
+
+    // Send first question after a brief delay
+    setTimeout(() => {
+      console.log("Sending first question...");
+      sendNextQuestion();
+    }, 1500);
+  }, [conversationId, sendNextQuestion]);
+
+  // Listen for assessment start event
+  useEffect(() => {
+    const handleOpenForAssessment = () => {
+      const shouldStart = sessionStorage.getItem("startAssessmentFlow");
+      if (shouldStart === "true") {
+        console.log("Opening chat for assessment...");
+        setIsOpen(true);
+        setIsMinimized(false);
+        sessionStorage.removeItem("startAssessmentFlow");
+        // Set flag to start assessment once conversation is loaded
+        setShouldStartAssessment(true);
+      }
+    };
+
+    window.addEventListener("openChatForAssessment", handleOpenForAssessment);
+    return () => {
+      window.removeEventListener(
+        "openChatForAssessment",
+        handleOpenForAssessment
+      );
+    };
+  }, []);
+
+  // Start assessment when conversation is ready and flag is set
+  useEffect(() => {
+    if (
+      shouldStartAssessment &&
+      conversationId &&
+      !assessmentStartedRef.current
+    ) {
+      console.log("Conversation loaded, starting assessment flow...");
+      assessmentStartedRef.current = true;
+      setShouldStartAssessment(false);
+      setTimeout(() => {
+        startAssessmentFlow();
+      }, 500);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldStartAssessment, conversationId]);
+
   const loadUnreadCount = async () => {
     const result = await getUnreadCount();
     if (result.success && result.data !== undefined) {
@@ -166,15 +398,21 @@ export function ChatWidget() {
     setNewMessage(""); // Clear input immediately for better UX
 
     try {
-      const result = await sendMessage(conversationId, messageContent);
-      if (!result.success) {
-        // If failed, restore the message
-        setNewMessage(messageContent);
-        showAlert({
-          type: "error",
-          message: result.error || "Failed to send message",
-          duration: 3000,
-        });
+      // If assessment is active and waiting for answer, handle it specially
+      if (isAssessmentActive && waitingForAnswer) {
+        await sendMessage(conversationId, messageContent);
+        await handleAssessmentAnswer(messageContent);
+      } else {
+        const result = await sendMessage(conversationId, messageContent);
+        if (!result.success) {
+          // If failed, restore the message
+          setNewMessage(messageContent);
+          showAlert({
+            type: "error",
+            message: result.error || "Failed to send message",
+            duration: 3000,
+          });
+        }
       }
       // Don't need to manually add to messages array - real-time subscription will handle it
     } finally {
@@ -244,27 +482,37 @@ export function ChatWidget() {
     <>
       {/* Floating Chat Button */}
       {!isOpen && (
-        <button
-          onClick={handleOpen}
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.3),0_2px_6px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.4),0_3px_8px_rgba(0,0,0,0.2)] transition-all z-50"
-          style={{ background: "var(--primary)" }}
-        >
-          <MessageCircle
-            className="w-6 h-6"
-            style={{ color: "var(--bg-dark)" }}
-          />
-          {unreadCount > 0 && (
-            <span
-              className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{ background: "var(--error)", color: "#ffffff" }}
-            >
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          )}
-        </button>
+        <div className="relative">
+          <button
+            onClick={disabled ? undefined : handleOpen}
+            disabled={disabled}
+            className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.3),0_2px_6px_rgba(0,0,0,0.15)] transition-all z-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: disabled ? "var(--bg-secondary)" : "var(--primary)",
+              boxShadow: disabled ? "none" : undefined,
+            }}
+            title={
+              disabled
+                ? "Please start a case assessment first to use chat"
+                : "Chat with PSG"
+            }
+          >
+            <MessageCircle
+              className="w-6 h-6"
+              style={{ color: "var(--bg-dark)" }}
+            />
+            {unreadCount > 0 && (
+              <span
+                className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ background: "var(--error)", color: "#ffffff" }}
+              >
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
+        </div>
       )}
 
-      {/* Chat Box */}
       {isOpen && (
         <div
           className={`fixed bottom-6 right-6 w-96 flex flex-col shadow-[0_4px_20px_rgba(0,0,0,0.4),0_2px_10px_rgba(0,0,0,0.2)] rounded-lg overflow-hidden z-50 transition-all ${
@@ -388,7 +636,9 @@ export function ChatWidget() {
                             }}
                           >
                             <p className="text-sm whitespace-pre-wrap break-words">
-                              {conversationId
+                              {message.sender_id === null
+                                ? message.content
+                                : conversationId
                                 ? decryptMessage(
                                     message.content,
                                     conversationId
