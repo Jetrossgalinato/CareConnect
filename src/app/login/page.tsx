@@ -125,7 +125,7 @@ export default function LoginPage() {
               className="text-2xl font-bold mb-2"
               style={{ color: "var(--text)" }}
             >
-              Welcome Back
+              Welcome Back!
             </h1>
             <p style={{ color: "var(--text-muted)" }}>
               Sign in to your CareConnect account
