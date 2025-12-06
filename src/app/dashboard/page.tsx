@@ -224,7 +224,7 @@ export default async function DashboardPage() {
           {user.role === "psg_member" && (
             <div className="mb-8 w-full">
               <div
-                className="rounded-lg p-6 md:p-8 w-full"
+                className="rounded-lg  w-full"
                 style={{
                   background:
                     "linear-gradient(135deg, var(--primary-20) 0%, var(--primary-10) 100%)",
