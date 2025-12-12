@@ -76,62 +76,36 @@ export default async function DashboardPage() {
                   className="text-base md:text-lg mb-4 leading-relaxed"
                   style={{ color: "var(--text)" }}
                 >
-                  Taking care of your mental health is just as important as your
-                  physical health. We&apos;re here to support you every step of
-                  the way through confidential screenings, peer support
-                  sessions, and professional guidance.
+                  We&apos;re here to support you with confidential screenings,
+                  peer support, and professional guidance.
                 </p>
                 <div className="grid md:grid-cols-3 gap-4 mt-6">
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-3">
                     <div className="text-2xl">🔒</div>
-                    <div>
-                      <p
-                        className="font-semibold text-sm"
-                        style={{ color: "var(--text)" }}
-                      >
-                        100% Confidential
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Your privacy is our priority
-                      </p>
-                    </div>
+                    <p
+                      className="font-semibold text-sm"
+                      style={{ color: "var(--text)" }}
+                    >
+                      100% Confidential
+                    </p>
                   </div>
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-3">
                     <div className="text-2xl">🤝</div>
-                    <div>
-                      <p
-                        className="font-semibold text-sm"
-                        style={{ color: "var(--text)" }}
-                      >
-                        Peer Support
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Connect with trained PSG members
-                      </p>
-                    </div>
+                    <p
+                      className="font-semibold text-sm"
+                      style={{ color: "var(--text)" }}
+                    >
+                      Peer Support
+                    </p>
                   </div>
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-3">
                     <div className="text-2xl">⚡</div>
-                    <div>
-                      <p
-                        className="font-semibold text-sm"
-                        style={{ color: "var(--text)" }}
-                      >
-                        Quick & Easy
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Book appointments in seconds
-                      </p>
-                    </div>
+                    <p
+                      className="font-semibold text-sm"
+                      style={{ color: "var(--text)" }}
+                    >
+                      Quick & Easy
+                    </p>
                   </div>
                 </div>
               </div>
@@ -517,21 +491,7 @@ export default async function DashboardPage() {
                 : "Quick Access"}
             </h2>
             {/* Student Info Section */}
-            {user.role === "student" && (
-              <div className="mb-6">
-                <p
-                  className="text-sm leading-relaxed"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  Not sure where to begin? Start with a{" "}
-                  <strong>Mental Health Screening</strong> to get personalized
-                  recommendations, or jump straight to{" "}
-                  <strong>My Appointments</strong> to schedule a session with a
-                  PSG member. Need immediate support? Use the{" "}
-                  <strong>Self-Referral Form</strong>.
-                </p>
-              </div>
-            )}
+            {user.role === "student" && null}
             {/* Admin Info Section */}
             {user.role === "admin" && (
               <div className="mb-6">
@@ -599,13 +559,6 @@ export default async function DashboardPage() {
                       >
                         Take a confidential mental health assessment
                       </p>
-                      <p
-                        className="text-xs italic"
-                        style={{ color: "var(--primary)" }}
-                      >
-                        ✨ Takes only 5 minutes • Get instant color-coded
-                        results
-                      </p>
                     </div>
                   </div>
                 </Link>
@@ -643,12 +596,6 @@ export default async function DashboardPage() {
                         style={{ color: "var(--text-muted)" }}
                       >
                         Check your screening results and recommendations
-                      </p>
-                      <p
-                        className="text-xs italic"
-                        style={{ color: "var(--primary)" }}
-                      >
-                        📊 Track your progress • See personalized suggestions
                       </p>
                     </div>
                   </div>
@@ -688,12 +635,6 @@ export default async function DashboardPage() {
                       >
                         Schedule sessions with PSG members
                       </p>
-                      <p
-                        className="text-xs italic"
-                        style={{ color: "var(--primary)" }}
-                      >
-                        📅 Real-time availability • Book in under 5 seconds
-                      </p>
                     </div>
                   </div>
                 </Link>
@@ -731,12 +672,6 @@ export default async function DashboardPage() {
                         style={{ color: "var(--text-muted)" }}
                       >
                         Submit a referral request for support
-                      </p>
-                      <p
-                        className="text-xs italic"
-                        style={{ color: "var(--primary)" }}
-                      >
-                        🆘 Need help now? • Connect with OCCS professionals
                       </p>
                     </div>
                   </div>
@@ -853,12 +788,10 @@ export default async function DashboardPage() {
                   >
                     <span className="text-lg">⚠️</span>
                     <span>
-                      <strong>Remember:</strong> If you&apos;re experiencing a
-                      mental health emergency or having thoughts of self-harm,
-                      please contact the National Mental Health Crisis Hotline
-                      at <strong>1553</strong> or visit the OCCS office
-                      immediately. You&apos;re not alone, and help is available
-                      24/7.
+                      <strong>Emergency:</strong> If you are in crisis, contact
+                      the National Mental Health Crisis Hotline at{" "}
+                      <strong>1553</strong> or visit the OCCS office
+                      immediately. Help is available 24/7.
                     </span>
                   </p>
                 </div>
