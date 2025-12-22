@@ -79,32 +79,6 @@ export default async function DashboardPage() {
                   We&apos;re here to support you with confidential screenings,
                   peer support, and professional guidance.
                 </p>
-                <div className="grid md:grid-cols-3 gap-4 mt-6">
-                  <div className="flex items-center gap-3">
-                    <p
-                      className="font-semibold text-sm"
-                      style={{ color: "var(--text)" }}
-                    >
-                      100% Confidential
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <p
-                      className="font-semibold text-sm"
-                      style={{ color: "var(--text)" }}
-                    >
-                      Peer Support
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <p
-                      className="font-semibold text-sm"
-                      style={{ color: "var(--text)" }}
-                    >
-                      Quick & Easy
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
           )}
@@ -134,56 +108,6 @@ export default async function DashboardPage() {
                   ensure the mental health support system runs smoothly for all
                   students and PSG members.
                 </p>
-                <div className="grid md:grid-cols-3 gap-4 mt-6">
-                  <div className="flex items-start gap-3">
-                    <div>
-                      <p
-                        className="font-semibold text-sm"
-                        style={{ color: "var(--text)" }}
-                      >
-                        User Management
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Control access and permissions
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div>
-                      <p
-                        className="font-semibold text-sm"
-                        style={{ color: "var(--text)" }}
-                      >
-                        System Analytics
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Track trends and insights
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div>
-                      <p
-                        className="font-semibold text-sm"
-                        style={{ color: "var(--text)" }}
-                      >
-                        Audit & Security
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Monitor all system activities
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           )}
@@ -213,56 +137,6 @@ export default async function DashboardPage() {
                   is vital in providing mental health support to fellow students
                   through active listening, guidance, and compassionate care.
                 </p>
-                <div className="grid md:grid-cols-3 gap-4 mt-6">
-                  <div className="flex items-start gap-3">
-                    <div>
-                      <p
-                        className="font-semibold text-sm"
-                        style={{ color: "var(--text)" }}
-                      >
-                        Manage Sessions
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Schedule and document meetings
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div>
-                      <p
-                        className="font-semibold text-sm"
-                        style={{ color: "var(--text)" }}
-                      >
-                        Set Availability
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Control your weekly schedule
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div>
-                      <p
-                        className="font-semibold text-sm"
-                        style={{ color: "var(--text)" }}
-                      >
-                        Review Cases
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Handle screenings and referrals
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           )}
