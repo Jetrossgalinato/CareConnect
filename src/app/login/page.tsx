@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
@@ -12,7 +12,7 @@ import { useAlert } from "@/components/AlertProvider";
 import { useSearchParams } from "next/navigation";
 import { ThemeToggler } from "@/components/ThemeToggler";
 
-export default function LoginPage() {
+function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
@@ -36,7 +36,7 @@ export default function LoginPage() {
       sessionStorage.setItem("loginSuccess", "true");
       console.log(
         "loginSuccess flag set:",
-        sessionStorage.getItem("loginSuccess")
+        sessionStorage.getItem("loginSuccess"),
       );
     }
 
@@ -250,5 +250,22 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <Loader2
+            className="w-8 h-8 animate-spin"
+            style={{ color: "var(--primary)" }}
+          />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
