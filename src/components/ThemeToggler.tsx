@@ -6,7 +6,18 @@ import { useState, useEffect } from "react";
 
 function getInitialTheme(): "dark" | "light" {
   if (typeof window === "undefined") return "dark";
-  return (localStorage.getItem("theme") as "dark" | "light") || "dark";
+
+  const stored = localStorage.getItem("theme") as "dark" | "light";
+  if (stored) return stored;
+
+  if (
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  ) {
+    return "dark";
+  }
+
+  return "light";
 }
 
 export function ThemeToggler() {
