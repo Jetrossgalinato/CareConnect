@@ -30,13 +30,8 @@ export function useAlert() {
 }
 
 export function AlertProvider({ children }: { children: ReactNode }) {
-  const [alert, setAlert] = useState<GlobalAlert | null>(() => {
-    if (typeof window !== "undefined") {
-      const stored = sessionStorage.getItem("careconnect-alert");
-      if (stored) return JSON.parse(stored) as GlobalAlert;
-    }
-    return null;
-  });
+  const [alert, setAlert] = useState<GlobalAlert | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [progress, setProgress] = useState(0);
@@ -78,14 +73,28 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     if (timerRef.current) clearTimeout(timerRef.current);
   };
 
+  // Load alert on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const stored = sessionStorage.getItem("careconnect-alert");
+      if (stored) {
+        setAlert(JSON.parse(stored) as GlobalAlert);
+      }
+      setIsLoaded(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Persist alert in sessionStorage
   useEffect(() => {
+    if (!isLoaded) return;
+
     if (alert) {
       sessionStorage.setItem("careconnect-alert", JSON.stringify(alert));
     } else {
       sessionStorage.removeItem("careconnect-alert");
     }
-  }, [alert]);
+  }, [alert, isLoaded]);
 
   // Restore alert on mount
   // No effect needed for alert visibility or progress

@@ -10,19 +10,17 @@ function getInitialTheme(): "dark" | "light" {
 }
 
 export function ThemeToggler() {
-  const [isDark, setIsDark] = useState(() => {
-    // Only access localStorage during client-side initialization
-    if (typeof window !== "undefined") {
-      const savedTheme = localStorage.getItem("theme") || "dark";
-      return savedTheme === "dark";
-    }
-    return true; // Default to dark theme on server
-  });
+  const [isDark, setIsDark] = useState(true);
 
   // Apply theme to DOM on mount and when theme changes
   useEffect(() => {
-    const savedTheme = getInitialTheme();
-    document.documentElement.setAttribute("data-theme", savedTheme);
+    const timer = setTimeout(() => {
+      // Check localStorage on mount
+      const savedTheme = getInitialTheme();
+      setIsDark(savedTheme === "dark");
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const toggleTheme = () => {
@@ -35,7 +33,6 @@ export function ThemeToggler() {
   return (
     <div
       className="theme-toggler"
-      suppressHydrationWarning
       style={{
         width: 36,
         height: 36,
