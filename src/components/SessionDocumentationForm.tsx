@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, Save, Clock, FileText, MessageSquare } from "lucide-react";
 import { createSession, updateSession } from "@/actions/sessions";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 import type { Session } from "@/types/sessions";
 
 const sessionSchema = z.object({

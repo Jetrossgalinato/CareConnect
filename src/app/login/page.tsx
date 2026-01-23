@@ -8,7 +8,7 @@ import { login } from "@/lib/actions/auth";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect } from "react";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 import { useSearchParams } from "next/navigation";
 import { ThemeToggler } from "@/components/ThemeToggler";
 

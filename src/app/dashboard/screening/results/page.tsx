@@ -11,7 +11,7 @@ import {
   createCaseAssessment,
 } from "@/lib/actions/screening";
 import { MessageSquare, Calendar, RotateCcw } from "lucide-react";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 
 export default function ScreeningResultsPage() {
   const [result, setResult] = useState<ScreeningResult | null>(null);

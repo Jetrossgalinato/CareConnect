@@ -10,7 +10,7 @@ import {
   completeAppointment,
 } from "@/actions/appointments";
 import { getSessionByAppointmentId } from "@/actions/sessions";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 import type { AppointmentWithProfiles } from "@/types/appointments";
 import type { SessionWithAppointment } from "@/types/sessions";
 import { APPOINTMENT_STATUS_LABELS } from "@/types/appointments";

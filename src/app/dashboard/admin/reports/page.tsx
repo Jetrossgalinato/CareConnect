@@ -10,7 +10,7 @@ import {
   getSessionReports,
   getUsageReport,
 } from "@/actions/admin";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 import type {
   AppointmentReport,
   ReferralReport,

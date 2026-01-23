@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 
 export function DashboardLoginAlert() {
   const { showAlert } = useAlert();

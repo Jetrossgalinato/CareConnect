@@ -12,13 +12,7 @@ export function DashboardClientWrapper({
   children: React.ReactNode;
 }) {
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [hasCaseAssessment, setHasCaseAssessment] = useState(() => {
-    // Initialize from sessionStorage
-    if (typeof window !== "undefined") {
-      return sessionStorage.getItem("hasCaseAssessment") === "true";
-    }
-    return false;
-  });
+  const [hasCaseAssessment, setHasCaseAssessment] = useState(false);
   const [hasConversation, setHasConversation] = useState(false);
 
   useEffect(() => {
@@ -58,6 +52,9 @@ export function DashboardClientWrapper({
       const status = sessionStorage.getItem("hasCaseAssessment");
       setHasCaseAssessment(status === "true");
     };
+
+    // Initial check
+    handleStorageChange();
 
     window.addEventListener("storage", handleStorageChange);
     // Also listen for custom event from same page

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 import { createClient } from "@/lib/supabase/client";
 import { getAllReferrals, getPSGAssignedReferrals } from "@/actions/referrals";
 import {

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Button } from "@/components/ui/button";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 import {
   getReferralById,
   getReferralUpdates,

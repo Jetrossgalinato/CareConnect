@@ -18,7 +18,7 @@ const supabase = await createClient();
 ```typescript
 "use client";
 
-import { useAuth } from "@/lib/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 function MyComponent() {
   const { user, profile, loading, isAuthenticated } = useAuth();

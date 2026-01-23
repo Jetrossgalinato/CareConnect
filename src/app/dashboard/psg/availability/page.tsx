@@ -8,7 +8,7 @@ import {
   updatePSGAvailability,
   deletePSGAvailability,
 } from "@/actions/psg-availability";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 import type { PSGAvailability, DayOfWeek } from "@/types/appointments";
 import { DAY_NAMES } from "@/types/appointments";
 import { createClient } from "@/lib/supabase/client";
