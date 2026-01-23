@@ -11,7 +11,7 @@ import {
   getScreeningById,
   updateScreeningReview,
 } from "@/lib/actions/screening";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 import { Loader } from "@/components/Loader";
 
 export default function ScreeningDetailPage({

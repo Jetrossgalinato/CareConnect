@@ -2,7 +2,6 @@
 
 import React, {
   createContext,
-  useContext,
   useState,
   useRef,
   useEffect,
@@ -16,18 +15,14 @@ export type GlobalAlert = {
   duration?: number; // ms
 };
 
-interface AlertContextType {
+export interface AlertContextType {
   showAlert: (alert: GlobalAlert) => void;
   closeAlert: () => void;
 }
 
-const AlertContext = createContext<AlertContextType | undefined>(undefined);
-
-export function useAlert() {
-  const ctx = useContext(AlertContext);
-  if (!ctx) throw new Error("useAlert must be used within AlertProvider");
-  return ctx;
-}
+export const AlertContext = createContext<AlertContextType | undefined>(
+  undefined,
+);
 
 export function AlertProvider({ children }: { children: ReactNode }) {
   const [alert, setAlert] = useState<GlobalAlert | null>(null);

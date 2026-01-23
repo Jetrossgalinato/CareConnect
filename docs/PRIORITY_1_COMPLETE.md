@@ -42,6 +42,9 @@ Authentication and role-based access control is now fully implemented for CareCo
 ### Core Auth Files
 
 ```
+src/hooks/
+└── useAuth.ts             # Client-side auth hook
+
 src/lib/
 ├── supabase/
 │   ├── client.ts          # Browser client
@@ -52,10 +55,8 @@ src/lib/
 │   └── auth.ts            # Server actions (login, register, logout)
 ├── validations/
 │   └── auth.ts            # Zod schemas
-├── utils/
-│   └── auth.ts            # Role helpers
-└── hooks/
-    └── useAuth.ts         # Client-side auth hook
+└── utils/
+    └── auth.ts            # Role helpers
 ```
 
 ### Pages

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getAvailableTimeSlots } from "@/actions/psg-availability";
 import { createAppointment } from "@/actions/appointments";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 import type { AvailableTimeSlot } from "@/types/appointments";
 import { createClient } from "@/lib/supabase/client";
 import { DashboardNavbar } from "@/components/DashboardNavbar";

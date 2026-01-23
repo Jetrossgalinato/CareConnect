@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getAppointmentById, cancelAppointment } from "@/actions/appointments";
-import { useAlert } from "@/components/AlertProvider";
+import { useAlert } from "@/hooks/useAlert";
 import type { AppointmentWithProfiles } from "@/types/appointments";
 import { APPOINTMENT_STATUS_LABELS } from "@/types/appointments";
 import { DashboardNavbar } from "@/components/DashboardNavbar";

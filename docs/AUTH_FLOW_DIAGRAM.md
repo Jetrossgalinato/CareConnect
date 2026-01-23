@@ -226,7 +226,7 @@ Login                         Session Active              Logout
 │  └─► Creates browser Supabase client                        │
 │      Used in: Client Components, Hooks, Realtime            │
 │                                                              │
-│  src/lib/hooks/useAuth.ts                                   │
+│  src/hooks/useAuth.ts                                       │
 │  └─► React hook for client auth state                       │
 │      Returns: user, profile, loading, isAuthenticated       │
 │                                                              │
