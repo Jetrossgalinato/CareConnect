@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -13,6 +13,7 @@ import {
 import { useAlert } from "@/hooks/useAlert";
 import type {
   AppointmentReport,
+  ReportFilters,
   ReferralReport,
   SessionReport,
   UsageReport,
@@ -48,8 +49,36 @@ export default function ReportsPage() {
   const [sessionReports, setSessionReports] = useState<SessionReport[]>([]);
   const [usageReport, setUsageReport] = useState<UsageReport | null>(null);
 
+  useEffect(() => {
+    const loadDefaultAppointments = async () => {
+      setLoading(true);
+      try {
+        const result = await getAppointmentReports();
+        if (result.success && result.data) {
+          setAppointmentReports(result.data);
+        } else {
+          showAlert({
+            message: result.error || "Failed to load appointments",
+            type: "error",
+            duration: 5000,
+          });
+        }
+      } catch {
+        showAlert({
+          message: "An unexpected error occurred",
+          type: "error",
+          duration: 5000,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDefaultAppointments();
+  }, [showAlert]);
+
   const handleGenerateReport = async () => {
-    if (!dateRange.startDate || !dateRange.endDate) {
+    if (activeTab === "usage" && (!dateRange.startDate || !dateRange.endDate)) {
       showAlert({
         message: "Please select both start and end dates",
         type: "error",
@@ -60,10 +89,10 @@ export default function ReportsPage() {
 
     setLoading(true);
     try {
-      const filters = {
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
-        status: statusFilter !== "all" ? statusFilter : undefined,
+      const filters: ReportFilters = {
+        ...(dateRange.startDate ? { start_date: dateRange.startDate } : {}),
+        ...(dateRange.endDate ? { end_date: dateRange.endDate } : {}),
+        ...(statusFilter !== "all" ? { status: statusFilter } : {}),
       };
 
       if (activeTab === "appointments") {
@@ -102,7 +131,7 @@ export default function ReportsPage() {
       } else if (activeTab === "usage") {
         const result = await getUsageReport(
           dateRange.startDate,
-          dateRange.endDate
+          dateRange.endDate,
         );
         if (result.success && result.data) {
           setUsageReport(result.data);
@@ -194,12 +223,12 @@ export default function ReportsPage() {
     doc.setTextColor(100, 100, 100);
     doc.text(
       `Period: ${new Date(
-        dateRange.startDate
+        dateRange.startDate,
       ).toLocaleDateString()} - ${new Date(
-        dateRange.endDate
+        dateRange.endDate,
       ).toLocaleDateString()}`,
       14,
-      42
+      42,
     );
     doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 48);
 
@@ -220,21 +249,21 @@ export default function ReportsPage() {
           appointmentReports.filter((a) => a.status === "completed").length
         }`,
         60,
-        startY
+        startY,
       );
       doc.text(
         `Scheduled: ${
           appointmentReports.filter((a) => a.status === "scheduled").length
         }`,
         110,
-        startY
+        startY,
       );
       doc.text(
         `Cancelled: ${
           appointmentReports.filter((a) => a.status === "cancelled").length
         }`,
         160,
-        startY
+        startY,
       );
       startY += 10;
 
@@ -267,21 +296,21 @@ export default function ReportsPage() {
           referralReports.filter((r) => r.status === "completed").length
         }`,
         60,
-        startY
+        startY,
       );
       doc.text(
         `In Progress: ${
           referralReports.filter((r) => r.status === "in_progress").length
         }`,
         110,
-        startY
+        startY,
       );
       doc.text(
         `Escalated: ${
           referralReports.filter((r) => r.status === "escalated").length
         }`,
         160,
-        startY
+        startY,
       );
       startY += 10;
 
@@ -304,7 +333,7 @@ export default function ReportsPage() {
       // Summary stats
       const totalDuration = sessionReports.reduce(
         (sum, s) => sum + (s.duration_minutes || 0),
-        0
+        0,
       );
       const avgDuration =
         sessionReports.length > 0
@@ -383,12 +412,12 @@ export default function ReportsPage() {
         `Page ${i} of ${pageCount}`,
         pageWidth / 2,
         doc.internal.pageSize.getHeight() - 10,
-        { align: "center" }
+        { align: "center" },
       );
       doc.text(
         "CareConnect - Confidential Report",
         14,
-        doc.internal.pageSize.getHeight() - 10
+        doc.internal.pageSize.getHeight() - 10,
       );
     }
 
@@ -576,7 +605,7 @@ export default function ReportsPage() {
 
           <button
             onClick={handleGenerateReport}
-            disabled={loading || !dateRange.startDate || !dateRange.endDate}
+            disabled={loading}
             className="px-6 py-2 rounded-lg hover:opacity-90 transition-all disabled:opacity-50"
             style={{
               background: "var(--primary)",
@@ -671,7 +700,7 @@ export default function ReportsPage() {
                       >
                         {
                           appointmentReports.filter(
-                            (a) => a.status === "completed"
+                            (a) => a.status === "completed",
                           ).length
                         }
                       </p>
@@ -692,7 +721,7 @@ export default function ReportsPage() {
                       >
                         {
                           appointmentReports.filter(
-                            (a) => a.status === "scheduled"
+                            (a) => a.status === "scheduled",
                           ).length
                         }
                       </p>
@@ -713,7 +742,7 @@ export default function ReportsPage() {
                       >
                         {
                           appointmentReports.filter(
-                            (a) => a.status === "cancelled"
+                            (a) => a.status === "cancelled",
                           ).length
                         }
                       </p>
@@ -788,14 +817,14 @@ export default function ReportsPage() {
                                     apt.status === "completed"
                                       ? "var(--success-20)"
                                       : apt.status === "scheduled"
-                                      ? "var(--primary-20)"
-                                      : "var(--error-20)",
+                                        ? "var(--primary-20)"
+                                        : "var(--error-20)",
                                   color:
                                     apt.status === "completed"
                                       ? "var(--success)"
                                       : apt.status === "scheduled"
-                                      ? "var(--primary)"
-                                      : "var(--error)",
+                                        ? "var(--primary)"
+                                        : "var(--error)",
                                 }}
                               >
                                 {apt.status.toUpperCase()}
@@ -846,7 +875,7 @@ export default function ReportsPage() {
                       >
                         {
                           referralReports.filter(
-                            (r) => r.status === "completed"
+                            (r) => r.status === "completed",
                           ).length
                         }
                       </p>
@@ -867,7 +896,7 @@ export default function ReportsPage() {
                       >
                         {
                           referralReports.filter(
-                            (r) => r.status === "in_progress"
+                            (r) => r.status === "in_progress",
                           ).length
                         }
                       </p>
@@ -888,7 +917,7 @@ export default function ReportsPage() {
                       >
                         {
                           referralReports.filter(
-                            (r) => r.status === "escalated"
+                            (r) => r.status === "escalated",
                           ).length
                         }
                       </p>
@@ -969,14 +998,14 @@ export default function ReportsPage() {
                                     ref.severity === "high"
                                       ? "var(--error-20)"
                                       : ref.severity === "medium"
-                                      ? "var(--warning-20)"
-                                      : "var(--success-20)",
+                                        ? "var(--warning-20)"
+                                        : "var(--success-20)",
                                   color:
                                     ref.severity === "high"
                                       ? "var(--error)"
                                       : ref.severity === "medium"
-                                      ? "var(--warning)"
-                                      : "var(--success)",
+                                        ? "var(--warning)"
+                                        : "var(--success)",
                                 }}
                               >
                                 {ref.severity.toUpperCase()}
@@ -990,14 +1019,14 @@ export default function ReportsPage() {
                                     ref.status === "completed"
                                       ? "var(--success-20)"
                                       : ref.status === "in_progress"
-                                      ? "var(--primary-20)"
-                                      : "var(--text-muted)",
+                                        ? "var(--primary-20)"
+                                        : "var(--text-muted)",
                                   color:
                                     ref.status === "completed"
                                       ? "var(--success)"
                                       : ref.status === "in_progress"
-                                      ? "var(--primary)"
-                                      : "var(--text)",
+                                        ? "var(--primary)"
+                                        : "var(--text)",
                                 }}
                               >
                                 {ref.status.replace("_", " ").toUpperCase()}
@@ -1048,7 +1077,7 @@ export default function ReportsPage() {
                       >
                         {sessionReports.reduce(
                           (sum, s) => sum + (s.duration_minutes || 0),
-                          0
+                          0,
                         )}{" "}
                         min
                       </p>
@@ -1071,8 +1100,8 @@ export default function ReportsPage() {
                           ? Math.round(
                               sessionReports.reduce(
                                 (sum, s) => sum + (s.duration_minutes || 0),
-                                0
-                              ) / sessionReports.length
+                                0,
+                              ) / sessionReports.length,
                             )
                           : 0}{" "}
                         min
@@ -1127,7 +1156,7 @@ export default function ReportsPage() {
                               style={{ color: "var(--text)" }}
                             >
                               {new Date(
-                                session.created_at
+                                session.created_at,
                               ).toLocaleDateString()}
                             </td>
                             <td
@@ -1304,10 +1333,11 @@ export default function ReportsPage() {
               className="text-lg font-semibold mb-2"
               style={{ color: "var(--text)" }}
             >
-              No Report Generated
+              No Data Found
             </p>
             <p style={{ color: "var(--text-muted)" }}>
-              Select a date range and click Generate Report to view data
+              No records match the current filters. Adjust filters and generate
+              the report again.
             </p>
           </div>
         )}
