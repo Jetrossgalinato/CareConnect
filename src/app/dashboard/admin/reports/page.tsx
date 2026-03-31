@@ -58,19 +58,38 @@ export default function ReportsPage() {
   });
 
   useEffect(() => {
-    const loadDefaultAppointments = async () => {
+    const loadDefaultReports = async () => {
       setLoading(true);
       try {
-        const result = await getAppointmentReports();
-        if (result.success && result.data) {
-          setAppointmentReports(result.data);
-          setHasLoadedDefaults((prev) => ({
-            ...prev,
-            appointments: true,
-          }));
+        const [appointmentsResult, referralsResult, sessionsResult] =
+          await Promise.all([
+            getAppointmentReports(),
+            getReferralReports(),
+            getSessionReports(),
+          ]);
+
+        if (appointmentsResult.success && appointmentsResult.data) {
+          setAppointmentReports(appointmentsResult.data);
+          setHasLoadedDefaults((prev) => ({ ...prev, appointments: true }));
         } else {
           showAlert({
-            message: result.error || "Failed to load appointments",
+            message: appointmentsResult.error || "Failed to load appointments",
+            type: "error",
+            duration: 5000,
+          });
+        }
+
+        if (referralsResult.success && referralsResult.data) {
+          setReferralReports(referralsResult.data);
+          setHasLoadedDefaults((prev) => ({ ...prev, referrals: true }));
+        }
+
+        if (sessionsResult.success && sessionsResult.data) {
+          setSessionReports(sessionsResult.data);
+          setHasLoadedDefaults((prev) => ({ ...prev, sessions: true }));
+        } else {
+          showAlert({
+            message: sessionsResult.error || "Failed to load sessions",
             type: "error",
             duration: 5000,
           });
@@ -86,8 +105,14 @@ export default function ReportsPage() {
       }
     };
 
-    loadDefaultAppointments();
+    loadDefaultReports();
   }, [showAlert]);
+
+  useEffect(() => {
+    if (activeTab === "sessions" || activeTab === "usage") {
+      setStatusFilter("all");
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     const loadActiveTabDefaults = async () => {
@@ -154,7 +179,10 @@ export default function ReportsPage() {
       const filters: ReportFilters = {
         ...(dateRange.startDate ? { start_date: dateRange.startDate } : {}),
         ...(dateRange.endDate ? { end_date: dateRange.endDate } : {}),
-        ...(statusFilter !== "all" ? { status: statusFilter } : {}),
+        ...(statusFilter !== "all" &&
+        (activeTab === "appointments" || activeTab === "referrals")
+          ? { status: statusFilter }
+          : {}),
       };
 
       if (activeTab === "appointments") {
@@ -636,7 +664,7 @@ export default function ReportsPage() {
               />
             </div>
 
-            {activeTab !== "usage" && (
+            {(activeTab === "appointments" || activeTab === "referrals") && (
               <div>
                 <label
                   className="block mb-2 text-sm font-medium"
