@@ -51,7 +51,8 @@ export async function register(data: RegisterInput) {
     };
   }
 
-  const { email, password, fullName, schoolId, role } = validatedFields.data;
+  const { email, password, fullName, schoolId } = validatedFields.data;
+  const role = "student";
 
   // Sign up with Supabase
   const { data: authData, error: signUpError } = await supabase.auth.signUp({

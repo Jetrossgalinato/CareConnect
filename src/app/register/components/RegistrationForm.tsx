@@ -21,9 +21,6 @@ export default function RegistrationForm() {
     watch,
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      role: "student",
-    },
   });
 
   const password = watch("password");
@@ -171,89 +168,6 @@ export default function RegistrationForm() {
           {errors.schoolId && (
             <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
               {errors.schoolId.message}
-            </p>
-          )}
-        </div>
-
-        {/* Role Selection */}
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700 mb-2"
-            style={{ color: "var(--text)" }}
-          >
-            I am a
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            {/* Student Option */}
-            <label
-              className="relative flex items-center justify-center p-4 border-2 rounded-lg cursor-pointer transition"
-              style={{
-                borderColor:
-                  watch("role") === "student"
-                    ? "var(--primary)"
-                    : "var(--border)",
-                background:
-                  watch("role") === "student"
-                    ? "var(--primary)"
-                    : "var(--bg-dark)",
-              }}
-            >
-              <input
-                type="radio"
-                value="student"
-                {...register("role")}
-                className="sr-only"
-                disabled={isLoading}
-              />
-              <span
-                className="text-sm font-medium"
-                style={{
-                  color:
-                    watch("role") === "student"
-                      ? "var(--bg-dark)"
-                      : "var(--text)",
-                }}
-              >
-                Student
-              </span>
-            </label>
-            {/* PSG Member Option */}
-            <label
-              className="relative flex items-center justify-center p-4 border-2 rounded-lg cursor-pointer transition"
-              style={{
-                borderColor:
-                  watch("role") === "psg_member"
-                    ? "var(--primary)"
-                    : "var(--border)",
-                background:
-                  watch("role") === "psg_member"
-                    ? "var(--primary)"
-                    : "var(--bg-dark)",
-              }}
-            >
-              <input
-                type="radio"
-                value="psg_member"
-                {...register("role")}
-                className="sr-only"
-                disabled={isLoading}
-              />
-              <span
-                className="text-sm font-medium"
-                style={{
-                  color:
-                    watch("role") === "psg_member"
-                      ? "var(--bg-dark)"
-                      : "var(--text)",
-                }}
-              >
-                PSG Member
-              </span>
-            </label>
-          </div>
-          {errors.role && (
-            <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
-              {errors.role.message}
             </p>
           )}
         </div>
