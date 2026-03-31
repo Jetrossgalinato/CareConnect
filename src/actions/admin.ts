@@ -83,6 +83,14 @@ export async function updateUser(userId: string, updates: UpdateUserInput) {
       return { success: false, error: "Only admins can update users" };
     }
 
+    if (updates.role === "admin") {
+      return {
+        success: false,
+        error:
+          "Admin accounts can only be created through the Supabase SQL editor",
+      };
+    }
+
     const { data, error } = await supabase
       .from("profiles")
       .update(updates)
@@ -176,8 +184,8 @@ export async function getSystemStats(): Promise<{
         new Date(
           new Date().getFullYear(),
           new Date().getMonth(),
-          1
-        ).toISOString()
+          1,
+        ).toISOString(),
       );
 
     // Get referral counts
@@ -193,8 +201,8 @@ export async function getSystemStats(): Promise<{
         new Date(
           new Date().getFullYear(),
           new Date().getMonth(),
-          1
-        ).toISOString()
+          1,
+        ).toISOString(),
       );
 
     // Get session counts
@@ -210,8 +218,8 @@ export async function getSystemStats(): Promise<{
         new Date(
           new Date().getFullYear(),
           new Date().getMonth(),
-          1
-        ).toISOString()
+          1,
+        ).toISOString(),
       );
 
     const stats: SystemStats = {
@@ -254,7 +262,7 @@ export async function getAppointmentReports(filters?: ReportFilters) {
         created_at,
         student:profiles!appointments_student_id_fkey(id, full_name, school_id),
         psg_member:profiles!appointments_psg_member_id_fkey(id, full_name)
-      `
+      `,
       )
       .order("appointment_date", { ascending: false });
 
@@ -325,7 +333,7 @@ export async function getReferralReports(filters?: ReportFilters) {
         updated_at,
         student:profiles!referrals_student_id_fkey(id, full_name, school_id),
         assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(full_name)
-      `
+      `,
       )
       .order("created_at", { ascending: false });
 
@@ -360,13 +368,16 @@ export async function getReferralReports(filters?: ReportFilters) {
         const assignedPsg = Array.isArray(ref.assigned_psg_member)
           ? ref.assigned_psg_member[0]
           : ref.assigned_psg_member;
+        const source = ref.source || "unknown";
+        const status = ref.status || "unknown";
+        const severity = ref.severity || "unknown";
         return {
           id: ref.id,
           student_name: student?.full_name || "Unknown",
           student_id: student?.school_id || "N/A",
-          source: ref.source,
-          status: ref.status,
-          severity: ref.severity,
+          source,
+          status,
+          severity,
           assigned_psg_member: assignedPsg?.full_name,
           created_at: ref.created_at,
           updated_at: ref.updated_at,
@@ -398,7 +409,7 @@ export async function getSessionReports(filters?: ReportFilters) {
           student:profiles!appointments_student_id_fkey(full_name, school_id),
           psg_member:profiles!appointments_psg_member_id_fkey(full_name)
         )
-      `
+      `,
       )
       .order("created_at", { ascending: false });
 
@@ -452,66 +463,154 @@ export async function getSessionReports(filters?: ReportFilters) {
 }
 
 export async function getUsageReport(
-  startDate: string,
-  endDate: string
+  startDate?: string,
+  endDate?: string,
 ): Promise<{ success: boolean; data?: UsageReport; error?: string }> {
   try {
     const supabase = await createClient();
 
     // Get appointment counts
-    const { count: total_appointments } = await supabase
+    let totalAppointmentsQuery = supabase
       .from("appointments")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", startDate)
-      .lte("created_at", endDate);
+      .select("*", { count: "exact", head: true });
 
-    const { count: completed_appointments } = await supabase
-      .from("appointments")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "completed")
-      .gte("created_at", startDate)
-      .lte("created_at", endDate);
+    if (startDate) {
+      totalAppointmentsQuery = totalAppointmentsQuery.gte(
+        "created_at",
+        startDate,
+      );
+    }
+    if (endDate) {
+      totalAppointmentsQuery = totalAppointmentsQuery.lte(
+        "created_at",
+        endDate,
+      );
+    }
 
-    const { count: cancelled_appointments } = await supabase
+    const { count: total_appointments } = await totalAppointmentsQuery;
+
+    let completedAppointmentsQuery = supabase
       .from("appointments")
       .select("*", { count: "exact", head: true })
-      .eq("status", "cancelled")
-      .gte("created_at", startDate)
-      .lte("created_at", endDate);
+      .eq("status", "completed");
+
+    if (startDate) {
+      completedAppointmentsQuery = completedAppointmentsQuery.gte(
+        "created_at",
+        startDate,
+      );
+    }
+    if (endDate) {
+      completedAppointmentsQuery = completedAppointmentsQuery.lte(
+        "created_at",
+        endDate,
+      );
+    }
+
+    const { count: completed_appointments } = await completedAppointmentsQuery;
+
+    let cancelledAppointmentsQuery = supabase
+      .from("appointments")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "cancelled");
+
+    if (startDate) {
+      cancelledAppointmentsQuery = cancelledAppointmentsQuery.gte(
+        "created_at",
+        startDate,
+      );
+    }
+    if (endDate) {
+      cancelledAppointmentsQuery = cancelledAppointmentsQuery.lte(
+        "created_at",
+        endDate,
+      );
+    }
+
+    const { count: cancelled_appointments } = await cancelledAppointmentsQuery;
 
     // Get referral counts
-    const { count: total_referrals } = await supabase
+    let totalReferralsQuery = supabase
       .from("referrals")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", startDate)
-      .lte("created_at", endDate);
+      .select("*", { count: "exact", head: true });
+
+    if (startDate) {
+      totalReferralsQuery = totalReferralsQuery.gte("created_at", startDate);
+    }
+    if (endDate) {
+      totalReferralsQuery = totalReferralsQuery.lte("created_at", endDate);
+    }
+
+    const { count: total_referrals } = await totalReferralsQuery;
 
     // Get session counts
-    const { count: total_sessions } = await supabase
+    let totalSessionsQuery = supabase
       .from("sessions")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", startDate)
-      .lte("created_at", endDate);
+      .select("*", { count: "exact", head: true });
+
+    if (startDate) {
+      totalSessionsQuery = totalSessionsQuery.gte("created_at", startDate);
+    }
+    if (endDate) {
+      totalSessionsQuery = totalSessionsQuery.lte("created_at", endDate);
+    }
+
+    const { count: total_sessions } = await totalSessionsQuery;
 
     // Get user counts
-    const { count: total_users } = await supabase
+    let totalUsersQuery = supabase
       .from("profiles")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", startDate)
-      .lte("created_at", endDate);
+      .select("*", { count: "exact", head: true });
+
+    if (startDate) {
+      totalUsersQuery = totalUsersQuery.gte("created_at", startDate);
+    }
+    if (endDate) {
+      totalUsersQuery = totalUsersQuery.lte("created_at", endDate);
+    }
+
+    const { count: total_users } = await totalUsersQuery;
 
     // Get active students (those with appointments or referrals in period)
-    const { data: activeStudentsFromAppointments } = await supabase
+    let activeStudentsAppointmentsQuery = supabase
       .from("appointments")
-      .select("student_id")
-      .gte("created_at", startDate)
-      .lte("created_at", endDate);
+      .select("student_id");
 
-    const { data: activeStudentsFromReferrals } = await supabase
+    if (startDate) {
+      activeStudentsAppointmentsQuery = activeStudentsAppointmentsQuery.gte(
+        "created_at",
+        startDate,
+      );
+    }
+    if (endDate) {
+      activeStudentsAppointmentsQuery = activeStudentsAppointmentsQuery.lte(
+        "created_at",
+        endDate,
+      );
+    }
+
+    const { data: activeStudentsFromAppointments } =
+      await activeStudentsAppointmentsQuery;
+
+    let activeStudentsReferralsQuery = supabase
       .from("referrals")
-      .select("student_id")
-      .gte("created_at", startDate)
-      .lte("created_at", endDate);
+      .select("student_id");
+
+    if (startDate) {
+      activeStudentsReferralsQuery = activeStudentsReferralsQuery.gte(
+        "created_at",
+        startDate,
+      );
+    }
+    if (endDate) {
+      activeStudentsReferralsQuery = activeStudentsReferralsQuery.lte(
+        "created_at",
+        endDate,
+      );
+    }
+
+    const { data: activeStudentsFromReferrals } =
+      await activeStudentsReferralsQuery;
 
     const studentIds = new Set([
       ...(activeStudentsFromAppointments?.map((a) => a.student_id) || []),
@@ -520,19 +619,33 @@ export async function getUsageReport(
     const active_students = studentIds.size;
 
     // Get active PSG members (those with appointments in period)
-    const { data: activePSG } = await supabase
-      .from("appointments")
-      .select("psg_member_id")
-      .gte("created_at", startDate)
-      .lte("created_at", endDate);
+    let activePsgQuery = supabase.from("appointments").select("psg_member_id");
+
+    if (startDate) {
+      activePsgQuery = activePsgQuery.gte("created_at", startDate);
+    }
+    if (endDate) {
+      activePsgQuery = activePsgQuery.lte("created_at", endDate);
+    }
+
+    const { data: activePSG } = await activePsgQuery;
 
     const active_psg_members = new Set(activePSG?.map((a) => a.psg_member_id))
       .size;
 
+    const period =
+      startDate && endDate
+        ? `${new Date(startDate).toLocaleDateString()} - ${new Date(
+            endDate,
+          ).toLocaleDateString()}`
+        : startDate
+          ? `From ${new Date(startDate).toLocaleDateString()}`
+          : endDate
+            ? `Until ${new Date(endDate).toLocaleDateString()}`
+            : "All time";
+
     const report: UsageReport = {
-      period: `${new Date(startDate).toLocaleDateString()} - ${new Date(
-        endDate
-      ).toLocaleDateString()}`,
+      period,
       total_appointments: total_appointments || 0,
       completed_appointments: completed_appointments || 0,
       cancelled_appointments: cancelled_appointments || 0,
@@ -564,7 +677,7 @@ export async function getAuditLogs(limit: number = 100) {
         `
         *,
         user:profiles(full_name, email, role)
-      `
+      `,
       )
       .order("created_at", { ascending: false })
       .limit(limit);

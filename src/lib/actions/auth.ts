@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { type Profile } from "@/lib/utils/auth";
 import {
   loginSchema,
   registerSchema,
@@ -24,7 +25,7 @@ export async function login(data: LoginInput) {
   const { email, password } = validatedFields.data;
 
   // Sign in with Supabase
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data: authData, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -35,8 +36,20 @@ export async function login(data: LoginInput) {
     };
   }
 
+  let isAdmin = authData.user?.user_metadata?.role === "admin";
+
+  if (authData.user?.id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", authData.user.id)
+      .maybeSingle();
+
+    isAdmin = profile?.role === "admin" || isAdmin;
+  }
+
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect(isAdmin ? "/dashboard/admin" : "/dashboard");
 }
 
 export async function register(data: RegisterInput) {
@@ -50,7 +63,8 @@ export async function register(data: RegisterInput) {
     };
   }
 
-  const { email, password, fullName, schoolId, role } = validatedFields.data;
+  const { email, password, fullName, schoolId } = validatedFields.data;
+  const role = "student";
 
   // Sign up with Supabase
   const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -99,7 +113,7 @@ export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
-  redirect("/login");
+  redirect("/login?loggedOut=true");
 }
 
 export async function getUser() {
@@ -117,5 +131,41 @@ export async function getUser() {
     .eq("id", user.id)
     .single();
 
-  return profile;
+  if (profile) {
+    return profile;
+  }
+
+  // Heal missing profile rows to avoid auth redirect loops.
+  const fallbackProfile: Profile = {
+    id: user.id,
+    email: user.email ?? "",
+    full_name:
+      (typeof user.user_metadata?.full_name === "string" &&
+        user.user_metadata.full_name) ||
+      (user.email?.split("@")[0] ?? "User"),
+    role:
+      user.user_metadata?.role === "admin" ||
+      user.user_metadata?.role === "psg_member" ||
+      user.user_metadata?.role === "student"
+        ? user.user_metadata.role
+        : "student",
+    school_id:
+      typeof user.user_metadata?.school_id === "string"
+        ? user.user_metadata.school_id
+        : null,
+    avatar_url:
+      typeof user.user_metadata?.avatar_url === "string"
+        ? user.user_metadata.avatar_url
+        : null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  const { data: createdProfile } = await supabase
+    .from("profiles")
+    .upsert(fallbackProfile)
+    .select("*")
+    .single();
+
+  return createdProfile ?? fallbackProfile;
 }

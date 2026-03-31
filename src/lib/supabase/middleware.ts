@@ -16,17 +16,17 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
+            request.cookies.set(name, value),
           );
           supabaseResponse = NextResponse.next({
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 
   // Refreshing the auth token
@@ -43,10 +43,10 @@ export async function updateSession(request: NextRequest) {
   ];
   const authRoutes = ["/login", "/register"];
   const isProtectedRoute = protectedRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route)
+    request.nextUrl.pathname.startsWith(route),
   );
   const isAuthRoute = authRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route)
+    request.nextUrl.pathname.startsWith(route),
   );
 
   // Redirect to login if accessing protected route without auth
@@ -58,8 +58,15 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect to dashboard if accessing auth routes while authenticated
   if (isAuthRoute && user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname =
+      profile?.role === "admin" ? "/dashboard/admin" : "/dashboard";
     return NextResponse.redirect(url);
   }
 

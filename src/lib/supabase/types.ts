@@ -154,8 +154,7 @@ export interface Database {
         Row: {
           id: string;
           conversation_id: string;
-          sender_id: string;
-          receiver_id: string;
+          sender_id: string | null;
           content: string;
           read_at: string | null;
           created_at: string;
@@ -163,8 +162,7 @@ export interface Database {
         Insert: {
           id?: string;
           conversation_id: string;
-          sender_id: string;
-          receiver_id: string;
+          sender_id?: string | null;
           content: string;
           read_at?: string | null;
           created_at?: string;
@@ -172,8 +170,7 @@ export interface Database {
         Update: {
           id?: string;
           conversation_id?: string;
-          sender_id?: string;
-          receiver_id?: string;
+          sender_id?: string | null;
           content?: string;
           read_at?: string | null;
           created_at?: string;

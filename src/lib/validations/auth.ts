@@ -10,7 +10,7 @@ export const loginSchema = z.object({
     .email("Invalid email format")
     .regex(
       carsuEmailRegex,
-      "Must use a Caraga State University email (@carsu.edu.ph)"
+      "Must use a Caraga State University email (@carsu.edu.ph)",
     ),
   password: z
     .string()
@@ -26,7 +26,7 @@ export const registerSchema = z
       .email("Invalid email format")
       .regex(
         carsuEmailRegex,
-        "Must use a Caraga State University email (@carsu.edu.ph)"
+        "Must use a Caraga State University email (@carsu.edu.ph)",
       ),
     password: z
       .string()
@@ -43,9 +43,6 @@ export const registerSchema = z
       .string()
       .min(1, "School ID is required")
       .regex(/^[0-9]{3}-[0-9]{5}$/, "School ID must be in format: XXX-XXXXX"),
-    role: z.enum(["student", "psg_member"], {
-      message: "Please select a role",
-    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",

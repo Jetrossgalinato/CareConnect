@@ -86,7 +86,7 @@ export function ChatWidgetPSG() {
               `
               *,
               sender:profiles!messages_sender_id_fkey(id, full_name, role, avatar_url)
-            `
+            `,
             )
             .eq("id", payload.new.id)
             .single();
@@ -102,7 +102,7 @@ export function ChatWidgetPSG() {
             // Refresh conversations to update last message
             loadConversations();
           }
-        }
+        },
       )
       .subscribe();
 
@@ -127,7 +127,7 @@ export function ChatWidgetPSG() {
         },
         () => {
           loadConversations();
-        }
+        },
       )
       .subscribe();
 
@@ -169,18 +169,27 @@ export function ChatWidgetPSG() {
       const supabase = createClient();
       const conversationsWithUnread = await Promise.all(
         result.data.map(async (conv) => {
-          const { count } = await supabase
+          let unreadQuery = supabase
             .from("messages")
-            .select("*", { count: "exact", head: true })
+            .select("id", { count: "exact", head: true })
             .eq("conversation_id", conv.id)
-            .neq("sender_id", currentUserId || "")
             .is("read_at", null);
+
+          if (currentUserId) {
+            unreadQuery = unreadQuery.neq("sender_id", currentUserId);
+          }
+
+          const { count, error } = await unreadQuery;
+
+          if (error) {
+            console.error("Error loading unread count:", error);
+          }
 
           return {
             ...conv,
-            unread_count: count || 0,
+            unread_count: error ? 0 : count || 0,
           };
-        })
+        }),
       );
       setConversations(conversationsWithUnread);
     }
@@ -203,7 +212,7 @@ export function ChatWidgetPSG() {
   };
 
   const handleSelectConversation = async (
-    conversation: ConversationWithProfiles
+    conversation: ConversationWithProfiles,
   ) => {
     setSelectedConversation(conversation);
     await loadMessages(conversation.id);
@@ -305,7 +314,7 @@ export function ChatWidgetPSG() {
   const filteredConversations = conversations.filter(
     (conv) =>
       conv.student.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conv.student.school_id?.toLowerCase().includes(searchTerm.toLowerCase())
+      conv.student.school_id?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -440,8 +449,8 @@ export function ChatWidgetPSG() {
                                     conv.assessment_color === "red"
                                       ? "var(--error)"
                                       : conv.assessment_color === "yellow"
-                                      ? "var(--warning)"
-                                      : "var(--success)",
+                                        ? "var(--warning)"
+                                        : "var(--success)",
                                   color: "#ffffff",
                                 }}
                               >
@@ -497,7 +506,7 @@ export function ChatWidgetPSG() {
                   {selectedConversation
                     ? `Student ${
                         conversations.findIndex(
-                          (c) => c.id === selectedConversation.id
+                          (c) => c.id === selectedConversation.id,
                         ) + 1
                       }`
                     : "Support Chat"}
@@ -611,7 +620,7 @@ export function ChatWidgetPSG() {
                                 ? "PSG"
                                 : `Student ${
                                     conversations.findIndex(
-                                      (c) => c.id === selectedConversation?.id
+                                      (c) => c.id === selectedConversation?.id,
                                     ) + 1
                                   }`}
                             </p>
@@ -634,11 +643,11 @@ export function ChatWidgetPSG() {
                                 {message.sender_id === null
                                   ? message.content
                                   : selectedConversation
-                                  ? decryptMessage(
-                                      message.content,
-                                      selectedConversation.id
-                                    )
-                                  : message.content}
+                                    ? decryptMessage(
+                                        message.content,
+                                        selectedConversation.id,
+                                      )
+                                    : message.content}
                               </p>
                             </div>
                             <p

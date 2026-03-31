@@ -107,7 +107,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
         <div
           style={{
             position: "fixed",
-            top: "2rem",
+            top: "6rem",
             right: "2rem",
             zIndex: 9999,
             maxWidth: "350px",

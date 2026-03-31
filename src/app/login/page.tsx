@@ -9,13 +9,14 @@ import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useAlert } from "@/hooks/useAlert";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ThemeToggler } from "@/components/ThemeToggler";
 
 function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { showAlert } = useAlert();
 
   const {
@@ -56,7 +57,7 @@ function LoginContent() {
     // If no error, redirect will happen automatically from server action
   };
 
-  // Show success alert if registered=true in search params
+  // Show success alerts from login query params
   useEffect(() => {
     if (searchParams.get("registered") === "true") {
       showAlert({
@@ -65,8 +66,18 @@ function LoginContent() {
         duration: 4000,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+
+    if (searchParams.get("loggedOut") === "true") {
+      showAlert({
+        type: "success",
+        message: "Logout Successfully",
+        duration: 3000,
+      });
+
+      // Remove query param after showing alert to avoid duplicate alerts.
+      router.replace("/login");
+    }
+  }, [router, searchParams, showAlert]);
 
   return (
     <div
