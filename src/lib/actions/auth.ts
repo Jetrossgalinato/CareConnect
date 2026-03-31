@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { type Profile } from "@/lib/utils/auth";
 import {
   loginSchema,
   registerSchema,
@@ -117,5 +118,41 @@ export async function getUser() {
     .eq("id", user.id)
     .single();
 
-  return profile;
+  if (profile) {
+    return profile;
+  }
+
+  // Heal missing profile rows to avoid auth redirect loops.
+  const fallbackProfile: Profile = {
+    id: user.id,
+    email: user.email ?? "",
+    full_name:
+      (typeof user.user_metadata?.full_name === "string" &&
+        user.user_metadata.full_name) ||
+      (user.email?.split("@")[0] ?? "User"),
+    role:
+      user.user_metadata?.role === "admin" ||
+      user.user_metadata?.role === "psg_member" ||
+      user.user_metadata?.role === "student"
+        ? user.user_metadata.role
+        : "student",
+    school_id:
+      typeof user.user_metadata?.school_id === "string"
+        ? user.user_metadata.school_id
+        : null,
+    avatar_url:
+      typeof user.user_metadata?.avatar_url === "string"
+        ? user.user_metadata.avatar_url
+        : null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  const { data: createdProfile } = await supabase
+    .from("profiles")
+    .upsert(fallbackProfile)
+    .select("*")
+    .single();
+
+  return createdProfile ?? fallbackProfile;
 }
