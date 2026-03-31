@@ -48,6 +48,14 @@ export default function ReportsPage() {
   const [referralReports, setReferralReports] = useState<ReferralReport[]>([]);
   const [sessionReports, setSessionReports] = useState<SessionReport[]>([]);
   const [usageReport, setUsageReport] = useState<UsageReport | null>(null);
+  const [hasLoadedDefaults, setHasLoadedDefaults] = useState<
+    Record<ReportTab, boolean>
+  >({
+    appointments: false,
+    referrals: false,
+    sessions: false,
+    usage: false,
+  });
 
   useEffect(() => {
     const loadDefaultAppointments = async () => {
@@ -56,6 +64,10 @@ export default function ReportsPage() {
         const result = await getAppointmentReports();
         if (result.success && result.data) {
           setAppointmentReports(result.data);
+          setHasLoadedDefaults((prev) => ({
+            ...prev,
+            appointments: true,
+          }));
         } else {
           showAlert({
             message: result.error || "Failed to load appointments",
@@ -77,16 +89,66 @@ export default function ReportsPage() {
     loadDefaultAppointments();
   }, [showAlert]);
 
-  const handleGenerateReport = async () => {
-    if (activeTab === "usage" && (!dateRange.startDate || !dateRange.endDate)) {
-      showAlert({
-        message: "Please select both start and end dates",
-        type: "error",
-        duration: 5000,
-      });
-      return;
-    }
+  useEffect(() => {
+    const loadActiveTabDefaults = async () => {
+      if (activeTab === "appointments" || hasLoadedDefaults[activeTab]) {
+        return;
+      }
 
+      setLoading(true);
+      try {
+        if (activeTab === "referrals") {
+          const result = await getReferralReports();
+          if (result.success && result.data) {
+            setReferralReports(result.data);
+            setHasLoadedDefaults((prev) => ({ ...prev, referrals: true }));
+          } else {
+            showAlert({
+              message: result.error || "Failed to load referrals",
+              type: "error",
+              duration: 5000,
+            });
+          }
+        } else if (activeTab === "sessions") {
+          const result = await getSessionReports();
+          if (result.success && result.data) {
+            setSessionReports(result.data);
+            setHasLoadedDefaults((prev) => ({ ...prev, sessions: true }));
+          } else {
+            showAlert({
+              message: result.error || "Failed to load sessions",
+              type: "error",
+              duration: 5000,
+            });
+          }
+        } else if (activeTab === "usage") {
+          const result = await getUsageReport();
+          if (result.success && result.data) {
+            setUsageReport(result.data);
+            setHasLoadedDefaults((prev) => ({ ...prev, usage: true }));
+          } else {
+            showAlert({
+              message: result.error || "Failed to load usage report",
+              type: "error",
+              duration: 5000,
+            });
+          }
+        }
+      } catch {
+        showAlert({
+          message: "An unexpected error occurred",
+          type: "error",
+          duration: 5000,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadActiveTabDefaults();
+  }, [activeTab, hasLoadedDefaults, showAlert]);
+
+  const handleGenerateReport = async () => {
     setLoading(true);
     try {
       const filters: ReportFilters = {
@@ -130,8 +192,8 @@ export default function ReportsPage() {
         }
       } else if (activeTab === "usage") {
         const result = await getUsageReport(
-          dateRange.startDate,
-          dateRange.endDate,
+          dateRange.startDate || undefined,
+          dateRange.endDate || undefined,
         );
         if (result.success && result.data) {
           setUsageReport(result.data);
@@ -163,19 +225,23 @@ export default function ReportsPage() {
   const handleExport = () => {
     let data: unknown[] = [];
     let filename = "";
+    const rangeSuffix =
+      dateRange.startDate && dateRange.endDate
+        ? `${dateRange.startDate}_to_${dateRange.endDate}`
+        : "all_time";
 
     if (activeTab === "appointments") {
       data = appointmentReports;
-      filename = `appointments_report_${dateRange.startDate}_to_${dateRange.endDate}.json`;
+      filename = `appointments_report_${rangeSuffix}.json`;
     } else if (activeTab === "referrals") {
       data = referralReports;
-      filename = `referrals_report_${dateRange.startDate}_to_${dateRange.endDate}.json`;
+      filename = `referrals_report_${rangeSuffix}.json`;
     } else if (activeTab === "sessions") {
       data = sessionReports;
-      filename = `sessions_report_${dateRange.startDate}_to_${dateRange.endDate}.json`;
+      filename = `sessions_report_${rangeSuffix}.json`;
     } else if (activeTab === "usage") {
       data = usageReport ? [usageReport] : [];
-      filename = `usage_report_${dateRange.startDate}_to_${dateRange.endDate}.json`;
+      filename = `usage_report_${rangeSuffix}.json`;
     }
 
     const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -219,17 +285,16 @@ export default function ReportsPage() {
     doc.text(reportTitle, 14, 35);
 
     // Add date range
+    const periodLabel =
+      dateRange.startDate && dateRange.endDate
+        ? `${new Date(dateRange.startDate).toLocaleDateString()} - ${new Date(
+            dateRange.endDate,
+          ).toLocaleDateString()}`
+        : "All time";
+
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text(
-      `Period: ${new Date(
-        dateRange.startDate,
-      ).toLocaleDateString()} - ${new Date(
-        dateRange.endDate,
-      ).toLocaleDateString()}`,
-      14,
-      42,
-    );
+    doc.text(`Period: ${periodLabel}`, 14, 42);
     doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 48);
 
     let startY = 55;
@@ -318,13 +383,19 @@ export default function ReportsPage() {
       autoTable(doc, {
         startY,
         head: [["Date", "Student", "Source", "Severity", "Status"]],
-        body: referralReports.map((ref) => [
-          new Date(ref.created_at).toLocaleDateString(),
-          ref.student_name,
-          ref.source.replace("_", " ").toUpperCase(),
-          ref.severity.toUpperCase(),
-          ref.status.replace("_", " ").toUpperCase(),
-        ]),
+        body: referralReports.map((ref) => {
+          const source = (ref.source || "unknown").replace("_", " ");
+          const severity = ref.severity || "unknown";
+          const status = (ref.status || "unknown").replace("_", " ");
+
+          return [
+            new Date(ref.created_at).toLocaleDateString(),
+            ref.student_name,
+            source.toUpperCase(),
+            severity.toUpperCase(),
+            status.toUpperCase(),
+          ];
+        }),
         theme: "grid",
         headStyles: { fillColor: [40, 150, 80] },
         styles: { fontSize: 9 },
@@ -422,7 +493,11 @@ export default function ReportsPage() {
     }
 
     // Save PDF
-    const filename = `${activeTab}_report_${dateRange.startDate}_to_${dateRange.endDate}.pdf`;
+    const rangeSuffix =
+      dateRange.startDate && dateRange.endDate
+        ? `${dateRange.startDate}_to_${dateRange.endDate}`
+        : "all_time";
+    const filename = `${activeTab}_report_${rangeSuffix}.pdf`;
     doc.save(filename);
 
     showAlert({
@@ -965,75 +1040,87 @@ export default function ReportsPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {referralReports.map((ref) => (
-                          <tr
-                            key={ref.id}
-                            style={{
-                              borderBottom: "1px solid var(--border-muted)",
-                            }}
-                          >
-                            <td
-                              className="px-4 py-3"
-                              style={{ color: "var(--text)" }}
+                        {referralReports.map((ref) => {
+                          const source = (ref.source || "unknown").replace(
+                            "_",
+                            " ",
+                          );
+                          const status = (ref.status || "unknown").replace(
+                            "_",
+                            " ",
+                          );
+                          const severity = ref.severity || "unknown";
+
+                          return (
+                            <tr
+                              key={ref.id}
+                              style={{
+                                borderBottom: "1px solid var(--border-muted)",
+                              }}
                             >
-                              {new Date(ref.created_at).toLocaleDateString()}
-                            </td>
-                            <td
-                              className="px-4 py-3"
-                              style={{ color: "var(--text)" }}
-                            >
-                              {ref.student_name}
-                            </td>
-                            <td
-                              className="px-4 py-3"
-                              style={{ color: "var(--text)" }}
-                            >
-                              {ref.source.replace("_", " ").toUpperCase()}
-                            </td>
-                            <td className="px-4 py-3">
-                              <span
-                                className="px-3 py-1 rounded-full text-xs font-medium"
-                                style={{
-                                  background:
-                                    ref.severity === "high"
-                                      ? "var(--error-20)"
-                                      : ref.severity === "medium"
-                                        ? "var(--warning-20)"
-                                        : "var(--success-20)",
-                                  color:
-                                    ref.severity === "high"
-                                      ? "var(--error)"
-                                      : ref.severity === "medium"
-                                        ? "var(--warning)"
-                                        : "var(--success)",
-                                }}
+                              <td
+                                className="px-4 py-3"
+                                style={{ color: "var(--text)" }}
                               >
-                                {ref.severity.toUpperCase()}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span
-                                className="px-3 py-1 rounded-full text-xs font-medium"
-                                style={{
-                                  background:
-                                    ref.status === "completed"
-                                      ? "var(--success-20)"
-                                      : ref.status === "in_progress"
-                                        ? "var(--primary-20)"
-                                        : "var(--text-muted)",
-                                  color:
-                                    ref.status === "completed"
-                                      ? "var(--success)"
-                                      : ref.status === "in_progress"
-                                        ? "var(--primary)"
-                                        : "var(--text)",
-                                }}
+                                {new Date(ref.created_at).toLocaleDateString()}
+                              </td>
+                              <td
+                                className="px-4 py-3"
+                                style={{ color: "var(--text)" }}
                               >
-                                {ref.status.replace("_", " ").toUpperCase()}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
+                                {ref.student_name}
+                              </td>
+                              <td
+                                className="px-4 py-3"
+                                style={{ color: "var(--text)" }}
+                              >
+                                {source.toUpperCase()}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span
+                                  className="px-3 py-1 rounded-full text-xs font-medium"
+                                  style={{
+                                    background:
+                                      severity === "high"
+                                        ? "var(--error-20)"
+                                        : severity === "medium"
+                                          ? "var(--warning-20)"
+                                          : "var(--success-20)",
+                                    color:
+                                      severity === "high"
+                                        ? "var(--error)"
+                                        : severity === "medium"
+                                          ? "var(--warning)"
+                                          : "var(--success)",
+                                  }}
+                                >
+                                  {severity.toUpperCase()}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span
+                                  className="px-3 py-1 rounded-full text-xs font-medium"
+                                  style={{
+                                    background:
+                                      status === "completed"
+                                        ? "var(--success-20)"
+                                        : status === "in progress"
+                                          ? "var(--primary-20)"
+                                          : "var(--text-muted)",
+                                    color:
+                                      status === "completed"
+                                        ? "var(--success)"
+                                        : status === "in progress"
+                                          ? "var(--primary)"
+                                          : "var(--text)",
+                                  }}
+                                >
+                                  {status.toUpperCase()}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
