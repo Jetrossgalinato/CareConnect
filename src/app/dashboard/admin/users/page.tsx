@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getAllUsers, updateUser, deleteUser } from "@/actions/admin";
 import { useAlert } from "@/hooks/useAlert";
@@ -20,7 +19,6 @@ import {
 } from "lucide-react";
 
 export default function UserManagementPage() {
-  const router = useRouter();
   const { showAlert } = useAlert();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
@@ -39,6 +37,7 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -83,7 +82,7 @@ export default function UserManagementPage() {
         (user) =>
           user.full_name.toLowerCase().includes(query) ||
           user.email.toLowerCase().includes(query) ||
-          user.school_id?.toLowerCase().includes(query)
+          user.school_id?.toLowerCase().includes(query),
       );
     }
 
@@ -114,10 +113,14 @@ export default function UserManagementPage() {
 
     try {
       setProcessing(true);
-      const result = await updateUser(selectedUser.id, {
+      const updates = {
         full_name: editFormData.full_name,
         school_id: editFormData.school_id || undefined,
-        role: editFormData.role,
+      } as const;
+
+      const result = await updateUser(selectedUser.id, {
+        ...updates,
+        ...(selectedUser.role !== "admin" ? { role: editFormData.role } : {}),
       });
 
       if (result.success) {
@@ -565,25 +568,37 @@ export default function UserManagementPage() {
                   >
                     Role
                   </label>
-                  <select
-                    value={editFormData.role}
-                    onChange={(e) =>
-                      setEditFormData({
-                        ...editFormData,
-                        role: e.target.value as UserRole,
-                      })
-                    }
-                    className="w-full px-4 py-2 rounded-lg"
-                    style={{
-                      border: "1px solid var(--border-muted)",
-                      background: "var(--bg)",
-                      color: "var(--text)",
-                    }}
-                  >
-                    <option value="student">Student</option>
-                    <option value="psg_member">PSG Member</option>
-                    <option value="admin">Admin</option>
-                  </select>
+                  {selectedUser.role === "admin" ? (
+                    <div
+                      className="w-full px-4 py-2 rounded-lg"
+                      style={{
+                        border: "1px solid var(--border-muted)",
+                        background: "var(--bg)",
+                        color: "var(--text)",
+                      }}
+                    >
+                      Admin (SQL-managed)
+                    </div>
+                  ) : (
+                    <select
+                      value={editFormData.role}
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          role: e.target.value as UserRole,
+                        })
+                      }
+                      className="w-full px-4 py-2 rounded-lg"
+                      style={{
+                        border: "1px solid var(--border-muted)",
+                        background: "var(--bg)",
+                        color: "var(--text)",
+                      }}
+                    >
+                      <option value="student">Student</option>
+                      <option value="psg_member">PSG Member</option>
+                    </select>
+                  )}
                 </div>
               </div>
               <div className="flex gap-3 mt-6">

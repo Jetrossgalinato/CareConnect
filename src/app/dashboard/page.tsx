@@ -22,6 +22,10 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  if (user.role === "admin") {
+    redirect("/dashboard/admin");
+  }
+
   // Fetch system stats for admin users
   const statsResult = user.role === "admin" ? await getSystemStats() : null;
   const stats = statsResult?.success ? statsResult.data : null;
@@ -352,8 +356,8 @@ export default async function DashboardPage() {
               {user.role === "admin"
                 ? "Administrative Functions"
                 : user.role === "student"
-                ? "Get Started - Choose What You Need"
-                : "Quick Access"}
+                  ? "Get Started - Choose What You Need"
+                  : "Quick Access"}
             </h2>
             {/* Student Info Section */}
             {user.role === "student" && null}

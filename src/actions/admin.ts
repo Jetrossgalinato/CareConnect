@@ -83,6 +83,14 @@ export async function updateUser(userId: string, updates: UpdateUserInput) {
       return { success: false, error: "Only admins can update users" };
     }
 
+    if (updates.role === "admin") {
+      return {
+        success: false,
+        error:
+          "Admin accounts can only be created through the Supabase SQL editor",
+      };
+    }
+
     const { data, error } = await supabase
       .from("profiles")
       .update(updates)
@@ -176,8 +184,8 @@ export async function getSystemStats(): Promise<{
         new Date(
           new Date().getFullYear(),
           new Date().getMonth(),
-          1
-        ).toISOString()
+          1,
+        ).toISOString(),
       );
 
     // Get referral counts
@@ -193,8 +201,8 @@ export async function getSystemStats(): Promise<{
         new Date(
           new Date().getFullYear(),
           new Date().getMonth(),
-          1
-        ).toISOString()
+          1,
+        ).toISOString(),
       );
 
     // Get session counts
@@ -210,8 +218,8 @@ export async function getSystemStats(): Promise<{
         new Date(
           new Date().getFullYear(),
           new Date().getMonth(),
-          1
-        ).toISOString()
+          1,
+        ).toISOString(),
       );
 
     const stats: SystemStats = {
@@ -254,7 +262,7 @@ export async function getAppointmentReports(filters?: ReportFilters) {
         created_at,
         student:profiles!appointments_student_id_fkey(id, full_name, school_id),
         psg_member:profiles!appointments_psg_member_id_fkey(id, full_name)
-      `
+      `,
       )
       .order("appointment_date", { ascending: false });
 
@@ -325,7 +333,7 @@ export async function getReferralReports(filters?: ReportFilters) {
         updated_at,
         student:profiles!referrals_student_id_fkey(id, full_name, school_id),
         assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(full_name)
-      `
+      `,
       )
       .order("created_at", { ascending: false });
 
@@ -398,7 +406,7 @@ export async function getSessionReports(filters?: ReportFilters) {
           student:profiles!appointments_student_id_fkey(full_name, school_id),
           psg_member:profiles!appointments_psg_member_id_fkey(full_name)
         )
-      `
+      `,
       )
       .order("created_at", { ascending: false });
 
@@ -453,7 +461,7 @@ export async function getSessionReports(filters?: ReportFilters) {
 
 export async function getUsageReport(
   startDate: string,
-  endDate: string
+  endDate: string,
 ): Promise<{ success: boolean; data?: UsageReport; error?: string }> {
   try {
     const supabase = await createClient();
@@ -531,7 +539,7 @@ export async function getUsageReport(
 
     const report: UsageReport = {
       period: `${new Date(startDate).toLocaleDateString()} - ${new Date(
-        endDate
+        endDate,
       ).toLocaleDateString()}`,
       total_appointments: total_appointments || 0,
       completed_appointments: completed_appointments || 0,
@@ -564,7 +572,7 @@ export async function getAuditLogs(limit: number = 100) {
         `
         *,
         user:profiles(full_name, email, role)
-      `
+      `,
       )
       .order("created_at", { ascending: false })
       .limit(limit);

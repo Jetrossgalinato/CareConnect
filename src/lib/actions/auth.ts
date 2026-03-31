@@ -25,7 +25,7 @@ export async function login(data: LoginInput) {
   const { email, password } = validatedFields.data;
 
   // Sign in with Supabase
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data: authData, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -36,8 +36,20 @@ export async function login(data: LoginInput) {
     };
   }
 
+  let isAdmin = authData.user?.user_metadata?.role === "admin";
+
+  if (authData.user?.id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", authData.user.id)
+      .maybeSingle();
+
+    isAdmin = profile?.role === "admin" || isAdmin;
+  }
+
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect(isAdmin ? "/dashboard/admin" : "/dashboard");
 }
 
 export async function register(data: RegisterInput) {
