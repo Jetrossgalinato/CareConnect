@@ -5,12 +5,15 @@ import { getSessionSummary } from "@/lib/utils/admin-reports";
 
 type SessionsReportSectionProps = {
   sessionReports: SessionReport[];
+  paginatedSessionReports?: SessionReport[];
 };
 
 export function SessionsReportSection({
   sessionReports,
+  paginatedSessionReports,
 }: SessionsReportSectionProps) {
   const summary = getSessionSummary(sessionReports);
+  const visibleReports = paginatedSessionReports ?? sessionReports;
 
   return (
     <div className="space-y-4">
@@ -72,7 +75,7 @@ export function SessionsReportSection({
             </tr>
           </thead>
           <tbody>
-            {sessionReports.map((session) => (
+            {visibleReports.map((session) => (
               <tr
                 key={session.id}
                 style={{ borderBottom: "1px solid var(--border-muted)" }}

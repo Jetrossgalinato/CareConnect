@@ -10,12 +10,15 @@ import {
 
 type ReferralsReportSectionProps = {
   referralReports: ReferralReport[];
+  paginatedReferralReports?: ReferralReport[];
 };
 
 export function ReferralsReportSection({
   referralReports,
+  paginatedReferralReports,
 }: ReferralsReportSectionProps) {
   const summary = getReferralSummary(referralReports);
+  const visibleReports = paginatedReferralReports ?? referralReports;
 
   return (
     <div className="space-y-4">
@@ -91,7 +94,7 @@ export function ReferralsReportSection({
             </tr>
           </thead>
           <tbody>
-            {referralReports.map((referral) => {
+            {visibleReports.map((referral) => {
               const source = normalizeReportValue(referral.source);
               const status = normalizeReportValue(referral.status);
               const severity = normalizeReportValue(referral.severity);

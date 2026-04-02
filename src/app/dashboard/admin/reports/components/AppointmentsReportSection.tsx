@@ -8,12 +8,15 @@ import {
 
 type AppointmentsReportSectionProps = {
   appointmentReports: AppointmentReport[];
+  paginatedAppointmentReports?: AppointmentReport[];
 };
 
 export function AppointmentsReportSection({
   appointmentReports,
+  paginatedAppointmentReports,
 }: AppointmentsReportSectionProps) {
   const summary = getAppointmentSummary(appointmentReports);
+  const visibleReports = paginatedAppointmentReports ?? appointmentReports;
 
   return (
     <div className="space-y-4">
@@ -83,7 +86,7 @@ export function AppointmentsReportSection({
             </tr>
           </thead>
           <tbody>
-            {appointmentReports.map((appointment) => {
+            {visibleReports.map((appointment) => {
               const statusStyle = getAppointmentStatusStyle(appointment.status);
 
               return (
