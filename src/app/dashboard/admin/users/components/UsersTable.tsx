@@ -161,17 +161,19 @@ export function UsersTable({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => onEdit(user)}
-                          className="p-2 rounded-lg hover:bg-opacity-80 transition-all"
-                          style={{ background: "var(--primary-20)" }}
-                          title="Edit user"
-                        >
-                          <Edit
-                            className="w-4 h-4"
-                            style={{ color: "var(--primary)" }}
-                          />
-                        </button>
+                        {user.role !== "admin" && (
+                          <button
+                            onClick={() => onEdit(user)}
+                            className="p-2 rounded-lg hover:bg-opacity-80 transition-all"
+                            style={{ background: "var(--primary-20)" }}
+                            title="Edit user"
+                          >
+                            <Edit
+                              className="w-4 h-4"
+                              style={{ color: "var(--primary)" }}
+                            />
+                          </button>
+                        )}
                         {user.role === "psg_member" && (
                           <button
                             onClick={() => onBlock(user)}

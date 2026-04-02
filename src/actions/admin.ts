@@ -83,6 +83,24 @@ export async function updateUser(userId: string, updates: UpdateUserInput) {
       return { success: false, error: "Only admins can update users" };
     }
 
+    const { data: targetUser, error: targetUserError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+
+    if (targetUserError) {
+      console.error("Get target user error:", targetUserError);
+      return { success: false, error: "Failed to fetch user" };
+    }
+
+    if (targetUser?.role === "admin") {
+      return {
+        success: false,
+        error: "Admin accounts are SQL-managed and cannot be edited here",
+      };
+    }
+
     if (updates.role === "admin") {
       return {
         success: false,

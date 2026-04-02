@@ -92,15 +92,27 @@ export function useUserManagement() {
     void loadUsers();
   }, [loadUsers]);
 
-  const handleEditClick = useCallback((user: UserProfile) => {
-    setSelectedUser(user);
-    setEditFormData({
-      full_name: user.full_name,
-      school_id: user.school_id || "",
-      role: user.role,
-    });
-    setShowEditDialog(true);
-  }, []);
+  const handleEditClick = useCallback(
+    (user: UserProfile) => {
+      if (user.role === "admin") {
+        showAlert({
+          message: "Admin accounts are SQL-managed and cannot be edited",
+          type: "error",
+          duration: 5000,
+        });
+        return;
+      }
+
+      setSelectedUser(user);
+      setEditFormData({
+        full_name: user.full_name,
+        school_id: user.school_id || "",
+        role: user.role,
+      });
+      setShowEditDialog(true);
+    },
+    [showAlert],
+  );
 
   const handleEditSubmit = useCallback(async () => {
     if (!selectedUser) return;
