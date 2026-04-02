@@ -130,31 +130,21 @@ export function downloadAuditLogsPdf(
 
   autoTable(doc, {
     startY: 62,
-    head: [["Timestamp", "User", "Action", "Table", "Record ID", "Details"]],
-    body: logs.map((log) => {
-      const details = stringifyAuditDetails(log.details);
-      const trimmedDetails =
-        details.length > 80 ? `${details.slice(0, 77)}...` : details;
-
-      return [
-        new Date(log.created_at).toLocaleString(),
-        `${log.user_name} (${log.user_email})`,
-        log.action,
-        log.table_name,
-        formatAuditRecordId(log.record_id),
-        trimmedDetails,
-      ];
-    }),
+    head: [["Timestamp", "User", "Action", "Table"]],
+    body: logs.map((log) => [
+      new Date(log.created_at).toLocaleString(),
+      `${log.user_name} (${log.user_email})`,
+      log.action,
+      log.table_name,
+    ]),
     theme: "grid",
     headStyles: { fillColor: [40, 150, 80] },
     styles: { fontSize: 8 },
     columnStyles: {
-      0: { cellWidth: 32 },
-      1: { cellWidth: 40 },
-      2: { cellWidth: 20 },
-      3: { cellWidth: 22 },
-      4: { cellWidth: 20 },
-      5: { cellWidth: 56 },
+      0: { cellWidth: 38 },
+      1: { cellWidth: 68 },
+      2: { cellWidth: 30 },
+      3: { cellWidth: 44 },
     },
   });
 

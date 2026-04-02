@@ -2,11 +2,7 @@
 
 import { FileText } from "lucide-react";
 import type { AuditLog } from "@/types/admin";
-import {
-  formatAuditRecordId,
-  getActionColor,
-  stringifyAuditDetails,
-} from "@/lib/utils/admin-audit";
+import { getActionColor } from "@/lib/utils/admin-audit";
 
 type AuditLogsTableProps = {
   logs: AuditLog[];
@@ -71,27 +67,11 @@ export function AuditLogsTable({ logs }: AuditLogsTableProps) {
                 >
                   Table
                 </th>
-                <th
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  Record ID
-                </th>
-                <th
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  Details
-                </th>
               </tr>
             </thead>
             <tbody>
               {logs.map((log, idx) => {
                 const actionColor = getActionColor(log.action);
-                const detailsText = stringifyAuditDetails(log.details);
-                const detailsTitle = log.details
-                  ? stringifyAuditDetails(log.details, true)
-                  : "No details available";
 
                 return (
                   <tr
@@ -141,19 +121,6 @@ export function AuditLogsTable({ logs }: AuditLogsTableProps) {
                       style={{ color: "var(--text)" }}
                     >
                       {log.table_name}
-                    </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm font-mono"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      {formatAuditRecordId(log.record_id)}
-                    </td>
-                    <td
-                      className="px-6 py-4 max-w-xs truncate text-sm"
-                      style={{ color: "var(--text-muted)" }}
-                      title={detailsTitle}
-                    >
-                      {detailsText}
                     </td>
                   </tr>
                 );
