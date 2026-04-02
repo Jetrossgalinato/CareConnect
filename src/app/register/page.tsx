@@ -1,8 +1,8 @@
-"use client";
-
 import RegistrationForm from "./components/RegistrationForm";
 import { ThemeToggler } from "@/components/ThemeToggler";
+import { Loader } from "@/components/Loader";
 import Image from "next/image";
+import { Suspense } from "react";
 
 export default function RegisterPage() {
   return (
@@ -56,7 +56,9 @@ export default function RegisterPage() {
 
       {/* Right side - Registration Form */}
       <div className="flex-1 flex items-center justify-center p-8">
-        <RegistrationForm />
+        <Suspense fallback={<Loader size={32} text="Loading form..." />}>
+          <RegistrationForm />
+        </Suspense>
       </div>
     </div>
   );
