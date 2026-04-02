@@ -1,7 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getAllUsers, updateUser, deleteUser } from "@/actions/admin";
+import {
+  getAllUsers,
+  updateUser,
+  blockPsgMember,
+  deleteUser,
+} from "@/actions/admin";
 import { useAlert } from "@/hooks/useAlert";
 import { filterUsers } from "@/lib/utils/admin-users";
 import type { UserProfile, UserRole } from "@/types/admin";
@@ -29,6 +34,7 @@ export function useUserManagement() {
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [editFormData, setEditFormData] =
     useState<EditFormData>(EMPTY_EDIT_FORM_DATA);
@@ -47,6 +53,11 @@ export function useUserManagement() {
     setShowEditDialog(false);
     resetSelection();
   }, [resetSelection]);
+
+  const closeBlockDialog = useCallback(() => {
+    setShowBlockDialog(false);
+    setSelectedUser(null);
+  }, []);
 
   const closeDeleteDialog = useCallback(() => {
     setShowDeleteDialog(false);
@@ -141,13 +152,69 @@ export function useUserManagement() {
     }
   }, [editFormData, loadUsers, resetSelection, selectedUser, showAlert]);
 
+  const handleBlockClick = useCallback((user: UserProfile) => {
+    setSelectedUser(user);
+    setShowBlockDialog(true);
+  }, []);
+
   const handleDeleteClick = useCallback((user: UserProfile) => {
     setSelectedUser(user);
     setShowDeleteDialog(true);
   }, []);
 
+  const handleBlockConfirm = useCallback(async () => {
+    if (!selectedUser) return;
+
+    if (selectedUser.role !== "psg_member") {
+      showAlert({
+        message: "Only PSG members can be blocked",
+        type: "error",
+        duration: 5000,
+      });
+      return;
+    }
+
+    try {
+      setProcessing(true);
+      const result = await blockPsgMember(selectedUser.id);
+
+      if (result.success) {
+        showAlert({
+          message: "PSG member blocked successfully!",
+          type: "success",
+          duration: 5000,
+        });
+        closeBlockDialog();
+        await loadUsers();
+      } else {
+        showAlert({
+          message: result.error || "Failed to block PSG member",
+          type: "error",
+          duration: 5000,
+        });
+      }
+    } catch {
+      showAlert({
+        message: "An unexpected error occurred",
+        type: "error",
+        duration: 5000,
+      });
+    } finally {
+      setProcessing(false);
+    }
+  }, [closeBlockDialog, loadUsers, selectedUser, showAlert]);
+
   const handleDeleteConfirm = useCallback(async () => {
     if (!selectedUser) return;
+
+    if (selectedUser.role !== "student") {
+      showAlert({
+        message: "Only student accounts can be deleted",
+        type: "error",
+        duration: 5000,
+      });
+      return;
+    }
 
     try {
       setProcessing(true);
@@ -155,7 +222,7 @@ export function useUserManagement() {
 
       if (result.success) {
         showAlert({
-          message: "User deleted successfully!",
+          message: "Student deleted successfully!",
           type: "success",
           duration: 5000,
         });
@@ -163,7 +230,7 @@ export function useUserManagement() {
         await loadUsers();
       } else {
         showAlert({
-          message: result.error || "Failed to delete user",
+          message: result.error || "Failed to delete student",
           type: "error",
           duration: 5000,
         });
@@ -187,6 +254,7 @@ export function useUserManagement() {
     roleFilter,
     showEditDialog,
     showDeleteDialog,
+    showBlockDialog,
     selectedUser,
     editFormData,
     setSearchQuery,
@@ -196,7 +264,10 @@ export function useUserManagement() {
     handleEditSubmit,
     handleDeleteClick,
     handleDeleteConfirm,
+    handleBlockClick,
+    handleBlockConfirm,
     closeEditDialog,
     closeDeleteDialog,
+    closeBlockDialog,
   };
 }

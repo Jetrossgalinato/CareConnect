@@ -65,6 +65,7 @@ export default function UserManagementPage() {
     roleFilter,
     showEditDialog,
     showDeleteDialog,
+    showBlockDialog,
     selectedUser,
     editFormData,
     setSearchQuery,
@@ -74,8 +75,11 @@ export default function UserManagementPage() {
     handleEditSubmit,
     handleDeleteClick,
     handleDeleteConfirm,
+    handleBlockClick,
+    handleBlockConfirm,
     closeEditDialog,
     closeDeleteDialog,
+    closeBlockDialog,
   } = useUserManagement();
 
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
@@ -159,6 +163,7 @@ export default function UserManagementPage() {
         <UsersTable
           users={paginatedUsers}
           onEdit={handleEditClick}
+          onBlock={handleBlockClick}
           onDelete={handleDeleteClick}
         />
 
@@ -361,6 +366,58 @@ export default function UserManagementPage() {
           </div>
         )}
 
+        {showBlockDialog && selectedUser && (
+          <div
+            className="fixed inset-0 flex items-center justify-center p-4 z-50"
+            style={{ background: "rgba(0, 0, 0, 0.5)" }}
+          >
+            <div
+              className="rounded-lg p-6 max-w-md w-full"
+              style={{
+                background: "var(--bg-light)",
+                border: "1px solid var(--border-muted)",
+              }}
+            >
+              <h3
+                className="text-base font-bold mb-4"
+                style={{ color: "var(--text)" }}
+              >
+                Block PSG Member
+              </h3>
+              <p className="mb-4" style={{ color: "var(--text-muted)" }}>
+                Are you sure you want to block{" "}
+                <strong>{selectedUser.full_name}</strong>? This will remove PSG
+                access and deactivate all active availability slots.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleBlockConfirm}
+                  disabled={processing}
+                  className="flex-1 px-6 py-2 rounded-lg hover:opacity-90 transition-all disabled:opacity-50"
+                  style={{
+                    background: "var(--error)",
+                    color: "var(--bg-dark)",
+                  }}
+                >
+                  {processing ? "Blocking..." : "Block PSG Member"}
+                </button>
+                <button
+                  onClick={closeBlockDialog}
+                  disabled={processing}
+                  className="px-6 py-2 rounded-lg transition-all"
+                  style={{
+                    background: "var(--bg)",
+                    border: "1px solid var(--border-muted)",
+                    color: "var(--text)",
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {showDeleteDialog && selectedUser && (
           <div
             className="fixed inset-0 flex items-center justify-center p-4 z-50"
@@ -377,7 +434,7 @@ export default function UserManagementPage() {
                 className="text-base font-bold mb-4"
                 style={{ color: "var(--text)" }}
               >
-                Delete User
+                Delete Student
               </h3>
               <p className="mb-4" style={{ color: "var(--text-muted)" }}>
                 Are you sure you want to delete{" "}
@@ -394,7 +451,7 @@ export default function UserManagementPage() {
                     color: "var(--bg-dark)",
                   }}
                 >
-                  {processing ? "Deleting..." : "Delete User"}
+                  {processing ? "Deleting..." : "Delete Student"}
                 </button>
                 <button
                   onClick={closeDeleteDialog}

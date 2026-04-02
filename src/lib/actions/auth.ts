@@ -41,9 +41,16 @@ export async function login(data: LoginInput) {
   if (authData.user?.id) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, is_blocked")
       .eq("id", authData.user.id)
       .maybeSingle();
+
+    if (profile?.is_blocked) {
+      await supabase.auth.signOut();
+      return {
+        error: "Your account is blocked. Please contact an administrator.",
+      };
+    }
 
     isAdmin = profile?.role === "admin" || isAdmin;
   }
@@ -157,6 +164,7 @@ export async function getUser() {
       typeof user.user_metadata?.avatar_url === "string"
         ? user.user_metadata.avatar_url
         : null,
+    is_blocked: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

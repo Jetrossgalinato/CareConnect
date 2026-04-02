@@ -77,6 +77,16 @@ function LoginContent() {
       // Remove query param after showing alert to avoid duplicate alerts.
       router.replace("/login");
     }
+
+    if (searchParams.get("blocked") === "true") {
+      showAlert({
+        type: "error",
+        message: "Your account is blocked. Please contact an administrator.",
+        duration: 5000,
+      });
+
+      router.replace("/login");
+    }
   }, [router, searchParams, showAlert]);
 
   return (

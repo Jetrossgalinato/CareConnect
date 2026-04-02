@@ -34,6 +34,22 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const { data: profile } = user
+    ? await supabase
+        .from("profiles")
+        .select("role, is_blocked")
+        .eq("id", user.id)
+        .maybeSingle()
+    : { data: null };
+
+  if (user && profile?.is_blocked) {
+    await supabase.auth.signOut();
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("blocked", "true");
+    return NextResponse.redirect(url);
+  }
+
   // Protected routes
   const protectedRoutes = [
     "/dashboard",
@@ -58,12 +74,6 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect to dashboard if accessing auth routes while authenticated
   if (isAuthRoute && user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
-
     const url = request.nextUrl.clone();
     url.pathname =
       profile?.role === "admin" ? "/dashboard/admin" : "/dashboard";

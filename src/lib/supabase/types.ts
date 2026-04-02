@@ -29,6 +29,7 @@ export interface Database {
         Row: {
           id: string;
           role: UserRole;
+          is_blocked: boolean;
           full_name: string;
           school_id: string | null;
           avatar_url: string | null;
@@ -39,6 +40,7 @@ export interface Database {
         Insert: {
           id: string;
           role?: UserRole;
+          is_blocked?: boolean;
           full_name: string;
           school_id?: string | null;
           avatar_url?: string | null;
@@ -49,6 +51,7 @@ export interface Database {
         Update: {
           id?: string;
           role?: UserRole;
+          is_blocked?: boolean;
           full_name?: string;
           school_id?: string | null;
           avatar_url?: string | null;

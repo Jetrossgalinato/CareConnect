@@ -133,12 +133,108 @@ export async function deleteUser(userId: string) {
       return { success: false, error: "Only admins can delete users" };
     }
 
+    const { data: targetUser, error: targetUserError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+
+    if (targetUserError) {
+      console.error("Get target user error:", targetUserError);
+      return { success: false, error: "Failed to fetch user" };
+    }
+
+    if (targetUser?.role === "psg_member") {
+      return {
+        success: false,
+        error: "PSG members cannot be deleted. Use block instead.",
+      };
+    }
+
     // Delete from profiles (cascades to other tables)
     const { error } = await supabase.from("profiles").delete().eq("id", userId);
 
     if (error) {
       console.error("Delete user error:", error);
       return { success: false, error: "Failed to delete user" };
+    }
+
+    revalidatePath("/dashboard/admin/users");
+    return { success: true };
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
+export async function blockPsgMember(userId: string) {
+  try {
+    const supabase = await createClient();
+
+    // Check if admin
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin") {
+      return { success: false, error: "Only admins can block PSG members" };
+    }
+
+    const { data: targetUser, error: targetUserError } = await supabase
+      .from("profiles")
+      .select("role, is_blocked")
+      .eq("id", userId)
+      .single();
+
+    if (targetUserError) {
+      console.error("Get target user error:", targetUserError);
+      return { success: false, error: "Failed to fetch user" };
+    }
+
+    if (targetUser?.role !== "psg_member") {
+      return { success: false, error: "Only PSG members can be blocked" };
+    }
+
+    if (targetUser.is_blocked) {
+      return { success: false, error: "PSG member is already blocked" };
+    }
+
+    // Keep role unchanged and explicitly mark the account as blocked.
+    const { error: updateProfileError } = await supabase
+      .from("profiles")
+      .update({ is_blocked: true })
+      .eq("id", userId);
+
+    if (updateProfileError) {
+      console.error(
+        "Block PSG member profile update error:",
+        updateProfileError,
+      );
+      return { success: false, error: "Failed to block PSG member" };
+    }
+
+    // Ensure blocked member no longer appears as available for booking.
+    const { error: deactivateAvailabilityError } = await supabase
+      .from("psg_availability")
+      .update({ is_active: false })
+      .eq("psg_member_id", userId)
+      .eq("is_active", true);
+
+    if (deactivateAvailabilityError) {
+      console.error(
+        "Deactivate PSG availability error:",
+        deactivateAvailabilityError,
+      );
+      return { success: false, error: "Failed to deactivate PSG availability" };
     }
 
     revalidatePath("/dashboard/admin/users");
