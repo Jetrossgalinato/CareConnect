@@ -1,3 +1,5 @@
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import type { AuditLog } from "@/types/admin";
 
 type ActionBadgeStyle = {
@@ -89,4 +91,88 @@ export function stringifyAuditDetails(
   }
 
   return JSON.stringify(details, null, pretty ? 2 : undefined);
+}
+
+type AuditPdfFilters = {
+  searchQuery: string;
+  actionFilter: string;
+  tableFilter: string;
+};
+
+export function downloadAuditLogsPdf(
+  logs: AuditLog[],
+  filters: AuditPdfFilters,
+): void {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  doc.setFontSize(20);
+  doc.setTextColor(40, 150, 80);
+  doc.text("CareConnect", 14, 15);
+
+  doc.setFontSize(12);
+  doc.setTextColor(100, 100, 100);
+  doc.text("System Audit Logs", 14, 22);
+
+  doc.setFontSize(16);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Audit Log Report", 14, 35);
+
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 42);
+  doc.text(`Records: ${logs.length}`, 14, 48);
+  doc.text(
+    `Filters: query=${filters.searchQuery || "none"}, action=${filters.actionFilter}, table=${filters.tableFilter}`,
+    14,
+    54,
+  );
+
+  autoTable(doc, {
+    startY: 62,
+    head: [["Timestamp", "User", "Action", "Table", "Record ID", "Details"]],
+    body: logs.map((log) => {
+      const details = stringifyAuditDetails(log.details);
+      const trimmedDetails =
+        details.length > 80 ? `${details.slice(0, 77)}...` : details;
+
+      return [
+        new Date(log.created_at).toLocaleString(),
+        `${log.user_name} (${log.user_email})`,
+        log.action,
+        log.table_name,
+        formatAuditRecordId(log.record_id),
+        trimmedDetails,
+      ];
+    }),
+    theme: "grid",
+    headStyles: { fillColor: [40, 150, 80] },
+    styles: { fontSize: 8 },
+    columnStyles: {
+      0: { cellWidth: 32 },
+      1: { cellWidth: 40 },
+      2: { cellWidth: 20 },
+      3: { cellWidth: 22 },
+      4: { cellWidth: 20 },
+      5: { cellWidth: 56 },
+    },
+  });
+
+  const pageCount = doc.getNumberOfPages();
+  for (let pageIndex = 1; pageIndex <= pageCount; pageIndex += 1) {
+    doc.setPage(pageIndex);
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text(
+      `Page ${pageIndex} of ${pageCount}`,
+      pageWidth / 2,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: "center" },
+    );
+  }
+
+  const now = new Date();
+  const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+  const timePart = `${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
+  doc.save(`audit_logs_${datePart}_${timePart}.pdf`);
 }
