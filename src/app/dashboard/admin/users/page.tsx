@@ -19,7 +19,6 @@ import { UsersFilters } from "./components/UsersFilters";
 import { UsersTable } from "./components/UsersTable";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { BlockPsgDialog } from "./components/BlockPsgDialog";
-import { DeleteStudentDialog } from "./components/DeleteStudentDialog";
 import { InviteLinkDialog } from "./components/InviteLinkDialog";
 import { ArrowLeft, Download, Link as LinkIcon } from "lucide-react";
 
@@ -71,7 +70,6 @@ export default function UserManagementPage() {
     searchQuery,
     roleFilter,
     showEditDialog,
-    showDeleteDialog,
     showBlockDialog,
     selectedUser,
     editFormData,
@@ -80,14 +78,11 @@ export default function UserManagementPage() {
     setEditFormData,
     handleEditClick,
     handleEditSubmit,
-    handleDeleteClick,
-    handleDeleteConfirm,
     handleBlockClick,
     handleBlockConfirm,
     handleGeneratePsgInvite,
     handleCopyInviteLink,
     closeEditDialog,
-    closeDeleteDialog,
     closeBlockDialog,
     closeInviteDialog,
   } = useUserManagement();
@@ -188,7 +183,6 @@ export default function UserManagementPage() {
           users={paginatedUsers}
           onEdit={handleEditClick}
           onBlock={handleBlockClick}
-          onDelete={handleDeleteClick}
         />
 
         {filteredUsers.length > 0 && (
@@ -271,15 +265,6 @@ export default function UserManagementPage() {
             processing={processing}
             onConfirm={handleBlockConfirm}
             onClose={closeBlockDialog}
-          />
-        )}
-
-        {showDeleteDialog && selectedUser && (
-          <DeleteStudentDialog
-            selectedUser={selectedUser}
-            processing={processing}
-            onConfirm={handleDeleteConfirm}
-            onClose={closeDeleteDialog}
           />
         )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, ShieldCheck, ShieldX, Trash2, User } from "lucide-react";
+import { Edit, ShieldCheck, ShieldX, User } from "lucide-react";
 import type { UserProfile } from "@/types/admin";
 import {
   formatRoleChipLabel,
@@ -12,15 +12,9 @@ type UsersTableProps = {
   users: UserProfile[];
   onEdit: (user: UserProfile) => void;
   onBlock: (user: UserProfile) => void;
-  onDelete: (user: UserProfile) => void;
 };
 
-export function UsersTable({
-  users,
-  onEdit,
-  onBlock,
-  onDelete,
-}: UsersTableProps) {
+export function UsersTable({ users, onEdit, onBlock }: UsersTableProps) {
   return (
     <div
       className="rounded-lg overflow-hidden"
@@ -174,7 +168,8 @@ export function UsersTable({
                             />
                           </button>
                         )}
-                        {user.role === "psg_member" && (
+                        {(user.role === "psg_member" ||
+                          user.role === "student") && (
                           <button
                             onClick={() => onBlock(user)}
                             className="p-2 rounded-lg hover:bg-opacity-80 transition-all"
@@ -185,8 +180,8 @@ export function UsersTable({
                             }}
                             title={
                               user.is_blocked
-                                ? "Unblock PSG member"
-                                : "Block PSG member"
+                                ? "Unblock account"
+                                : "Block account"
                             }
                           >
                             {user.is_blocked ? (
@@ -200,19 +195,6 @@ export function UsersTable({
                                 style={{ color: "var(--error)" }}
                               />
                             )}
-                          </button>
-                        )}
-                        {user.role === "student" && (
-                          <button
-                            onClick={() => onDelete(user)}
-                            className="p-2 rounded-lg hover:bg-opacity-80 transition-all"
-                            style={{ background: "var(--error-20)" }}
-                            title="Delete student"
-                          >
-                            <Trash2
-                              className="w-4 h-4"
-                              style={{ color: "var(--error)" }}
-                            />
                           </button>
                         )}
                       </div>

@@ -130,7 +130,7 @@ export async function updateUser(userId: string, updates: UpdateUserInput) {
   }
 }
 
-export async function deleteUser(userId: string) {
+export async function deleteUser() {
   try {
     const supabase = await createClient();
 
@@ -152,34 +152,10 @@ export async function deleteUser(userId: string) {
       return { success: false, error: "Only admins can delete users" };
     }
 
-    const { data: targetUser, error: targetUserError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userId)
-      .single();
-
-    if (targetUserError) {
-      console.error("Get target user error:", targetUserError);
-      return { success: false, error: "Failed to fetch user" };
-    }
-
-    if (targetUser?.role === "psg_member") {
-      return {
-        success: false,
-        error: "PSG members cannot be deleted. Use block instead.",
-      };
-    }
-
-    // Delete from profiles (cascades to other tables)
-    const { error } = await supabase.from("profiles").delete().eq("id", userId);
-
-    if (error) {
-      console.error("Delete user error:", error);
-      return { success: false, error: "Failed to delete user" };
-    }
-
-    revalidatePath("/dashboard/admin/users");
-    return { success: true };
+    return {
+      success: false,
+      error: "Account deletion is disabled. Use block or unblock instead.",
+    };
   } catch (error) {
     console.error("Unexpected error:", error);
     return { success: false, error: "An unexpected error occurred" };
@@ -205,7 +181,7 @@ export async function blockPsgMember(userId: string) {
       .single();
 
     if (profile?.role !== "admin") {
-      return { success: false, error: "Only admins can block PSG members" };
+      return { success: false, error: "Only admins can block accounts" };
     }
 
     const { data: targetUser, error: targetUserError } = await supabase
@@ -219,12 +195,15 @@ export async function blockPsgMember(userId: string) {
       return { success: false, error: "Failed to fetch user" };
     }
 
-    if (targetUser?.role !== "psg_member") {
-      return { success: false, error: "Only PSG members can be blocked" };
+    if (targetUser?.role !== "psg_member" && targetUser?.role !== "student") {
+      return {
+        success: false,
+        error: "Only student and PSG accounts can be blocked",
+      };
     }
 
     if (targetUser.is_blocked) {
-      return { success: false, error: "PSG member is already blocked" };
+      return { success: false, error: "Account is already blocked" };
     }
 
     // Keep role unchanged and explicitly mark the account as blocked.
@@ -238,7 +217,7 @@ export async function blockPsgMember(userId: string) {
         "Block PSG member profile update error:",
         updateProfileError,
       );
-      return { success: false, error: "Failed to block PSG member" };
+      return { success: false, error: "Failed to block account" };
     }
 
     // Ensure blocked member no longer appears as available for booking.
@@ -283,7 +262,7 @@ export async function unblockPsgMember(userId: string) {
       .single();
 
     if (profile?.role !== "admin") {
-      return { success: false, error: "Only admins can unblock PSG members" };
+      return { success: false, error: "Only admins can unblock accounts" };
     }
 
     const { data: targetUser, error: targetUserError } = await supabase
@@ -297,12 +276,15 @@ export async function unblockPsgMember(userId: string) {
       return { success: false, error: "Failed to fetch user" };
     }
 
-    if (targetUser?.role !== "psg_member") {
-      return { success: false, error: "Only PSG members can be unblocked" };
+    if (targetUser?.role !== "psg_member" && targetUser?.role !== "student") {
+      return {
+        success: false,
+        error: "Only student and PSG accounts can be unblocked",
+      };
     }
 
     if (!targetUser.is_blocked) {
-      return { success: false, error: "PSG member is not blocked" };
+      return { success: false, error: "Account is not blocked" };
     }
 
     const { error: updateProfileError } = await supabase
@@ -315,7 +297,7 @@ export async function unblockPsgMember(userId: string) {
         "Unblock PSG member profile update error:",
         updateProfileError,
       );
-      return { success: false, error: "Failed to unblock PSG member" };
+      return { success: false, error: "Failed to unblock account" };
     }
 
     revalidatePath("/dashboard/admin/users");

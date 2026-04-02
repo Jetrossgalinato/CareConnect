@@ -14,6 +14,7 @@ export function BlockPsgDialog({
   onClose,
 }: BlockPsgDialogProps) {
   const isBlocked = selectedUser.is_blocked;
+  const roleLabel = selectedUser.role === "student" ? "Student" : "PSG Member";
 
   return (
     <div
@@ -31,14 +32,14 @@ export function BlockPsgDialog({
           className="text-base font-bold mb-4"
           style={{ color: "var(--text)" }}
         >
-          {isBlocked ? "Unblock PSG Member" : "Block PSG Member"}
+          {isBlocked ? `Unblock ${roleLabel}` : `Block ${roleLabel}`}
         </h3>
         <p className="mb-4" style={{ color: "var(--text-muted)" }}>
           {isBlocked ? (
             <>
               Are you sure you want to unblock{" "}
-              <strong>{selectedUser.full_name}</strong>? This will allow the PSG
-              member to sign in again.
+              <strong>{selectedUser.full_name}</strong>? This will allow the{" "}
+              {roleLabel.toLowerCase()} to sign in again.
             </>
           ) : (
             <>
@@ -63,8 +64,8 @@ export function BlockPsgDialog({
                 ? "Unblocking..."
                 : "Blocking..."
               : isBlocked
-                ? "Unblock PSG Member"
-                : "Block PSG Member"}
+                ? `Unblock ${roleLabel}`
+                : `Block ${roleLabel}`}
           </button>
           <button
             onClick={onClose}
