@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { login } from "@/lib/actions/auth";
 import Link from "next/link";
+import Image from "next/image";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useAlert } from "@/hooks/useAlert";
@@ -118,7 +119,7 @@ function LoginContent() {
           </p>
         </div>
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <img
+          <Image
             src="/authlogo.png"
             alt="CareConnect Logo"
             width={600}

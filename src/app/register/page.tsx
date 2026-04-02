@@ -2,6 +2,7 @@
 
 import RegistrationForm from "./components/RegistrationForm";
 import { ThemeToggler } from "@/components/ThemeToggler";
+import Image from "next/image";
 
 export default function RegisterPage() {
   return (
@@ -33,7 +34,7 @@ export default function RegisterPage() {
           </p>
         </div>
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <img
+          <Image
             src="/authlogo.png"
             alt="CareConnect Logo"
             width={600}
