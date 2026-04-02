@@ -34,8 +34,9 @@ export default async function AdminPage() {
             </h1>
           </div>
           <p style={{ color: "var(--text-muted)" }}>
-            This admin landing page is ready. You can now add your custom admin
-            content here.
+            Oversee user accounts, monitor referral and session activity, and
+            review system reports and audit logs to keep operations secure and
+            efficient.
           </p>
         </section>
 
@@ -62,6 +63,12 @@ export default async function AdminPage() {
               <p className="font-semibold" style={{ color: "var(--text)" }}>
                 User Management
               </p>
+              <p
+                className="text-sm mt-1"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Manage student and PSG member accounts.
+              </p>
             </Link>
 
             <Link
@@ -79,6 +86,12 @@ export default async function AdminPage() {
               <p className="font-semibold" style={{ color: "var(--text)" }}>
                 Reports
               </p>
+              <p
+                className="text-sm mt-1"
+                style={{ color: "var(--text-muted)" }}
+              >
+                View summaries and operational analytics.
+              </p>
             </Link>
 
             <Link
@@ -95,6 +108,12 @@ export default async function AdminPage() {
               />
               <p className="font-semibold" style={{ color: "var(--text)" }}>
                 Audit Logs
+              </p>
+              <p
+                className="text-sm mt-1"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Review tracked actions across the system.
               </p>
             </Link>
           </div>

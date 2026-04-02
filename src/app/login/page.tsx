@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { login } from "@/lib/actions/auth";
 import Link from "next/link";
+import Image from "next/image";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useAlert } from "@/hooks/useAlert";
@@ -77,6 +78,16 @@ function LoginContent() {
       // Remove query param after showing alert to avoid duplicate alerts.
       router.replace("/login");
     }
+
+    if (searchParams.get("blocked") === "true") {
+      showAlert({
+        type: "error",
+        message: "Your account is blocked. Please contact an administrator.",
+        duration: 5000,
+      });
+
+      router.replace("/login");
+    }
   }, [router, searchParams, showAlert]);
 
   return (
@@ -108,7 +119,7 @@ function LoginContent() {
           </p>
         </div>
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <img
+          <Image
             src="/authlogo.png"
             alt="CareConnect Logo"
             width={600}

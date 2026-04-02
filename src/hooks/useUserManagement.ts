@@ -1,7 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getAllUsers, updateUser, deleteUser } from "@/actions/admin";
+import {
+  getAllUsers,
+  updateUser,
+  blockPsgMember,
+  unblockPsgMember,
+  generatePsgInviteLink,
+} from "@/actions/admin";
 import { useAlert } from "@/hooks/useAlert";
 import { filterUsers } from "@/lib/utils/admin-users";
 import type { UserProfile, UserRole } from "@/types/admin";
@@ -25,10 +31,14 @@ export function useUserManagement() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [generatingInvite, setGeneratingInvite] = useState(false);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [inviteLink, setInviteLink] = useState("");
+  const [inviteExpiresAt, setInviteExpiresAt] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [editFormData, setEditFormData] =
     useState<EditFormData>(EMPTY_EDIT_FORM_DATA);
@@ -48,9 +58,13 @@ export function useUserManagement() {
     resetSelection();
   }, [resetSelection]);
 
-  const closeDeleteDialog = useCallback(() => {
-    setShowDeleteDialog(false);
+  const closeBlockDialog = useCallback(() => {
+    setShowBlockDialog(false);
     setSelectedUser(null);
+  }, []);
+
+  const closeInviteDialog = useCallback(() => {
+    setShowInviteDialog(false);
   }, []);
 
   const loadUsers = useCallback(async () => {
@@ -80,15 +94,27 @@ export function useUserManagement() {
     void loadUsers();
   }, [loadUsers]);
 
-  const handleEditClick = useCallback((user: UserProfile) => {
-    setSelectedUser(user);
-    setEditFormData({
-      full_name: user.full_name,
-      school_id: user.school_id || "",
-      role: user.role,
-    });
-    setShowEditDialog(true);
-  }, []);
+  const handleEditClick = useCallback(
+    (user: UserProfile) => {
+      if (user.role === "admin") {
+        showAlert({
+          message: "Admin accounts are SQL-managed and cannot be edited",
+          type: "error",
+          duration: 5000,
+        });
+        return;
+      }
+
+      setSelectedUser(user);
+      setEditFormData({
+        full_name: user.full_name,
+        school_id: user.school_id || "",
+        role: user.role,
+      });
+      setShowEditDialog(true);
+    },
+    [showAlert],
+  );
 
   const handleEditSubmit = useCallback(async () => {
     if (!selectedUser) return;
@@ -141,29 +167,46 @@ export function useUserManagement() {
     }
   }, [editFormData, loadUsers, resetSelection, selectedUser, showAlert]);
 
-  const handleDeleteClick = useCallback((user: UserProfile) => {
+  const handleBlockClick = useCallback((user: UserProfile) => {
     setSelectedUser(user);
-    setShowDeleteDialog(true);
+    setShowBlockDialog(true);
   }, []);
 
-  const handleDeleteConfirm = useCallback(async () => {
+  const handleBlockConfirm = useCallback(async () => {
     if (!selectedUser) return;
+
+    if (selectedUser.role !== "psg_member" && selectedUser.role !== "student") {
+      showAlert({
+        message: "Only student and PSG accounts can be blocked",
+        type: "error",
+        duration: 5000,
+      });
+      return;
+    }
 
     try {
       setProcessing(true);
-      const result = await deleteUser(selectedUser.id);
+      const result = selectedUser.is_blocked
+        ? await unblockPsgMember(selectedUser.id)
+        : await blockPsgMember(selectedUser.id);
 
       if (result.success) {
         showAlert({
-          message: "User deleted successfully!",
+          message: selectedUser.is_blocked
+            ? "Account unblocked successfully!"
+            : "Account blocked successfully!",
           type: "success",
           duration: 5000,
         });
-        closeDeleteDialog();
+        closeBlockDialog();
         await loadUsers();
       } else {
         showAlert({
-          message: result.error || "Failed to delete user",
+          message:
+            result.error ||
+            (selectedUser.is_blocked
+              ? "Failed to unblock account"
+              : "Failed to block account"),
           type: "error",
           duration: 5000,
         });
@@ -177,16 +220,68 @@ export function useUserManagement() {
     } finally {
       setProcessing(false);
     }
-  }, [closeDeleteDialog, loadUsers, selectedUser, showAlert]);
+  }, [closeBlockDialog, loadUsers, selectedUser, showAlert]);
+
+  const handleGeneratePsgInvite = useCallback(async () => {
+    try {
+      setGeneratingInvite(true);
+      const result = await generatePsgInviteLink();
+
+      if (!result.success || !result.data) {
+        showAlert({
+          message: result.error || "Failed to generate PSG invite link",
+          type: "error",
+          duration: 5000,
+        });
+        return;
+      }
+
+      const { inviteLink, expiresAt } = result.data;
+      setInviteLink(inviteLink);
+      setInviteExpiresAt(expiresAt);
+      setShowInviteDialog(true);
+    } catch {
+      showAlert({
+        message: "An unexpected error occurred",
+        type: "error",
+        duration: 5000,
+      });
+    } finally {
+      setGeneratingInvite(false);
+    }
+  }, [showAlert]);
+
+  const handleCopyInviteLink = useCallback(async () => {
+    if (!inviteLink) return;
+
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      showAlert({
+        message: "Invite link copied to clipboard",
+        type: "success",
+        duration: 4000,
+      });
+    } catch {
+      showAlert({
+        message: "Failed to copy invite link",
+        type: "error",
+        duration: 4000,
+      });
+    }
+  }, [inviteLink, showAlert]);
 
   return {
     filteredUsers,
     loading,
     processing,
+    generatingInvite,
+    showInviteDialog,
+    inviteLink,
+    inviteExpiresAt,
     searchQuery,
     roleFilter,
     showEditDialog,
-    showDeleteDialog,
+    showBlockDialog,
     selectedUser,
     editFormData,
     setSearchQuery,
@@ -194,9 +289,12 @@ export function useUserManagement() {
     setEditFormData,
     handleEditClick,
     handleEditSubmit,
-    handleDeleteClick,
-    handleDeleteConfirm,
+    handleBlockClick,
+    handleBlockConfirm,
+    handleGeneratePsgInvite,
+    handleCopyInviteLink,
     closeEditDialog,
-    closeDeleteDialog,
+    closeBlockDialog,
+    closeInviteDialog,
   };
 }

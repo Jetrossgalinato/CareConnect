@@ -8,6 +8,7 @@ export interface UserProfile {
   full_name: string;
   school_id?: string;
   role: UserRole;
+  is_blocked: boolean;
   avatar_url?: string;
   created_at: string;
   updated_at: string;

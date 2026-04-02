@@ -1,5 +1,6 @@
 "use server";
 
+import { createHash, randomBytes } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type {
@@ -83,6 +84,24 @@ export async function updateUser(userId: string, updates: UpdateUserInput) {
       return { success: false, error: "Only admins can update users" };
     }
 
+    const { data: targetUser, error: targetUserError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+
+    if (targetUserError) {
+      console.error("Get target user error:", targetUserError);
+      return { success: false, error: "Failed to fetch user" };
+    }
+
+    if (targetUser?.role === "admin") {
+      return {
+        success: false,
+        error: "Admin accounts are SQL-managed and cannot be edited here",
+      };
+    }
+
     if (updates.role === "admin") {
       return {
         success: false,
@@ -111,7 +130,7 @@ export async function updateUser(userId: string, updates: UpdateUserInput) {
   }
 }
 
-export async function deleteUser(userId: string) {
+export async function deleteUser() {
   try {
     const supabase = await createClient();
 
@@ -133,16 +152,212 @@ export async function deleteUser(userId: string) {
       return { success: false, error: "Only admins can delete users" };
     }
 
-    // Delete from profiles (cascades to other tables)
-    const { error } = await supabase.from("profiles").delete().eq("id", userId);
+    return {
+      success: false,
+      error: "Account deletion is disabled. Use block or unblock instead.",
+    };
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
 
-    if (error) {
-      console.error("Delete user error:", error);
-      return { success: false, error: "Failed to delete user" };
+export async function blockPsgMember(userId: string) {
+  try {
+    const supabase = await createClient();
+
+    // Check if admin
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin") {
+      return { success: false, error: "Only admins can block accounts" };
+    }
+
+    const { data: targetUser, error: targetUserError } = await supabase
+      .from("profiles")
+      .select("role, is_blocked")
+      .eq("id", userId)
+      .single();
+
+    if (targetUserError) {
+      console.error("Get target user error:", targetUserError);
+      return { success: false, error: "Failed to fetch user" };
+    }
+
+    if (targetUser?.role !== "psg_member" && targetUser?.role !== "student") {
+      return {
+        success: false,
+        error: "Only student and PSG accounts can be blocked",
+      };
+    }
+
+    if (targetUser.is_blocked) {
+      return { success: false, error: "Account is already blocked" };
+    }
+
+    // Keep role unchanged and explicitly mark the account as blocked.
+    const { error: updateProfileError } = await supabase
+      .from("profiles")
+      .update({ is_blocked: true })
+      .eq("id", userId);
+
+    if (updateProfileError) {
+      console.error(
+        "Block PSG member profile update error:",
+        updateProfileError,
+      );
+      return { success: false, error: "Failed to block account" };
+    }
+
+    // Ensure blocked member no longer appears as available for booking.
+    const { error: deactivateAvailabilityError } = await supabase
+      .from("psg_availability")
+      .update({ is_active: false })
+      .eq("psg_member_id", userId)
+      .eq("is_active", true);
+
+    if (deactivateAvailabilityError) {
+      console.error(
+        "Deactivate PSG availability error:",
+        deactivateAvailabilityError,
+      );
+      return { success: false, error: "Failed to deactivate PSG availability" };
     }
 
     revalidatePath("/dashboard/admin/users");
     return { success: true };
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
+export async function unblockPsgMember(userId: string) {
+  try {
+    const supabase = await createClient();
+
+    // Check if admin
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin") {
+      return { success: false, error: "Only admins can unblock accounts" };
+    }
+
+    const { data: targetUser, error: targetUserError } = await supabase
+      .from("profiles")
+      .select("role, is_blocked")
+      .eq("id", userId)
+      .single();
+
+    if (targetUserError) {
+      console.error("Get target user error:", targetUserError);
+      return { success: false, error: "Failed to fetch user" };
+    }
+
+    if (targetUser?.role !== "psg_member" && targetUser?.role !== "student") {
+      return {
+        success: false,
+        error: "Only student and PSG accounts can be unblocked",
+      };
+    }
+
+    if (!targetUser.is_blocked) {
+      return { success: false, error: "Account is not blocked" };
+    }
+
+    const { error: updateProfileError } = await supabase
+      .from("profiles")
+      .update({ is_blocked: false })
+      .eq("id", userId);
+
+    if (updateProfileError) {
+      console.error(
+        "Unblock PSG member profile update error:",
+        updateProfileError,
+      );
+      return { success: false, error: "Failed to unblock account" };
+    }
+
+    revalidatePath("/dashboard/admin/users");
+    return { success: true };
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
+export async function generatePsgInviteLink() {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin") {
+      return {
+        success: false,
+        error: "Only admins can generate PSG invite links",
+      };
+    }
+
+    const token = randomBytes(32).toString("hex");
+    const tokenHash = createHash("sha256").update(token).digest("hex");
+    const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+
+    const { error: inviteError } = await supabase.from("psg_invites").insert({
+      token_hash: tokenHash,
+      created_by: user.id,
+      expires_at: expiresAt,
+    });
+
+    if (inviteError) {
+      console.error("Generate PSG invite error:", inviteError);
+      return { success: false, error: "Failed to generate invite link" };
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const inviteLink = `${baseUrl}/register?invite=${encodeURIComponent(token)}`;
+
+    return {
+      success: true,
+      data: {
+        inviteLink,
+        expiresAt,
+      },
+    };
   } catch (error) {
     console.error("Unexpected error:", error);
     return { success: false, error: "An unexpected error occurred" };

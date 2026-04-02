@@ -1,5 +1,6 @@
 "use server";
 
+import { createHash } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { type Profile } from "@/lib/utils/auth";
 import {
@@ -41,9 +42,16 @@ export async function login(data: LoginInput) {
   if (authData.user?.id) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, is_blocked")
       .eq("id", authData.user.id)
       .maybeSingle();
+
+    if (profile?.is_blocked) {
+      await supabase.auth.signOut();
+      return {
+        error: "Your account is blocked. Please contact an administrator.",
+      };
+    }
 
     isAdmin = profile?.role === "admin" || isAdmin;
   }
@@ -63,8 +71,41 @@ export async function register(data: RegisterInput) {
     };
   }
 
-  const { email, password, fullName, schoolId } = validatedFields.data;
-  const role = "student";
+  const { email, password, fullName, codename, schoolId, inviteToken } =
+    validatedFields.data;
+
+  let role: "student" | "psg_member" = "student";
+
+  if (inviteToken) {
+    const tokenHash = createHash("sha256").update(inviteToken).digest("hex");
+    const { data: isInviteConsumed, error: inviteError } = await supabase.rpc(
+      "consume_psg_invite",
+      {
+        p_token_hash: tokenHash,
+        p_used_email: email,
+      },
+    );
+
+    if (inviteError || !isInviteConsumed) {
+      return {
+        error: "Invalid or expired PSG invite link",
+      };
+    }
+
+    role = "psg_member";
+  }
+
+  const profileDisplayName =
+    role === "psg_member" ? (codename || "").trim() : (fullName || "").trim();
+
+  if (profileDisplayName.length < 2) {
+    return {
+      error:
+        role === "psg_member"
+          ? "Codename is required"
+          : "Full name is required",
+    };
+  }
 
   // Sign up with Supabase
   const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -73,6 +114,7 @@ export async function register(data: RegisterInput) {
     options: {
       data: {
         full_name: fullName,
+        codename,
         school_id: schoolId,
         role,
       },
@@ -90,7 +132,7 @@ export async function register(data: RegisterInput) {
     const { error: profileError } = await supabase.from("profiles").insert({
       id: authData.user.id,
       email,
-      full_name: fullName,
+      full_name: profileDisplayName,
       school_id: schoolId,
       role,
     });
@@ -157,6 +199,7 @@ export async function getUser() {
       typeof user.user_metadata?.avatar_url === "string"
         ? user.user_metadata.avatar_url
         : null,
+    is_blocked: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

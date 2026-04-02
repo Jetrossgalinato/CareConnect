@@ -17,8 +17,11 @@ type ReportResultsProps = {
   activeTab: ReportTab;
   dateRange: DateRange;
   appointmentReports: AppointmentReport[];
+  paginatedAppointmentReports: AppointmentReport[];
   referralReports: ReferralReport[];
+  paginatedReferralReports: ReferralReport[];
   sessionReports: SessionReport[];
+  paginatedSessionReports: SessionReport[];
   usageReport: UsageReport | null;
   onDownloadPDF: () => void;
   onExportJSON: () => void;
@@ -28,8 +31,11 @@ export function ReportResults({
   activeTab,
   dateRange,
   appointmentReports,
+  paginatedAppointmentReports,
   referralReports,
+  paginatedReferralReports,
   sessionReports,
+  paginatedSessionReports,
   usageReport,
   onDownloadPDF,
   onExportJSON,
@@ -79,15 +85,24 @@ export function ReportResults({
 
       <div className="p-6">
         {activeTab === "appointments" && (
-          <AppointmentsReportSection appointmentReports={appointmentReports} />
+          <AppointmentsReportSection
+            appointmentReports={appointmentReports}
+            paginatedAppointmentReports={paginatedAppointmentReports}
+          />
         )}
 
         {activeTab === "referrals" && (
-          <ReferralsReportSection referralReports={referralReports} />
+          <ReferralsReportSection
+            referralReports={referralReports}
+            paginatedReferralReports={paginatedReferralReports}
+          />
         )}
 
         {activeTab === "sessions" && (
-          <SessionsReportSection sessionReports={sessionReports} />
+          <SessionsReportSection
+            sessionReports={sessionReports}
+            paginatedSessionReports={paginatedSessionReports}
+          />
         )}
 
         {activeTab === "usage" && usageReport && (

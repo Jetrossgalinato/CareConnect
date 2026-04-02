@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   getAppointmentById,
   confirmAppointment,
@@ -313,11 +314,13 @@ export default function PSGAppointmentDetailPage({ params }: PageProps) {
               }}
             >
               {appointment.student.avatar_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={appointment.student.avatar_url}
                   alt={appointment.student.full_name}
+                  width={64}
+                  height={64}
                   className="w-16 h-16 rounded-full object-cover"
+                  unoptimized
                 />
               )}
               <div>

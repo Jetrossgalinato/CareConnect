@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, Trash2, User } from "lucide-react";
+import { Edit, ShieldCheck, ShieldX, User } from "lucide-react";
 import type { UserProfile } from "@/types/admin";
 import {
   formatRoleChipLabel,
@@ -11,10 +11,10 @@ import {
 type UsersTableProps = {
   users: UserProfile[];
   onEdit: (user: UserProfile) => void;
-  onDelete: (user: UserProfile) => void;
+  onBlock: (user: UserProfile) => void;
 };
 
-export function UsersTable({ users, onEdit, onDelete }: UsersTableProps) {
+export function UsersTable({ users, onEdit, onBlock }: UsersTableProps) {
   return (
     <div
       className="rounded-lg overflow-hidden"
@@ -155,28 +155,48 @@ export function UsersTable({ users, onEdit, onDelete }: UsersTableProps) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => onEdit(user)}
-                          className="p-2 rounded-lg hover:bg-opacity-80 transition-all"
-                          style={{ background: "var(--primary-20)" }}
-                          title="Edit user"
-                        >
-                          <Edit
-                            className="w-4 h-4"
-                            style={{ color: "var(--primary)" }}
-                          />
-                        </button>
-                        <button
-                          onClick={() => onDelete(user)}
-                          className="p-2 rounded-lg hover:bg-opacity-80 transition-all"
-                          style={{ background: "var(--error-20)" }}
-                          title="Delete user"
-                        >
-                          <Trash2
-                            className="w-4 h-4"
-                            style={{ color: "var(--error)" }}
-                          />
-                        </button>
+                        {user.role !== "admin" && (
+                          <button
+                            onClick={() => onEdit(user)}
+                            className="p-2 rounded-lg hover:bg-opacity-80 transition-all"
+                            style={{ background: "var(--primary-20)" }}
+                            title="Edit user"
+                          >
+                            <Edit
+                              className="w-4 h-4"
+                              style={{ color: "var(--primary)" }}
+                            />
+                          </button>
+                        )}
+                        {(user.role === "psg_member" ||
+                          user.role === "student") && (
+                          <button
+                            onClick={() => onBlock(user)}
+                            className="p-2 rounded-lg hover:bg-opacity-80 transition-all"
+                            style={{
+                              background: user.is_blocked
+                                ? "var(--primary-20)"
+                                : "var(--error-20)",
+                            }}
+                            title={
+                              user.is_blocked
+                                ? "Unblock account"
+                                : "Block account"
+                            }
+                          >
+                            {user.is_blocked ? (
+                              <ShieldCheck
+                                className="w-4 h-4"
+                                style={{ color: "var(--primary)" }}
+                              />
+                            ) : (
+                              <ShieldX
+                                className="w-4 h-4"
+                                style={{ color: "var(--error)" }}
+                              />
+                            )}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

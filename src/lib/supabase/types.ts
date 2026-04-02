@@ -29,6 +29,7 @@ export interface Database {
         Row: {
           id: string;
           role: UserRole;
+          is_blocked: boolean;
           full_name: string;
           school_id: string | null;
           avatar_url: string | null;
@@ -39,6 +40,7 @@ export interface Database {
         Insert: {
           id: string;
           role?: UserRole;
+          is_blocked?: boolean;
           full_name: string;
           school_id?: string | null;
           avatar_url?: string | null;
@@ -49,6 +51,7 @@ export interface Database {
         Update: {
           id?: string;
           role?: UserRole;
+          is_blocked?: boolean;
           full_name?: string;
           school_id?: string | null;
           avatar_url?: string | null;
@@ -234,12 +237,47 @@ export interface Database {
           created_at?: string;
         };
       };
+      psg_invites: {
+        Row: {
+          id: string;
+          token_hash: string;
+          created_by: string | null;
+          used_by_email: string | null;
+          expires_at: string;
+          used_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          token_hash: string;
+          created_by?: string | null;
+          used_by_email?: string | null;
+          expires_at: string;
+          used_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          token_hash?: string;
+          created_by?: string | null;
+          used_by_email?: string | null;
+          expires_at?: string;
+          used_at?: string | null;
+          created_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      consume_psg_invite: {
+        Args: {
+          p_token_hash: string;
+          p_used_email: string;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
       user_role: UserRole;
