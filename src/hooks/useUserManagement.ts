@@ -5,6 +5,7 @@ import {
   getAllUsers,
   updateUser,
   blockPsgMember,
+  unblockPsgMember,
   deleteUser,
 } from "@/actions/admin";
 import { useAlert } from "@/hooks/useAlert";
@@ -176,11 +177,15 @@ export function useUserManagement() {
 
     try {
       setProcessing(true);
-      const result = await blockPsgMember(selectedUser.id);
+      const result = selectedUser.is_blocked
+        ? await unblockPsgMember(selectedUser.id)
+        : await blockPsgMember(selectedUser.id);
 
       if (result.success) {
         showAlert({
-          message: "PSG member blocked successfully!",
+          message: selectedUser.is_blocked
+            ? "PSG member unblocked successfully!"
+            : "PSG member blocked successfully!",
           type: "success",
           duration: 5000,
         });
@@ -188,7 +193,11 @@ export function useUserManagement() {
         await loadUsers();
       } else {
         showAlert({
-          message: result.error || "Failed to block PSG member",
+          message:
+            result.error ||
+            (selectedUser.is_blocked
+              ? "Failed to unblock PSG member"
+              : "Failed to block PSG member"),
           type: "error",
           duration: 5000,
         });

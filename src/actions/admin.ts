@@ -245,6 +245,68 @@ export async function blockPsgMember(userId: string) {
   }
 }
 
+export async function unblockPsgMember(userId: string) {
+  try {
+    const supabase = await createClient();
+
+    // Check if admin
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin") {
+      return { success: false, error: "Only admins can unblock PSG members" };
+    }
+
+    const { data: targetUser, error: targetUserError } = await supabase
+      .from("profiles")
+      .select("role, is_blocked")
+      .eq("id", userId)
+      .single();
+
+    if (targetUserError) {
+      console.error("Get target user error:", targetUserError);
+      return { success: false, error: "Failed to fetch user" };
+    }
+
+    if (targetUser?.role !== "psg_member") {
+      return { success: false, error: "Only PSG members can be unblocked" };
+    }
+
+    if (!targetUser.is_blocked) {
+      return { success: false, error: "PSG member is not blocked" };
+    }
+
+    const { error: updateProfileError } = await supabase
+      .from("profiles")
+      .update({ is_blocked: false })
+      .eq("id", userId);
+
+    if (updateProfileError) {
+      console.error(
+        "Unblock PSG member profile update error:",
+        updateProfileError,
+      );
+      return { success: false, error: "Failed to unblock PSG member" };
+    }
+
+    revalidatePath("/dashboard/admin/users");
+    return { success: true };
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
 // =============================
 // System Statistics
 // =============================

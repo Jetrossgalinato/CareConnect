@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, ShieldX, Trash2, User } from "lucide-react";
+import { Edit, ShieldCheck, ShieldX, Trash2, User } from "lucide-react";
 import type { UserProfile } from "@/types/admin";
 import {
   formatRoleChipLabel,
@@ -176,18 +176,28 @@ export function UsersTable({
                           <button
                             onClick={() => onBlock(user)}
                             className="p-2 rounded-lg hover:bg-opacity-80 transition-all"
-                            style={{ background: "var(--error-20)" }}
+                            style={{
+                              background: user.is_blocked
+                                ? "var(--primary-20)"
+                                : "var(--error-20)",
+                            }}
                             title={
                               user.is_blocked
-                                ? "PSG member is blocked"
+                                ? "Unblock PSG member"
                                 : "Block PSG member"
                             }
-                            disabled={user.is_blocked}
                           >
-                            <ShieldX
-                              className="w-4 h-4"
-                              style={{ color: "var(--error)" }}
-                            />
+                            {user.is_blocked ? (
+                              <ShieldCheck
+                                className="w-4 h-4"
+                                style={{ color: "var(--primary)" }}
+                              />
+                            ) : (
+                              <ShieldX
+                                className="w-4 h-4"
+                                style={{ color: "var(--error)" }}
+                              />
+                            )}
                           </button>
                         )}
                         {user.role === "student" && (
