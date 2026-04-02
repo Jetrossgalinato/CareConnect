@@ -1,15 +1,62 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import type { UserRole } from "@/types/admin";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { downloadUsersPdf } from "@/lib/utils/admin-users";
 import { UsersFilters } from "./components/UsersFilters";
 import { UsersTable } from "./components/UsersTable";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
+
+const PAGE_SIZE = 10;
+
+function getPaginationItems(currentPage: number, totalPages: number) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, idx) => idx + 1);
+  }
+
+  if (currentPage <= 4) {
+    return [1, 2, 3, 4, 5, "ellipsis", totalPages] as const;
+  }
+
+  if (currentPage >= totalPages - 3) {
+    return [
+      1,
+      "ellipsis",
+      totalPages - 4,
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ] as const;
+  }
+
+  return [
+    1,
+    "ellipsis",
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    "ellipsis",
+    totalPages,
+  ] as const;
+}
 
 export default function UserManagementPage() {
+  const [currentPage, setCurrentPage] = useState(1);
+
   const {
     filteredUsers,
     loading,
@@ -30,6 +77,26 @@ export default function UserManagementPage() {
     closeEditDialog,
     closeDeleteDialog,
   } = useUserManagement();
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const effectivePage = Math.min(currentPage, totalPages);
+
+  const paginatedUsers = useMemo(() => {
+    const start = (effectivePage - 1) * PAGE_SIZE;
+    return filteredUsers.slice(start, start + PAGE_SIZE);
+  }, [effectivePage, filteredUsers]);
+
+  const pageItems = useMemo(
+    () => getPaginationItems(effectivePage, totalPages),
+    [effectivePage, totalPages],
+  );
+
+  const handleExportPdf = () => {
+    downloadUsersPdf(filteredUsers, {
+      searchQuery,
+      roleFilter,
+    });
+  };
 
   if (loading) {
     return <Loader fullScreen text="Loading users..." />;
@@ -61,33 +128,102 @@ export default function UserManagementPage() {
               Manage system users, roles, and permissions
             </p>
           </div>
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+          <button
+            onClick={handleExportPdf}
+            disabled={filteredUsers.length === 0}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
-              background: "var(--bg-light)",
-              border: "1px solid var(--border-muted)",
-              color: "var(--text)",
+              background: "var(--primary-20)",
+              color: "var(--primary)",
             }}
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </Link>
+            <Download className="w-4 h-4" />
+            Export PDF
+          </button>
         </div>
 
         <UsersFilters
           searchQuery={searchQuery}
-          onSearchChange={(value) => setSearchQuery(value)}
+          onSearchChange={(value) => {
+            setCurrentPage(1);
+            setSearchQuery(value);
+          }}
           roleFilter={roleFilter}
-          onRoleFilterChange={(value) => setRoleFilter(value)}
+          onRoleFilterChange={(value) => {
+            setCurrentPage(1);
+            setRoleFilter(value);
+          }}
           filteredUsers={filteredUsers}
         />
 
         <UsersTable
-          users={filteredUsers}
+          users={paginatedUsers}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
         />
+
+        {filteredUsers.length > 0 && (
+          <div className="mt-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              Showing {(effectivePage - 1) * PAGE_SIZE + 1}-
+              {Math.min(effectivePage * PAGE_SIZE, filteredUsers.length)} of{" "}
+              {filteredUsers.length} users
+            </p>
+
+            <Pagination className="justify-end mx-0 w-auto">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setCurrentPage((prev) => Math.max(1, prev - 1));
+                    }}
+                    className={
+                      effectivePage === 1
+                        ? "pointer-events-none opacity-50"
+                        : undefined
+                    }
+                  />
+                </PaginationItem>
+
+                {pageItems.map((item, idx) => (
+                  <PaginationItem key={`${item}-${idx}`}>
+                    {item === "ellipsis" ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        href="#"
+                        isActive={item === effectivePage}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          setCurrentPage(item);
+                        }}
+                      >
+                        {item}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+                    }}
+                    className={
+                      effectivePage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : undefined
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
 
         {showEditDialog && selectedUser && (
           <div
