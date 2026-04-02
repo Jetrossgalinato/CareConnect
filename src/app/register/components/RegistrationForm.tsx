@@ -15,6 +15,8 @@ export default function RegistrationForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
+  const inviteToken = searchParams.get("invite") || "";
+  const isPsgInvite = Boolean(inviteToken);
 
   const {
     register,
@@ -23,6 +25,9 @@ export default function RegistrationForm() {
     watch,
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      inviteToken,
+    },
   });
 
   const password = watch("password");
@@ -36,8 +41,6 @@ export default function RegistrationForm() {
   const onSubmit = async (data: RegisterInput) => {
     setIsLoading(true);
     setError(null);
-
-    const inviteToken = searchParams.get("invite") || undefined;
 
     const result = await registerAction({
       ...data,
@@ -92,34 +95,63 @@ export default function RegistrationForm() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {/* Full Name */}
-        <div>
-          <label
-            htmlFor="fullName"
-            className="block text-sm font-medium mb-2"
-            style={{ color: "var(--text)" }}
-          >
-            Full Name
-          </label>
-          <input
-            id="fullName"
-            type="text"
-            {...register("fullName")}
-            placeholder="Juan Dela Cruz"
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition"
-            style={{
-              background: "var(--bg)",
-              color: "var(--text)",
-              borderColor: "var(--border)",
-            }}
-            disabled={isLoading}
-          />
-          {errors.fullName && (
-            <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
-              {errors.fullName.message}
-            </p>
-          )}
-        </div>
+        {isPsgInvite ? (
+          <div>
+            <label
+              htmlFor="codename"
+              className="block text-sm font-medium mb-2"
+              style={{ color: "var(--text)" }}
+            >
+              Codename
+            </label>
+            <input
+              id="codename"
+              type="text"
+              {...register("codename")}
+              placeholder="Falcon"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition"
+              style={{
+                background: "var(--bg)",
+                color: "var(--text)",
+                borderColor: "var(--border)",
+              }}
+              disabled={isLoading}
+            />
+            {errors.codename && (
+              <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
+                {errors.codename.message}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div>
+            <label
+              htmlFor="fullName"
+              className="block text-sm font-medium mb-2"
+              style={{ color: "var(--text)" }}
+            >
+              Full Name
+            </label>
+            <input
+              id="fullName"
+              type="text"
+              {...register("fullName")}
+              placeholder="Juan Dela Cruz"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition"
+              style={{
+                background: "var(--bg)",
+                color: "var(--text)",
+                borderColor: "var(--border)",
+              }}
+              disabled={isLoading}
+            />
+            {errors.fullName && (
+              <p className="mt-1 text-sm" style={{ color: "var(--danger)" }}>
+                {errors.fullName.message}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Email */}
         <div>

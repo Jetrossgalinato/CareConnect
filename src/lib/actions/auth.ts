@@ -71,7 +71,7 @@ export async function register(data: RegisterInput) {
     };
   }
 
-  const { email, password, fullName, schoolId, inviteToken } =
+  const { email, password, fullName, codename, schoolId, inviteToken } =
     validatedFields.data;
 
   let role: "student" | "psg_member" = "student";
@@ -95,6 +95,18 @@ export async function register(data: RegisterInput) {
     role = "psg_member";
   }
 
+  const profileDisplayName =
+    role === "psg_member" ? (codename || "").trim() : (fullName || "").trim();
+
+  if (profileDisplayName.length < 2) {
+    return {
+      error:
+        role === "psg_member"
+          ? "Codename is required"
+          : "Full name is required",
+    };
+  }
+
   // Sign up with Supabase
   const { data: authData, error: signUpError } = await supabase.auth.signUp({
     email,
@@ -102,6 +114,7 @@ export async function register(data: RegisterInput) {
     options: {
       data: {
         full_name: fullName,
+        codename,
         school_id: schoolId,
         role,
       },
@@ -119,7 +132,7 @@ export async function register(data: RegisterInput) {
     const { error: profileError } = await supabase.from("profiles").insert({
       id: authData.user.id,
       email,
-      full_name: fullName,
+      full_name: profileDisplayName,
       school_id: schoolId,
       role,
     });
