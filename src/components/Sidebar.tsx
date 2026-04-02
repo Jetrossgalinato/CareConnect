@@ -113,7 +113,7 @@ export function Sidebar({ userRole, className }: SidebarProps) {
         </h2>
       </div>
 
-      <nav className="space-y-1">
+      <nav className="space-y-4">
         {menus.map((item) => {
           const Icon = item.icon;
           const isActive =

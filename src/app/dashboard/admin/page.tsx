@@ -34,8 +34,9 @@ export default async function AdminPage() {
             </h1>
           </div>
           <p style={{ color: "var(--text-muted)" }}>
-            This admin landing page is ready. You can now add your custom admin
-            content here.
+            Oversee user accounts, monitor referral and session activity, and
+            review system reports and audit logs to keep operations secure and
+            efficient.
           </p>
         </section>
 
