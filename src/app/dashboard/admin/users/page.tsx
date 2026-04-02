@@ -20,7 +20,8 @@ import { UsersTable } from "./components/UsersTable";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { BlockPsgDialog } from "./components/BlockPsgDialog";
 import { DeleteStudentDialog } from "./components/DeleteStudentDialog";
-import { ArrowLeft, Download } from "lucide-react";
+import { InviteLinkDialog } from "./components/InviteLinkDialog";
+import { ArrowLeft, Download, Link as LinkIcon } from "lucide-react";
 
 const PAGE_SIZE = 10;
 
@@ -63,6 +64,10 @@ export default function UserManagementPage() {
     filteredUsers,
     loading,
     processing,
+    generatingInvite,
+    showInviteDialog,
+    inviteLink,
+    inviteExpiresAt,
     searchQuery,
     roleFilter,
     showEditDialog,
@@ -79,9 +84,12 @@ export default function UserManagementPage() {
     handleDeleteConfirm,
     handleBlockClick,
     handleBlockConfirm,
+    handleGeneratePsgInvite,
+    handleCopyInviteLink,
     closeEditDialog,
     closeDeleteDialog,
     closeBlockDialog,
+    closeInviteDialog,
   } = useUserManagement();
 
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
@@ -134,18 +142,32 @@ export default function UserManagementPage() {
               Manage system users, roles, and permissions
             </p>
           </div>
-          <button
-            onClick={handleExportPdf}
-            disabled={filteredUsers.length === 0}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{
-              background: "var(--primary-20)",
-              color: "var(--primary)",
-            }}
-          >
-            <Download className="w-4 h-4" />
-            Export PDF
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleGeneratePsgInvite}
+              disabled={generatingInvite}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                background: "var(--success-20)",
+                color: "var(--success)",
+              }}
+            >
+              <LinkIcon className="w-4 h-4" />
+              {generatingInvite ? "Generating..." : "Generate PSG Invite"}
+            </button>
+            <button
+              onClick={handleExportPdf}
+              disabled={filteredUsers.length === 0}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                background: "var(--primary-20)",
+                color: "var(--primary)",
+              }}
+            >
+              <Download className="w-4 h-4" />
+              Export PDF
+            </button>
+          </div>
         </div>
 
         <UsersFilters
@@ -258,6 +280,15 @@ export default function UserManagementPage() {
             processing={processing}
             onConfirm={handleDeleteConfirm}
             onClose={closeDeleteDialog}
+          />
+        )}
+
+        {showInviteDialog && (
+          <InviteLinkDialog
+            inviteLink={inviteLink}
+            inviteExpiresAt={inviteExpiresAt}
+            onCopy={handleCopyInviteLink}
+            onClose={closeInviteDialog}
           />
         )}
       </main>

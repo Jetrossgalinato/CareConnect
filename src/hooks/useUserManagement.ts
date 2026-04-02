@@ -7,6 +7,7 @@ import {
   blockPsgMember,
   unblockPsgMember,
   deleteUser,
+  generatePsgInviteLink,
 } from "@/actions/admin";
 import { useAlert } from "@/hooks/useAlert";
 import { filterUsers } from "@/lib/utils/admin-users";
@@ -31,6 +32,10 @@ export function useUserManagement() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [generatingInvite, setGeneratingInvite] = useState(false);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [inviteLink, setInviteLink] = useState("");
+  const [inviteExpiresAt, setInviteExpiresAt] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -63,6 +68,10 @@ export function useUserManagement() {
   const closeDeleteDialog = useCallback(() => {
     setShowDeleteDialog(false);
     setSelectedUser(null);
+  }, []);
+
+  const closeInviteDialog = useCallback(() => {
+    setShowInviteDialog(false);
   }, []);
 
   const loadUsers = useCallback(async () => {
@@ -267,10 +276,62 @@ export function useUserManagement() {
     }
   }, [closeDeleteDialog, loadUsers, selectedUser, showAlert]);
 
+  const handleGeneratePsgInvite = useCallback(async () => {
+    try {
+      setGeneratingInvite(true);
+      const result = await generatePsgInviteLink();
+
+      if (!result.success || !result.data) {
+        showAlert({
+          message: result.error || "Failed to generate PSG invite link",
+          type: "error",
+          duration: 5000,
+        });
+        return;
+      }
+
+      const { inviteLink, expiresAt } = result.data;
+      setInviteLink(inviteLink);
+      setInviteExpiresAt(expiresAt);
+      setShowInviteDialog(true);
+    } catch {
+      showAlert({
+        message: "An unexpected error occurred",
+        type: "error",
+        duration: 5000,
+      });
+    } finally {
+      setGeneratingInvite(false);
+    }
+  }, [showAlert]);
+
+  const handleCopyInviteLink = useCallback(async () => {
+    if (!inviteLink) return;
+
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      showAlert({
+        message: "Invite link copied to clipboard",
+        type: "success",
+        duration: 4000,
+      });
+    } catch {
+      showAlert({
+        message: "Failed to copy invite link",
+        type: "error",
+        duration: 4000,
+      });
+    }
+  }, [inviteLink, showAlert]);
+
   return {
     filteredUsers,
     loading,
     processing,
+    generatingInvite,
+    showInviteDialog,
+    inviteLink,
+    inviteExpiresAt,
     searchQuery,
     roleFilter,
     showEditDialog,
@@ -287,8 +348,11 @@ export function useUserManagement() {
     handleDeleteConfirm,
     handleBlockClick,
     handleBlockConfirm,
+    handleGeneratePsgInvite,
+    handleCopyInviteLink,
     closeEditDialog,
     closeDeleteDialog,
     closeBlockDialog,
+    closeInviteDialog,
   };
 }

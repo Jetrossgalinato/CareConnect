@@ -1,5 +1,6 @@
 "use server";
 
+import { createHash } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { type Profile } from "@/lib/utils/auth";
 import {
@@ -70,8 +71,29 @@ export async function register(data: RegisterInput) {
     };
   }
 
-  const { email, password, fullName, schoolId } = validatedFields.data;
-  const role = "student";
+  const { email, password, fullName, schoolId, inviteToken } =
+    validatedFields.data;
+
+  let role: "student" | "psg_member" = "student";
+
+  if (inviteToken) {
+    const tokenHash = createHash("sha256").update(inviteToken).digest("hex");
+    const { data: isInviteConsumed, error: inviteError } = await supabase.rpc(
+      "consume_psg_invite",
+      {
+        p_token_hash: tokenHash,
+        p_used_email: email,
+      },
+    );
+
+    if (inviteError || !isInviteConsumed) {
+      return {
+        error: "Invalid or expired PSG invite link",
+      };
+    }
+
+    role = "psg_member";
+  }
 
   // Sign up with Supabase
   const { data: authData, error: signUpError } = await supabase.auth.signUp({

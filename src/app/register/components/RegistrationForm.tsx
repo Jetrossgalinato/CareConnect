@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
@@ -13,6 +14,7 @@ export default function RegistrationForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
 
   const {
     register,
@@ -35,7 +37,12 @@ export default function RegistrationForm() {
     setIsLoading(true);
     setError(null);
 
-    const result = await registerAction(data);
+    const inviteToken = searchParams.get("invite") || undefined;
+
+    const result = await registerAction({
+      ...data,
+      ...(inviteToken ? { inviteToken } : {}),
+    });
     if (result?.error) {
       setError(result.error);
       setIsLoading(false);

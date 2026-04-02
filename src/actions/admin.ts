@@ -1,5 +1,6 @@
 "use server";
 
+import { createHash, randomBytes } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type {
@@ -319,6 +320,62 @@ export async function unblockPsgMember(userId: string) {
 
     revalidatePath("/dashboard/admin/users");
     return { success: true };
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
+export async function generatePsgInviteLink() {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin") {
+      return {
+        success: false,
+        error: "Only admins can generate PSG invite links",
+      };
+    }
+
+    const token = randomBytes(32).toString("hex");
+    const tokenHash = createHash("sha256").update(token).digest("hex");
+    const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+
+    const { error: inviteError } = await supabase.from("psg_invites").insert({
+      token_hash: tokenHash,
+      created_by: user.id,
+      expires_at: expiresAt,
+    });
+
+    if (inviteError) {
+      console.error("Generate PSG invite error:", inviteError);
+      return { success: false, error: "Failed to generate invite link" };
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const inviteLink = `${baseUrl}/register?invite=${encodeURIComponent(token)}`;
+
+    return {
+      success: true,
+      data: {
+        inviteLink,
+        expiresAt,
+      },
+    };
   } catch (error) {
     console.error("Unexpected error:", error);
     return { success: false, error: "An unexpected error occurred" };

@@ -43,6 +43,7 @@ export const registerSchema = z
       .string()
       .min(1, "School ID is required")
       .regex(/^[0-9]{3}-[0-9]{5}$/, "School ID must be in format: XXX-XXXXX"),
+    inviteToken: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
