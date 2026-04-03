@@ -6,6 +6,7 @@ import { useAlert } from "@/hooks/useAlert";
 import { decryptMessage } from "@/lib/encryption";
 import {
   getOrCreateConversation,
+  getStudentPsgMembers,
   getMessages,
   sendMessage,
   sendSystemMessage,
@@ -24,6 +25,12 @@ interface ChatWidgetProps {
   disabled?: boolean;
 }
 
+interface PsgMemberOption {
+  id: string;
+  full_name: string;
+  email: string;
+}
+
 export function ChatWidget({ disabled = false }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -34,6 +41,8 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
   const [sending, setSending] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [psgMembers, setPsgMembers] = useState<PsgMemberOption[]>([]);
+  const [selectedPsgMemberId, setSelectedPsgMemberId] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const assessmentStartedRef = useRef(false);
   const sentQuestionsRef = useRef<Set<number>>(new Set());
@@ -62,13 +71,21 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
     getCurrentUser();
   }, []);
 
-  // Load conversation and messages when chat opens
+  // Load PSG members when chat opens
   useEffect(() => {
-    if (isOpen && !conversationId) {
-      loadConversation();
+    if (isOpen && psgMembers.length === 0) {
+      loadPsgMembers();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+
+  // Load conversation for selected PSG member
+  useEffect(() => {
+    if (isOpen && selectedPsgMemberId) {
+      loadConversation(selectedPsgMemberId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, selectedPsgMemberId]);
 
   // Subscribe to real-time messages
   useEffect(() => {
@@ -76,7 +93,7 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
 
     console.log(
       "Setting up real-time subscription for conversation:",
-      conversationId
+      conversationId,
     );
 
     const supabase = createClient();
@@ -99,7 +116,7 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
               `
               *,
               sender:profiles!messages_sender_id_fkey(id, full_name, role, avatar_url)
-            `
+            `,
             )
             .eq("id", payload.new.id)
             .single();
@@ -120,7 +137,7 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
               loadUnreadCount();
             }
           }
-        }
+        },
       )
       .subscribe((status) => {
         console.log("Subscription status:", status);
@@ -183,7 +200,7 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
 
       setWaitingForAnswer(true);
     },
-    [conversationId, currentQuestionIndex]
+    [conversationId, currentQuestionIndex],
   );
 
   const completeAssessment = useCallback(async () => {
@@ -197,7 +214,7 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
     // Submit assessment
     const result = await submitCaseAssessment(
       conversationId,
-      assessmentResponses
+      assessmentResponses,
     );
 
     if (result.success) {
@@ -233,7 +250,7 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
       if (!["yes", "no"].includes(normalizedAnswer)) {
         await sendSystemMessage(
           conversationId,
-          "Please answer with 'yes' or 'no'."
+          "Please answer with 'yes' or 'no'.",
         );
         return;
       } // Store response
@@ -253,7 +270,7 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
         normalizedAnswer === currentQuestion.skipLogic.answer
       ) {
         const skipToIndex = CASE_ASSESSMENT_QUESTIONS.findIndex(
-          (q) => q.id === currentQuestion.skipLogic!.skipTo
+          (q) => q.id === currentQuestion.skipLogic!.skipTo,
         );
         if (skipToIndex !== -1) {
           setCurrentQuestionIndex(skipToIndex);
@@ -282,11 +299,20 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
       assessmentResponses,
       sendNextQuestion,
       completeAssessment,
-    ]
+    ],
   );
 
   const startAssessmentFlow = useCallback(async () => {
     if (!conversationId) {
+      if (!selectedPsgMemberId) {
+        showAlert({
+          type: "error",
+          message: "Please select a PSG member to start the assessment chat.",
+          duration: 4000,
+        });
+        return;
+      }
+
       // Wait for conversation to be created
       setTimeout(startAssessmentFlow, 500);
       return;
@@ -312,7 +338,7 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
       console.log("Sending first question...");
       sendNextQuestion();
     }, 1500);
-  }, [conversationId, sendNextQuestion]);
+  }, [conversationId, selectedPsgMemberId, sendNextQuestion, showAlert]);
 
   // Listen for assessment start event
   useEffect(() => {
@@ -332,7 +358,7 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
     return () => {
       window.removeEventListener(
         "openChatForAssessment",
-        handleOpenForAssessment
+        handleOpenForAssessment,
       );
     };
   }, []);
@@ -361,10 +387,23 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
     }
   };
 
-  const loadConversation = async () => {
+  const loadPsgMembers = async () => {
+    const result = await getStudentPsgMembers();
+    if (result.success && result.data) {
+      setPsgMembers(result.data);
+    } else {
+      showAlert({
+        type: "error",
+        message: result.error || "Failed to load PSG members",
+        duration: 3000,
+      });
+    }
+  };
+
+  const loadConversation = async (psgMemberId: string) => {
     setLoading(true);
     try {
-      const result = await getOrCreateConversation();
+      const result = await getOrCreateConversation(psgMemberId);
       if (result.success && result.data) {
         setConversationId(result.data.id);
         await loadMessages(result.data.id);
@@ -447,6 +486,13 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
 
   const handleMinimize = () => {
     setIsMinimized(true);
+  };
+
+  const handlePsgMemberChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    setSelectedPsgMemberId(selectedId);
+    setConversationId(null);
+    setMessages([]);
   };
 
   const formatTime = (dateStr: string) => {
@@ -563,6 +609,45 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
 
           {!isMinimized && (
             <>
+              <div
+                className="px-4 py-3 border-b"
+                style={{
+                  background: "var(--bg-light)",
+                  borderColor: "var(--border-muted)",
+                }}
+              >
+                <label
+                  htmlFor="psg-member-select"
+                  className="block text-xs font-medium mb-1"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Select PSG member
+                </label>
+                <select
+                  id="psg-member-select"
+                  value={selectedPsgMemberId}
+                  onChange={handlePsgMemberChange}
+                  className="w-full px-3 py-2 rounded-lg border text-sm focus:ring-2 focus:border-transparent outline-none"
+                  style={{
+                    background: "var(--bg)",
+                    color: "var(--text)",
+                    borderColor: "var(--border)",
+                  }}
+                  disabled={loading || psgMembers.length === 0}
+                >
+                  <option value="" disabled>
+                    {psgMembers.length === 0
+                      ? "No PSG members available"
+                      : "Choose a PSG member"}
+                  </option>
+                  {psgMembers.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.full_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Messages Area */}
               <div
                 className="flex-1 overflow-y-auto p-4 space-y-4"
@@ -585,7 +670,9 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
                       className="text-sm"
                       style={{ color: "var(--text-muted)" }}
                     >
-                      Start a conversation with our support team
+                      {selectedPsgMemberId
+                        ? "Start your conversation with the selected PSG member"
+                        : "Select a PSG member to start chatting"}
                     </p>
                   </div>
                 ) : (
@@ -622,7 +709,7 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
                           >
                             {isOwn
                               ? message.sender?.full_name || "You"
-                              : "PSG Member"}
+                              : message.sender?.full_name || "PSG Member"}
                           </p>
                           <div
                             className={`inline-block p-3 rounded-lg max-w-[80%] shadow-[0_1px_2px_rgba(0,0,0,0.1)] ${
@@ -639,11 +726,11 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
                               {message.sender_id === null
                                 ? message.content
                                 : conversationId
-                                ? decryptMessage(
-                                    message.content,
-                                    conversationId
-                                  )
-                                : message.content}
+                                  ? decryptMessage(
+                                      message.content,
+                                      conversationId,
+                                    )
+                                  : message.content}
                             </p>
                           </div>
                           <p
@@ -673,7 +760,11 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Type your message..."
+                    placeholder={
+                      selectedPsgMemberId
+                        ? "Type your message..."
+                        : "Select a PSG member first"
+                    }
                     rows={2}
                     className="flex-1 px-3 py-2 rounded-lg border resize-none focus:ring-2 focus:border-transparent outline-none text-sm"
                     style={{
@@ -681,11 +772,16 @@ export function ChatWidget({ disabled = false }: ChatWidgetProps) {
                       color: "var(--text)",
                       borderColor: "var(--border)",
                     }}
-                    disabled={sending || loading}
+                    disabled={sending || loading || !selectedPsgMemberId}
                   />
                   <button
                     onClick={handleSendMessage}
-                    disabled={!newMessage.trim() || sending || loading}
+                    disabled={
+                      !newMessage.trim() ||
+                      sending ||
+                      loading ||
+                      !selectedPsgMemberId
+                    }
                     className="px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_1px_2px_rgba(0,0,0,0.15)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
                     style={{
                       background: "var(--primary)",
