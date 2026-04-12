@@ -139,7 +139,7 @@ export default async function DashboardPage() {
   const roleBanner = isStudent ? STUDENT_BANNER : PSG_BANNER;
 
   return (
-    <DashboardClientWrapper>
+    <DashboardClientWrapper initialRole={user.role}>
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
         <DashboardNavbar subtitle={`Welcome back, ${user.full_name}`} />
 

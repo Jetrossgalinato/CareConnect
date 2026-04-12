@@ -9,15 +9,79 @@ import type {
   MessageWithSender,
 } from "@/types/messages";
 
+type PsgMemberOption = {
+  id: string;
+  full_name: string;
+  email: string;
+};
+
 type ActionResponse<T = unknown> = {
   success: boolean;
   data?: T;
   error?: string;
 };
 
-// Get or create conversation for student
-export async function getOrCreateConversation(): Promise<
-  ActionResponse<Conversation>
+// Get or create conversation for student with selected PSG member
+export async function getOrCreateConversation(
+  psgMemberId: string,
+): Promise<ActionResponse<Conversation>> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    if (!psgMemberId) {
+      return { success: false, error: "PSG member is required" };
+    }
+
+    // Check if conversation exists for this student + PSG pair
+    const { data: existingConversation, error: fetchError } = await supabase
+      .from("conversations")
+      .select("*")
+      .eq("student_id", user.id)
+      .eq("psg_member_id", psgMemberId)
+      .single();
+
+    if (fetchError && fetchError.code !== "PGRST116") {
+      console.error("Error fetching conversation:", fetchError);
+      return { success: false, error: "Failed to load conversation" };
+    }
+
+    if (existingConversation) {
+      return { success: true, data: existingConversation };
+    }
+
+    // Create new conversation
+    const { data: newConversation, error: createError } = await supabase
+      .from("conversations")
+      .insert({
+        student_id: user.id,
+        psg_member_id: psgMemberId,
+      })
+      .select()
+      .single();
+
+    if (createError) {
+      console.error("Error creating conversation:", createError);
+      return { success: false, error: "Failed to create conversation" };
+    }
+
+    return { success: true, data: newConversation };
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
+// Get PSG members that students can start a conversation with
+export async function getStudentPsgMembers(): Promise<
+  ActionResponse<PsgMemberOption[]>
 > {
   try {
     const supabase = await createClient();
@@ -30,32 +94,19 @@ export async function getOrCreateConversation(): Promise<
       return { success: false, error: "Authentication required" };
     }
 
-    // Check if conversation exists
-    const { data: existingConversation, error: fetchError } = await supabase
-      .from("conversations")
-      .select("*")
-      .eq("student_id", user.id)
-      .single();
+    const { data: psgMembers, error } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .eq("role", "psg_member")
+      .eq("is_blocked", false)
+      .order("full_name", { ascending: true });
 
-    if (existingConversation) {
-      return { success: true, data: existingConversation };
+    if (error) {
+      console.error("Error fetching PSG members:", error);
+      return { success: false, error: "Failed to load PSG members" };
     }
 
-    // Create new conversation
-    const { data: newConversation, error: createError } = await supabase
-      .from("conversations")
-      .insert({
-        student_id: user.id,
-      })
-      .select()
-      .single();
-
-    if (createError) {
-      console.error("Error creating conversation:", createError);
-      return { success: false, error: "Failed to create conversation" };
-    }
-
-    return { success: true, data: newConversation };
+    return { success: true, data: psgMembers || [] };
   } catch (error) {
     console.error("Unexpected error:", error);
     return { success: false, error: "An unexpected error occurred" };
@@ -84,7 +135,7 @@ export async function getConversations(): Promise<
         *,
         student:profiles!conversations_student_id_fkey(id, full_name, school_id, avatar_url),
         psg_member:profiles!conversations_psg_member_id_fkey(id, full_name, email, avatar_url)
-      `
+      `,
       )
       .order("last_message_at", { ascending: false });
 
@@ -102,11 +153,11 @@ export async function getConversations(): Promise<
           .eq("conversation_id", conv.id);
 
         return count && count > 0 ? conv : null;
-      })
+      }),
     );
 
     const filteredConversations = conversationsWithMessages.filter(
-      (conv) => conv !== null
+      (conv) => conv !== null,
     ) as ConversationWithProfiles[];
 
     return { success: true, data: filteredConversations };
@@ -118,7 +169,7 @@ export async function getConversations(): Promise<
 
 // Get messages for a conversation
 export async function getMessages(
-  conversationId: string
+  conversationId: string,
 ): Promise<ActionResponse<MessageWithSender[]>> {
   try {
     const supabase = await createClient();
@@ -137,7 +188,7 @@ export async function getMessages(
         `
         *,
         sender:profiles!messages_sender_id_fkey(id, full_name, role, avatar_url)
-      `
+      `,
       )
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: true });
@@ -157,7 +208,7 @@ export async function getMessages(
 // Send a message
 export async function sendMessage(
   conversationId: string,
-  content: string
+  content: string,
 ): Promise<ActionResponse<Message>> {
   try {
     const supabase = await createClient();
@@ -197,7 +248,7 @@ export async function sendMessage(
     if (error) {
       console.error(
         "Error sending message - Full error:",
-        JSON.stringify(error, null, 2)
+        JSON.stringify(error, null, 2),
       );
       console.error("Error code:", error.code);
       console.error("Error message:", error.message);
@@ -218,7 +269,7 @@ export async function sendMessage(
 // Send a system message (for assessment questions, not encrypted)
 export async function sendSystemMessage(
   conversationId: string,
-  content: string
+  content: string,
 ): Promise<ActionResponse<Message>> {
   try {
     const supabase = await createClient();
@@ -259,7 +310,7 @@ export async function sendSystemMessage(
 
 // Mark messages as read
 export async function markMessagesAsRead(
-  conversationId: string
+  conversationId: string,
 ): Promise<ActionResponse> {
   try {
     const supabase = await createClient();
@@ -304,22 +355,30 @@ export async function getUnreadCount(): Promise<ActionResponse<number>> {
       return { success: false, error: "Authentication required" };
     }
 
-    // Get user's conversation
-    const { data: conversation } = await supabase
+    // Get user's conversations
+    const { data: conversations, error: conversationsError } = await supabase
       .from("conversations")
       .select("id")
-      .eq("student_id", user.id)
-      .single();
+      .eq("student_id", user.id);
 
-    if (!conversation) {
+    if (conversationsError) {
+      console.error("Error fetching conversations:", conversationsError);
+      return { success: false, error: "Failed to load conversations" };
+    }
+
+    const conversationIds = (conversations || []).map(
+      (conversation) => conversation.id,
+    );
+
+    if (conversationIds.length === 0) {
       return { success: true, data: 0 };
     }
 
-    // Count unread messages
+    // Count unread messages across all student conversations
     const { count, error } = await supabase
       .from("messages")
       .select("*", { count: "exact", head: true })
-      .eq("conversation_id", conversation.id)
+      .in("conversation_id", conversationIds)
       .neq("sender_id", user.id)
       .is("read_at", null);
 
@@ -350,14 +409,22 @@ export async function hasExistingConversation(): Promise<
       return { success: false, error: "Authentication required" };
     }
 
-    // Check if conversation exists
-    const { data: conversation } = await supabase
+    // Check if at least one conversation exists
+    const { data: conversations, error: conversationsError } = await supabase
       .from("conversations")
       .select("id")
       .eq("student_id", user.id)
-      .maybeSingle();
+      .limit(1);
 
-    return { success: true, data: !!conversation };
+    if (conversationsError) {
+      console.error(
+        "Error checking existing conversation:",
+        conversationsError,
+      );
+      return { success: false, error: "Failed to check conversations" };
+    }
+
+    return { success: true, data: (conversations?.length || 0) > 0 };
   } catch (error) {
     console.error("Unexpected error:", error);
     return { success: false, error: "An unexpected error occurred" };

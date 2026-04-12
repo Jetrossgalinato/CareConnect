@@ -4,16 +4,15 @@ import { createClient } from "@/lib/supabase/client";
 import { DashboardLoginAlert } from "@/components/DashboardLoginAlert";
 import { ChatWidget } from "@/components/ChatWidget";
 import { ChatWidgetPSG } from "@/components/ChatWidgetPSG";
-import { hasExistingConversation } from "@/actions/messages";
 
 export function DashboardClientWrapper({
   children,
+  initialRole,
 }: {
   children: React.ReactNode;
+  initialRole?: string | null;
 }) {
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [hasCaseAssessment, setHasCaseAssessment] = useState(false);
-  const [hasConversation, setHasConversation] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(initialRole ?? null);
 
   useEffect(() => {
     const getUserRole = async () => {
@@ -23,6 +22,16 @@ export function DashboardClientWrapper({
       } = await supabase.auth.getUser();
 
       if (user) {
+        // Fast fallback so chat renders even if profile query is delayed/fails.
+        const metadataRole = user.user_metadata?.role;
+        if (
+          metadataRole === "student" ||
+          metadataRole === "psg_member" ||
+          metadataRole === "admin"
+        ) {
+          setUserRole(metadataRole);
+        }
+
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
@@ -31,14 +40,6 @@ export function DashboardClientWrapper({
 
         if (profile) {
           setUserRole(profile.role);
-
-          // Check if student has existing conversation
-          if (profile.role === "student") {
-            const result = await hasExistingConversation();
-            if (result.success && result.data) {
-              setHasConversation(true);
-            }
-          }
         }
       }
     };
@@ -46,34 +47,11 @@ export function DashboardClientWrapper({
     getUserRole();
   }, []);
 
-  useEffect(() => {
-    // Check if student has started case assessment and listen for changes
-    const handleStorageChange = () => {
-      const status = sessionStorage.getItem("hasCaseAssessment");
-      setHasCaseAssessment(status === "true");
-    };
-
-    // Initial check
-    handleStorageChange();
-
-    window.addEventListener("storage", handleStorageChange);
-    // Also listen for custom event from same page
-    window.addEventListener("caseAssessmentChanged", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("caseAssessmentChanged", handleStorageChange);
-    };
-  }, []);
-
-  // Chat is enabled if student has case assessment OR has existing conversation
-  const isChatEnabled = hasCaseAssessment || hasConversation;
-
   return (
     <>
       <DashboardLoginAlert />
       {children}
-      {userRole === "student" && <ChatWidget disabled={!isChatEnabled} />}
+      {userRole === "student" && <ChatWidget />}
       {(userRole === "psg_member" || userRole === "admin") && <ChatWidgetPSG />}
     </>
   );

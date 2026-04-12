@@ -5,6 +5,7 @@ import Image from "next/image";
 import { LogoutButton } from "@/components/LogoutButton";
 import { ThemeToggler } from "@/components/ThemeToggler";
 import { Home } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface DashboardNavbarProps {
   title?: string;
@@ -23,11 +24,16 @@ export function DashboardNavbar({
     <header
       style={{
         background: "var(--bg-dark)",
-        boxShadow: "0 2px 16px 0 var(--border-muted)",
+        boxShadow: "none",
       }}
+      className="sticky top-0 z-50 md:-ml-64 md:w-[calc(100%+16rem)]"
     >
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
+          <SidebarTrigger
+            className="md:hidden"
+            style={{ color: "var(--text)" }}
+          />
           <Image
             src="/logo.jpeg"
             alt="CareConnect Logo"
