@@ -160,7 +160,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    background: var(--bg);
+  }
   body {
-    @apply bg-background text-foreground;
+    background: var(--bg);
+    color: var(--text);
   }
 }

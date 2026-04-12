@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -19,6 +20,17 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import type { UserRole } from "@/lib/utils/auth";
+import {
+  Sidebar as ShadcnSidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
 
 type SidebarProps = {
   userRole?: UserRole;
@@ -90,6 +102,7 @@ function getMenusByRole(role: UserRole): SidebarMenuItem[] {
 export function Sidebar({ userRole, className }: SidebarProps) {
   const pathname = usePathname();
   const { profile } = useAuth();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const role = userRole ?? profile?.role;
   if (!role) return null;
@@ -97,48 +110,59 @@ export function Sidebar({ userRole, className }: SidebarProps) {
   const menus = getMenusByRole(role);
 
   return (
-    <aside
-      className={cn("w-72 min-h-screen p-4 border-r", className)}
-      style={{
-        background: "var(--bg-light)",
-        borderColor: "var(--border-muted)",
-      }}
+    <ShadcnSidebar
+      className={cn(
+        "top-20 h-[calc(100svh-5rem)] group-data-[side=left]:border-none group-data-[side=right]:border-none",
+        className,
+      )}
+      style={
+        {
+          "--sidebar": "var(--bg-light)",
+          "--sidebar-foreground": "var(--text)",
+          "--sidebar-accent": "var(--primary-20)",
+          "--sidebar-accent-foreground": "var(--primary)",
+          "--sidebar-border": "var(--border-muted)",
+        } as CSSProperties
+      }
+      collapsible="offcanvas"
     >
-      <div className="mb-4">
-        <h2
-          className="text-sm font-semibold"
-          style={{ color: "var(--text-muted)" }}
-        >
-          Menu
-        </h2>
-      </div>
+      <SidebarContent className="pt-4">
+        <SidebarGroup>
+          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {menus.map((item) => {
+                const Icon = item.icon;
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== "/dashboard" &&
+                    pathname.startsWith(item.href));
 
-      <nav className="space-y-4">
-        {menus.map((item) => {
-          const Icon = item.icon;
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/dashboard" && pathname.startsWith(item.href));
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
-                isActive ? "font-medium" : "",
-              )}
-              style={{
-                background: isActive ? "var(--primary-20)" : "transparent",
-                color: isActive ? "var(--primary)" : "var(--text)",
-              }}
-            >
-              <Icon className="w-4 h-4" />
-              <span className="text-sm">{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.label}
+                      className="h-10 rounded-lg text-[color:var(--text)] hover:bg-[var(--primary-20)] hover:text-[color:var(--primary)] data-[active=true]:bg-[var(--primary-20)] data-[active=true]:text-[color:var(--primary)]"
+                    >
+                      <Link
+                        href={item.href}
+                        onClick={() => {
+                          if (isMobile) setOpenMobile(false);
+                        }}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </ShadcnSidebar>
   );
 }
