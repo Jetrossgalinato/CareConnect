@@ -25,6 +25,7 @@ export function DashboardNavbar({
         background: "var(--bg-dark)",
         boxShadow: "0 2px 16px 0 var(--border-muted)",
       }}
+      className="sticky top-0 z-50"
     >
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
