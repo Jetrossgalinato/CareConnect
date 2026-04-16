@@ -1,6 +1,6 @@
 "use server";
 
-import { createHash } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { type Profile } from "@/lib/utils/auth";
 import {
@@ -57,7 +57,10 @@ export async function login(data: LoginInput) {
   }
 
   revalidatePath("/", "layout");
-  redirect(isAdmin ? "/dashboard/admin" : "/dashboard");
+
+  const loginToken = randomUUID();
+  const targetPath = isAdmin ? "/dashboard/admin" : "/dashboard";
+  redirect(`${targetPath}?loginToken=${loginToken}`);
 }
 
 export async function register(data: RegisterInput) {

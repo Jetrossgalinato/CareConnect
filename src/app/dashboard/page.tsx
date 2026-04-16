@@ -115,7 +115,11 @@ function StudentTipsSection() {
   );
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: { loginToken?: string | string[] };
+}) {
   const user = await getUser();
 
   if (!user) {
@@ -137,9 +141,17 @@ export default async function DashboardPage() {
     ? "Get Started - Choose What You Need"
     : "Quick Access";
   const roleBanner = isStudent ? STUDENT_BANNER : PSG_BANNER;
+  const loginToken = Array.isArray(searchParams?.loginToken)
+    ? searchParams?.loginToken[0]
+    : searchParams?.loginToken;
 
   return (
-    <DashboardClientWrapper initialRole={user.role}>
+    <DashboardClientWrapper
+      initialRole={user.role}
+      showStudentOnboarding={isStudent}
+      loginToken={loginToken}
+      studentName={user.full_name}
+    >
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
         <DashboardNavbar subtitle={`Welcome back, ${user.full_name}`} />
 
