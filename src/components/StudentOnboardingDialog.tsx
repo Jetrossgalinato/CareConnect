@@ -312,7 +312,7 @@ export function StudentOnboardingDialog({
                 variant="outline"
                 onClick={goToPreviousStep}
                 disabled={isFirstStep}
-                className="sm:min-w-36"
+                className="sm:min-w-36 text-background"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Previous
