@@ -38,7 +38,7 @@
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent-foreground: oklch(95.514% 0.00011 271.152);
   --destructive: oklch(0.577 0.245 27.325);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -83,6 +83,7 @@
   --info-bg: hsl(217 70% 90%);
   --primary-20: hsl(111 33% 90%);
   --auth-image-filter: brightness(1);
+  --accent-foreground: oklch(0.205 0 0);
 }
 
 @theme inline {
