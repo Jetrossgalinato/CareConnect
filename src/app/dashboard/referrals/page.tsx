@@ -3,25 +3,7 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/actions/auth";
 import Link from "next/link";
 import { FileText } from "lucide-react";
-import {
-  REFERRAL_STATUS_LABELS,
-  SEVERITY_LABELS,
-  SEVERITY_COLORS,
-  ReferralStatus,
-} from "@/types/referrals";
-
-// Utility functions
-const getStatusColor = (status: ReferralStatus): string => {
-  const colors: Record<ReferralStatus, string> = {
-    pending: "var(--warning)",
-    reviewed: "var(--info)",
-    assigned: "var(--primary)",
-    in_progress: "var(--primary)",
-    completed: "var(--success)",
-    escalated: "var(--error)",
-  };
-  return colors[status];
-};
+import { StudentReferralsListClient } from "@/components/student/StudentReferralsListClient";
 
 export default async function StudentReferralsPage() {
   const user = await getUser();
@@ -101,88 +83,7 @@ export default async function StudentReferralsPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
-            {referrals.map((referral) => {
-              const statusColor = getStatusColor(referral.status);
-              const severityColor = referral.severity
-                ? SEVERITY_COLORS[referral.severity]
-                : null;
-
-              return (
-                <Link
-                  key={referral.id}
-                  href={`/dashboard/referrals/${referral.id}`}
-                  className="block rounded-lg p-6 transition-all hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
-                  style={{
-                    background: "var(--bg-light)",
-                    border: "1px solid var(--border-muted)",
-                    boxShadow:
-                      "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.015)",
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span
-                          className="text-xs font-semibold px-2 py-1 rounded"
-                          style={{
-                            background: `${statusColor}20`,
-                            color: statusColor,
-                          }}
-                        >
-                          {REFERRAL_STATUS_LABELS[referral.status]}
-                        </span>
-                        {severityColor && referral.severity && (
-                          <span
-                            className="text-xs font-semibold px-2 py-1 rounded"
-                            style={{
-                              background: `${severityColor}20`,
-                              color: severityColor,
-                            }}
-                          >
-                            {SEVERITY_LABELS[referral.severity]}
-                          </span>
-                        )}
-                      </div>
-                      <p
-                        className="text-sm font-medium mb-1"
-                        style={{ color: "var(--text)" }}
-                      >
-                        {referral.reason}
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Submitted on{" "}
-                        {new Date(referral.created_at).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          },
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  {referral.assigned_psg_member && (
-                    <div
-                      className="pt-4 mt-4 text-xs"
-                      style={{
-                        borderTop: "1px solid var(--border-muted)",
-                        color: "var(--text-muted)",
-                      }}
-                    >
-                      <strong>Assigned PSG Member:</strong>{" "}
-                      {referral.assigned_psg_member.codename?.trim() || "N/A"}
-                    </div>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
+          <StudentReferralsListClient referrals={referrals} />
         )}
       </main>
     </div>

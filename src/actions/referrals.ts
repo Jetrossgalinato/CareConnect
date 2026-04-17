@@ -284,6 +284,78 @@ export async function getStudentReferrals(
   }
 }
 
+export async function getStudentReferralAppointmentDetails(
+  referralId: string,
+): Promise<
+  ActionResponse<{
+    id: string;
+    appointment_date: string;
+    location_type: "online" | "in_person" | null;
+    meeting_link: string | null;
+    notes: string | null;
+    status: string;
+  } | null>
+> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const { data: referral, error: referralError } = await supabase
+      .from("referrals")
+      .select("id, student_id, assigned_psg_member_id, reviewed_by")
+      .eq("id", referralId)
+      .single();
+
+    if (referralError || !referral) {
+      return { success: false, error: "Referral not found" };
+    }
+
+    if (referral.student_id !== user.id) {
+      return { success: false, error: "Unauthorized access" };
+    }
+
+    const psgMemberId = referral.assigned_psg_member_id || referral.reviewed_by;
+
+    if (!psgMemberId) {
+      return { success: true, data: null };
+    }
+
+    const { data: appointment, error: appointmentError } = await supabase
+      .from("appointments")
+      .select(
+        "id, appointment_date, location_type, meeting_link, notes, status",
+      )
+      .eq("student_id", user.id)
+      .eq("psg_member_id", psgMemberId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (appointmentError) {
+      console.error(
+        "Error fetching appointment details for referral:",
+        appointmentError,
+      );
+      return { success: false, error: appointmentError.message };
+    }
+
+    return { success: true, data: appointment ?? null };
+  } catch (error) {
+    console.error(
+      "Unexpected error fetching student referral appointment details:",
+      error,
+    );
+    return { success: false, error: "Failed to fetch appointment details" };
+  }
+}
+
 // Get single referral details
 export async function getReferralById(
   referralId: string,
