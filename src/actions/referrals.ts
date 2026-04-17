@@ -120,6 +120,47 @@ export async function getAllReferrals(): Promise<
   }
 }
 
+// Get referrals for the currently authenticated PSG/Admin user
+export async function getCurrentUserReferralsView(): Promise<
+  ActionResponse<ReferralWithProfiles[]>
+> {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: "Please login first" };
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return { success: false, error: "Unable to verify user role" };
+    }
+
+    if (profile.role === "admin") {
+      return await getAllReferrals();
+    }
+
+    if (profile.role === "psg_member") {
+      return await getPSGAssignedReferrals(user.id);
+    }
+
+    return { success: false, error: "Unauthorized access" };
+  } catch (error) {
+    console.error("Unexpected error loading current user referrals:", error);
+    return { success: false, error: "Failed to fetch referrals" };
+  }
+}
+
 // Get referrals for a specific PSG member (assigned to them OR unassigned)
 export async function getPSGAssignedReferrals(
   psgMemberId: string,

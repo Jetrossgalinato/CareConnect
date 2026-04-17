@@ -7,7 +7,7 @@ import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
 import { useAlert } from "@/hooks/useAlert";
 import { createClient } from "@/lib/supabase/client";
-import { getAllReferrals, getPSGAssignedReferrals } from "@/actions/referrals";
+import { getCurrentUserReferralsView } from "@/actions/referrals";
 import {
   ReferralWithProfiles,
   ReferralStatus,
@@ -17,64 +17,201 @@ import {
 } from "@/types/referrals";
 import { User, Calendar, FileText, Filter } from "lucide-react";
 
+async function withTimeout<T>(
+  promiseLike: PromiseLike<T>,
+  timeoutMs: number,
+  message: string,
+): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      Promise.resolve(promiseLike),
+      new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(message));
+        }, timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
+}
+
 export default function PSGReferralsPage() {
   const router = useRouter();
   const { showAlert } = useAlert();
   const [referrals, setReferrals] = useState<ReferralWithProfiles[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadTimedOut, setLoadTimedOut] = useState(false);
+  const [loadPhase, setLoadPhase] = useState<
+    "idle" | "referrals" | "auth" | "profile" | "fallback" | "done"
+  >("idle");
+  const [diagnostics, setDiagnostics] = useState<{
+    referralsMs: number;
+    authMs: number;
+    profileMs: number;
+    fallbackMs: number;
+    totalMs: number;
+    failedPhase?: string;
+  } | null>(null);
   const [filter, setFilter] = useState<"all" | ReferralStatus>("all");
 
   const loadUserAndReferrals = async () => {
+    setLoading(true);
+    setLoadTimedOut(false);
+    setLoadPhase("referrals");
+
+    const runStart = performance.now();
+    let referralsMs = 0;
+    const authMs = 0;
+    const profileMs = 0;
+    let fallbackMs = 0;
+    let fastPathError: unknown = null;
+    let currentPhase: "referrals" | "auth" | "profile" | "fallback" =
+      "referrals";
+
     try {
       const supabase = createClient();
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
+      try {
+        const referralsStart = performance.now();
+        const referralsResult = await withTimeout(
+          Promise.resolve(
+            supabase
+              .from("referrals")
+              .select(
+                `
+                *,
+                student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
+                assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
+                reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
+              `,
+              )
+              .order("created_at", { ascending: false }),
+          ),
+          7000,
+          "Loading referrals timed out",
+        );
+        referralsMs = Math.round(performance.now() - referralsStart);
 
-      if (authError || !user) {
-        showAlert({
-          message: "Please login first",
-          type: "error",
-          duration: 5000,
-        });
-        router.push("/login");
-        return;
+        if (!referralsResult.error && referralsResult.data) {
+          setReferrals(referralsResult.data as ReferralWithProfiles[]);
+          const totalMs = Math.round(performance.now() - runStart);
+          setDiagnostics({
+            referralsMs,
+            authMs,
+            profileMs,
+            fallbackMs,
+            totalMs,
+          });
+          setLoadPhase("done");
+          if (process.env.NODE_ENV !== "production") {
+            console.info("[PSG Referrals] Load timings", {
+              source: "client_query",
+              referralsMs,
+              totalMs,
+              count: referralsResult.data.length,
+            });
+          }
+          return;
+        }
+
+        fastPathError = referralsResult.error;
+      } catch (error) {
+        fastPathError = error;
+        referralsMs = Math.round(performance.now() - runStart);
       }
 
-      // Check user role
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      if (profile?.role !== "psg_member" && profile?.role !== "admin") {
-        showAlert({
-          message: "Unauthorized access",
-          type: "error",
-          duration: 5000,
+      if (fastPathError && process.env.NODE_ENV !== "production") {
+        console.warn("[PSG Referrals] Fast path failed, using fallback", {
+          error: fastPathError,
+          referralsMs,
         });
-        router.push("/dashboard");
-        return;
       }
 
-      const result =
-        profile?.role === "admin"
-          ? await getAllReferrals()
-          : await getPSGAssignedReferrals(user.id);
+      // Fallback path: preserve old behavior for compatibility/debugging.
+      currentPhase = "fallback";
+      setLoadPhase("fallback");
+      const fallbackStart = performance.now();
+      const result = await withTimeout(
+        Promise.resolve(getCurrentUserReferralsView()),
+        10000,
+        "Server fallback timed out",
+      );
+      fallbackMs = Math.round(performance.now() - fallbackStart);
 
       if (result.success && result.data) {
         setReferrals(result.data);
-      } else {
-        showAlert({
-          message: result.error || "Failed to load referrals",
-          type: "error",
-          duration: 5000,
+        const totalMs = Math.round(performance.now() - runStart);
+        setDiagnostics({
+          referralsMs,
+          authMs,
+          profileMs,
+          fallbackMs,
+          totalMs,
         });
+        setLoadPhase("done");
+        if (process.env.NODE_ENV !== "production") {
+          console.info("[PSG Referrals] Load timings", {
+            source: "server_action_fallback",
+            fastPathError,
+            referralsMs,
+            authMs,
+            profileMs,
+            fallbackMs,
+            totalMs,
+            count: result.data.length,
+          });
+        }
+      } else {
+        if (result.error === "Please login first") {
+          showAlert({
+            message: "Please login first",
+            type: "error",
+            duration: 5000,
+          });
+          router.push("/login");
+          return;
+        }
+
+        if (result.error === "Unauthorized access") {
+          showAlert({
+            message: "Unauthorized access",
+            type: "error",
+            duration: 5000,
+          });
+          router.push("/dashboard");
+          return;
+        }
+
+        throw new Error(result.error || "Failed to load referrals");
       }
     } catch (error) {
+      const totalMs = Math.round(performance.now() - runStart);
+      setDiagnostics({
+        referralsMs,
+        authMs,
+        profileMs,
+        fallbackMs,
+        totalMs,
+        failedPhase: currentPhase,
+      });
+
       console.error("Error loading referrals:", error);
+      if (process.env.NODE_ENV !== "production") {
+        console.error("[PSG Referrals] Load failed", {
+          error,
+          currentPhase,
+          referralsMs,
+          authMs,
+          profileMs,
+          fallbackMs,
+          totalMs,
+        });
+      }
+
       showAlert({
         message: "An unexpected error occurred",
         type: "error",
@@ -89,6 +226,24 @@ export default function PSGReferralsPage() {
     loadUserAndReferrals();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      return;
+    }
+
+    const watchdogId = setTimeout(() => {
+      setLoadTimedOut(true);
+      setLoading(false);
+      showAlert({
+        message: `Loading took too long during ${loadPhase}. Please try again.`,
+        type: "error",
+        duration: 5000,
+      });
+    }, 12000);
+
+    return () => clearTimeout(watchdogId);
+  }, [loading, showAlert, loadPhase]);
 
   const filteredReferrals =
     filter === "all"
@@ -275,7 +430,37 @@ export default function PSGReferralsPage() {
                   className="mx-auto mb-4"
                   style={{ color: "var(--text-muted)" }}
                 />
-                <p style={{ color: "var(--text-muted)" }}>No referrals found</p>
+                <p style={{ color: "var(--text-muted)" }}>
+                  {loadTimedOut
+                    ? "Could not finish loading referrals"
+                    : "No referrals found"}
+                </p>
+                {loadTimedOut && (
+                  <>
+                    {diagnostics && (
+                      <p
+                        className="mt-2 text-xs"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        Slow phase: {diagnostics.failedPhase || loadPhase} •
+                        query {diagnostics.referralsMs}ms • auth{" "}
+                        {diagnostics.authMs}ms • profile {diagnostics.profileMs}
+                        ms • fallback {diagnostics.fallbackMs}ms • total{" "}
+                        {diagnostics.totalMs}ms
+                      </p>
+                    )}
+                    <button
+                      onClick={loadUserAndReferrals}
+                      className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition"
+                      style={{
+                        background: "var(--primary)",
+                        color: "var(--bg-dark)",
+                      }}
+                    >
+                      Retry Loading
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               filteredReferrals.map((referral) => (
