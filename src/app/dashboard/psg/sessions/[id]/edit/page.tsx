@@ -27,7 +27,7 @@ export default async function EditSessionPage({
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar subtitle="Edit Session Documentation" />
+      <DashboardNavbar subtitle="Welcome back, PSG Member" />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}

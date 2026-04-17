@@ -36,7 +36,7 @@ export default async function PSGSessionsPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar subtitle="Session Documentation & History" />
+      <DashboardNavbar subtitle="Welcome back, PSG Member" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}

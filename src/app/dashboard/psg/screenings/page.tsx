@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
+import { Loader } from "@/components/Loader";
 import { AlertCircle, CheckCircle, Clock, Eye } from "lucide-react";
 import { ScreeningResult } from "@/lib/types/screening";
 import { getScreeningResults } from "@/lib/actions/screening";
@@ -51,7 +52,7 @@ export default function PSGScreeningsPage() {
   const screeningNumbers = new Map<string, number>();
   const allScreeningsSortedByDate = [...screenings].sort(
     (a, b) =>
-      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
   );
   allScreeningsSortedByDate.forEach((screening, index) => {
     screeningNumbers.set(screening.id, index + 1);
@@ -64,7 +65,7 @@ export default function PSGScreeningsPage() {
 
   const pendingCount = screenings.filter((s) => !s.reviewed_at).length;
   const highRiskCount = screenings.filter(
-    (s) => s.color_code === "red" && !s.reviewed_at
+    (s) => s.color_code === "red" && !s.reviewed_at,
   ).length;
   const reviewedCount = screenings.filter((s) => !!s.reviewed_at).length;
 
@@ -131,20 +132,10 @@ export default function PSGScreeningsPage() {
     return (
       <DashboardClientWrapper>
         <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-          <DashboardNavbar subtitle="PSG Member Portal" showHomeButton={true} />
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div
-              className="p-8 text-center rounded-xl border shadow"
-              style={{
-                background: "var(--bg-light)",
-                borderColor: "var(--border-muted)",
-              }}
-            >
-              <p style={{ color: "var(--text-muted)" }}>
-                Loading screenings...
-              </p>
-            </div>
-          </main>
+          <DashboardNavbar subtitle="Welcome back, PSG Member" />
+          <div className="flex items-center justify-center py-12">
+            <Loader text="Loading screenings..." />
+          </div>
         </div>
       </DashboardClientWrapper>
     );
@@ -153,7 +144,7 @@ export default function PSGScreeningsPage() {
   return (
     <DashboardClientWrapper>
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-        <DashboardNavbar subtitle="PSG Member Portal" showHomeButton={true} />
+        <DashboardNavbar subtitle="Welcome back, PSG Member" />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6">
@@ -426,7 +417,7 @@ export default function PSGScreeningsPage() {
                           <button
                             onClick={() =>
                               router.push(
-                                `/dashboard/psg/screenings/${screening.id}`
+                                `/dashboard/psg/screenings/${screening.id}`,
                               )
                             }
                             className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition border shadow-[0_1px_2px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.015)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.4),0_2px_4px_rgba(0,0,0,0.06),0_4px_8px_rgba(0,0,0,0.03)] w-full sm:w-auto"

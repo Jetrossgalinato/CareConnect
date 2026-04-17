@@ -122,7 +122,7 @@ export default function ScreeningDetailPage({
     return (
       <DashboardClientWrapper>
         <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-          <DashboardNavbar subtitle="PSG Member Portal" showHomeButton={true} />
+          <DashboardNavbar subtitle="Welcome back, PSG Member" />
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-center py-12">
               <Loader text="Loading screening details..." />
@@ -137,7 +137,7 @@ export default function ScreeningDetailPage({
     return (
       <DashboardClientWrapper>
         <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-          <DashboardNavbar subtitle="PSG Member Portal" showHomeButton={true} />
+          <DashboardNavbar subtitle="Welcome back, PSG Member" />
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div
               className="rounded-lg border p-6 text-center"
@@ -176,7 +176,7 @@ export default function ScreeningDetailPage({
   return (
     <DashboardClientWrapper>
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-        <DashboardNavbar subtitle="PSG Member Portal" showHomeButton={true} />
+        <DashboardNavbar subtitle="Welcome back, PSG Member" />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}

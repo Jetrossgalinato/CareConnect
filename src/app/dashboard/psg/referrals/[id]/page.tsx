@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
+import { Loader } from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { useAlert } from "@/hooks/useAlert";
 import {
@@ -136,12 +137,10 @@ export default function ReferralDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-        <DashboardNavbar subtitle="Loading..." />
+        <DashboardNavbar subtitle="Welcome back, PSG Member" />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center py-12">
-            <p style={{ color: "var(--text-muted)" }}>
-              Loading referral details...
-            </p>
+          <div className="flex items-center justify-center py-12">
+            <Loader text="Loading referral details..." />
           </div>
         </main>
       </div>
@@ -151,7 +150,7 @@ export default function ReferralDetailPage() {
   if (!referral) {
     return (
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-        <DashboardNavbar subtitle="Not Found" />
+        <DashboardNavbar subtitle="Welcome back, PSG Member" />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-12">
             <p style={{ color: "var(--text-muted)" }}>Referral not found</p>
@@ -168,7 +167,7 @@ export default function ReferralDetailPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar subtitle="Referral Details" />
+      <DashboardNavbar subtitle="Welcome back, PSG Member" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
