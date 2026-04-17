@@ -40,7 +40,7 @@ export default async function AdminPage() {
           </h2>
           <div className="grid gap-4 md:grid-cols-4">
             <Link
-              href="/dashboard/psg/referrals"
+              href="/dashboard/admin/referrals"
               className="rounded-lg p-5 transition hover:opacity-90"
               style={{
                 background: "var(--bg-light)",

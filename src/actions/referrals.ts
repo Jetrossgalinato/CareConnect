@@ -120,6 +120,62 @@ export async function getAllReferrals(): Promise<
   }
 }
 
+// Get only referrals forwarded by PSG members for admin queue review
+export async function getAdminForwardedReferrals(): Promise<
+  ActionResponse<ReferralWithProfiles[]>
+> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: "Please login first" };
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return { success: false, error: "Unable to verify user role" };
+    }
+
+    if (profile.role !== "admin") {
+      return { success: false, error: "Unauthorized access" };
+    }
+
+    const { data: referrals, error } = await supabase
+      .from("referrals")
+      .select(
+        `
+        *,
+        student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
+        assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
+        reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
+      `,
+      )
+      .not("reviewed_by", "is", null)
+      .neq("status", "pending")
+      .order("reviewed_at", { ascending: false })
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching admin referral queue:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: referrals || [] };
+  } catch (error) {
+    console.error("Unexpected error fetching admin referral queue:", error);
+    return { success: false, error: "Failed to fetch admin referral queue" };
+  }
+}
+
 // Get referrals for the currently authenticated PSG/Admin user
 export async function getCurrentUserReferralsView(): Promise<
   ActionResponse<ReferralWithProfiles[]>

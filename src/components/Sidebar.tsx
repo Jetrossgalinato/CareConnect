@@ -73,6 +73,11 @@ const PSG_MENU: SidebarMenuItem[] = [
 
 const ADMIN_MENU: SidebarMenuItem[] = [
   { label: "Admin Home", href: "/dashboard/admin", icon: Shield },
+  {
+    label: "Referral Queue",
+    href: "/dashboard/admin/referrals",
+    icon: ClipboardList,
+  },
   { label: "User Management", href: "/dashboard/admin/users", icon: Users },
   { label: "Reports", href: "/dashboard/admin/reports", icon: BarChart3 },
   { label: "Audit Logs", href: "/dashboard/admin/audit", icon: FileText },
