@@ -6,14 +6,22 @@ import { Loader } from "@/components/Loader";
 import { useAlert } from "@/hooks/useAlert";
 import {
   getCurrentUserProfile,
+  updateCurrentUserPassword,
   updateCurrentUserProfile,
 } from "@/lib/actions/auth";
 import { formatRole, type Profile } from "@/lib/utils/auth";
 
 type ProfileFormState = {
   full_name: string;
+  codename: string;
   school_id: string;
   avatar_url: string;
+};
+
+type PasswordFormState = {
+  old_password: string;
+  new_password: string;
+  confirm_new_password: string;
 };
 
 export default function ProfilePage() {
@@ -22,11 +30,18 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [form, setForm] = useState<ProfileFormState>({
     full_name: "",
+    codename: "",
     school_id: "",
     avatar_url: "",
   });
+  const [passwordForm, setPasswordForm] = useState<PasswordFormState>({
+    old_password: "",
+    new_password: "",
+    confirm_new_password: "",
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
@@ -50,6 +65,7 @@ export default function ProfilePage() {
         setProfile(result.data);
         setForm({
           full_name: result.data.full_name || "",
+          codename: result.data.codename || "",
           school_id: result.data.school_id || "",
           avatar_url: result.data.avatar_url || "",
         });
@@ -71,37 +87,96 @@ export default function ProfilePage() {
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    try {
-      setSaving(true);
-      const result = await updateCurrentUserProfile({
-        full_name: form.full_name,
-        school_id: form.school_id,
-        avatar_url: form.avatar_url,
-      });
+    const hasPasswordInput =
+      passwordForm.old_password ||
+      passwordForm.new_password ||
+      passwordForm.confirm_new_password;
 
-      if (!result.success || !result.data) {
+    if (hasPasswordInput) {
+      if (
+        !passwordForm.old_password ||
+        !passwordForm.new_password ||
+        !passwordForm.confirm_new_password
+      ) {
         showAlert({
           type: "error",
-          message: result.error || "Failed to save profile",
+          message: "To change password, complete all password fields",
           duration: 5000,
         });
         return;
       }
 
-      setProfile(result.data);
+      if (passwordForm.new_password !== passwordForm.confirm_new_password) {
+        showAlert({
+          type: "error",
+          message: "New password and confirmation do not match",
+          duration: 5000,
+        });
+        return;
+      }
+    }
+
+    try {
+      setSaving(true);
+
+      const profileResult = await updateCurrentUserProfile({
+        full_name: form.full_name,
+        codename: form.codename,
+        school_id: form.school_id,
+        avatar_url: form.avatar_url,
+      });
+
+      if (!profileResult.success || !profileResult.data) {
+        showAlert({
+          type: "error",
+          message: profileResult.error || "Failed to save profile",
+          duration: 5000,
+        });
+        return;
+      }
+
+      if (hasPasswordInput) {
+        setSavingPassword(true);
+        const passwordResult = await updateCurrentUserPassword({
+          old_password: passwordForm.old_password,
+          new_password: passwordForm.new_password,
+          confirm_new_password: passwordForm.confirm_new_password,
+        });
+        setSavingPassword(false);
+
+        if (!passwordResult.success) {
+          showAlert({
+            type: "error",
+            message: passwordResult.error || "Failed to update password",
+            duration: 5000,
+          });
+          return;
+        }
+
+        setPasswordForm({
+          old_password: "",
+          new_password: "",
+          confirm_new_password: "",
+        });
+      }
+
+      setProfile(profileResult.data);
       setForm({
-        full_name: result.data.full_name || "",
-        school_id: result.data.school_id || "",
-        avatar_url: result.data.avatar_url || "",
+        full_name: profileResult.data.full_name || "",
+        codename: profileResult.data.codename || "",
+        school_id: profileResult.data.school_id || "",
+        avatar_url: profileResult.data.avatar_url || "",
       });
 
       showAlert({
         type: "success",
-        message: "Profile updated successfully",
+        message: hasPasswordInput
+          ? "Profile and password updated successfully"
+          : "Profile updated successfully",
         duration: 4000,
       });
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("Error saving profile:", error);
       showAlert({
         type: "error",
         message: "Failed to save profile",
@@ -109,6 +184,7 @@ export default function ProfilePage() {
       });
     } finally {
       setSaving(false);
+      setSavingPassword(false);
     }
   };
 
@@ -214,6 +290,28 @@ export default function ProfilePage() {
               className="block mb-2 text-sm font-medium"
               style={{ color: "var(--text)" }}
             >
+              Codename (optional)
+            </label>
+            <input
+              type="text"
+              value={form.codename}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, codename: e.target.value }))
+              }
+              className="w-full px-4 py-2 rounded-lg"
+              style={{
+                border: "1px solid var(--border-muted)",
+                background: "var(--bg)",
+                color: "var(--text)",
+              }}
+            />
+          </div>
+
+          <div>
+            <label
+              className="block mb-2 text-sm font-medium"
+              style={{ color: "var(--text)" }}
+            >
               School ID (optional)
             </label>
             <input
@@ -231,17 +329,109 @@ export default function ProfilePage() {
             />
           </div>
 
+          <div className="pt-2">
+            <h2
+              className="text-base font-semibold"
+              style={{ color: "var(--text)" }}
+            >
+              Change Password (optional)
+            </h2>
+            <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+              Fill all fields only if you want to change your password.
+            </p>
+          </div>
+
+          <div>
+            <label
+              className="block mb-2 text-sm font-medium"
+              style={{ color: "var(--text)" }}
+            >
+              Old Password
+            </label>
+            <input
+              type="password"
+              value={passwordForm.old_password}
+              onChange={(e) =>
+                setPasswordForm((prev) => ({
+                  ...prev,
+                  old_password: e.target.value,
+                }))
+              }
+              className="w-full px-4 py-2 rounded-lg"
+              style={{
+                border: "1px solid var(--border-muted)",
+                background: "var(--bg)",
+                color: "var(--text)",
+              }}
+              autoComplete="current-password"
+            />
+          </div>
+
+          <div>
+            <label
+              className="block mb-2 text-sm font-medium"
+              style={{ color: "var(--text)" }}
+            >
+              New Password
+            </label>
+            <input
+              type="password"
+              value={passwordForm.new_password}
+              onChange={(e) =>
+                setPasswordForm((prev) => ({
+                  ...prev,
+                  new_password: e.target.value,
+                }))
+              }
+              className="w-full px-4 py-2 rounded-lg"
+              style={{
+                border: "1px solid var(--border-muted)",
+                background: "var(--bg)",
+                color: "var(--text)",
+              }}
+              minLength={8}
+              autoComplete="new-password"
+            />
+          </div>
+
+          <div>
+            <label
+              className="block mb-2 text-sm font-medium"
+              style={{ color: "var(--text)" }}
+            >
+              Confirm New Password
+            </label>
+            <input
+              type="password"
+              value={passwordForm.confirm_new_password}
+              onChange={(e) =>
+                setPasswordForm((prev) => ({
+                  ...prev,
+                  confirm_new_password: e.target.value,
+                }))
+              }
+              className="w-full px-4 py-2 rounded-lg"
+              style={{
+                border: "1px solid var(--border-muted)",
+                background: "var(--bg)",
+                color: "var(--text)",
+              }}
+              minLength={8}
+              autoComplete="new-password"
+            />
+          </div>
+
           <div className="flex justify-end">
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || savingPassword}
               className="px-6 py-2 rounded-lg font-medium text-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
                 background: "var(--primary)",
                 color: "var(--bg-dark)",
               }}
             >
-              {saving ? "Saving..." : "Save Profile"}
+              {saving || savingPassword ? "Saving..." : "Save Profile"}
             </button>
           </div>
         </form>
