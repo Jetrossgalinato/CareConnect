@@ -176,7 +176,7 @@ export default async function StudentReferralsPage() {
                       }}
                     >
                       <strong>Assigned PSG Member:</strong>{" "}
-                      {referral.assigned_psg_member.full_name}
+                      {referral.assigned_psg_member.codename?.trim() || "N/A"}
                     </div>
                   )}
                 </Link>
