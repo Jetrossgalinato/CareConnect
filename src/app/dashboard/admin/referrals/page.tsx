@@ -1,35 +1,8 @@
 import { redirect } from "next/navigation";
 import { getAdminForwardedReferrals } from "@/actions/referrals";
-import {
-  REFERRAL_SOURCE_LABELS,
-  REFERRAL_STATUS_LABELS,
-  SEVERITY_COLORS,
-  type ReferralStatus,
-} from "@/types/referrals";
-import { ClipboardList, Calendar, User, ShieldCheck } from "lucide-react";
-
-function getStatusColor(status: ReferralStatus): string {
-  const colors: Record<ReferralStatus, string> = {
-    pending: "var(--warning)",
-    reviewed: "var(--info)",
-    assigned: "var(--primary)",
-    in_progress: "var(--info)",
-    completed: "var(--success)",
-    escalated: "var(--error)",
-  };
-  return colors[status];
-}
-
-function formatDate(dateString: string | null): string {
-  if (!dateString) return "-";
-  return new Date(dateString).toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
+import { AdminReferralQueueClient } from "@/components/admin/AdminReferralQueueClient";
+import { AlertProvider } from "@/components/AlertProvider";
+import { ClipboardList } from "lucide-react";
 
 export default async function AdminReferralQueuePage() {
   const result = await getAdminForwardedReferrals();
@@ -148,88 +121,9 @@ export default async function AdminReferralQueuePage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {referrals.map((referral) => (
-              <div
-                key={referral.id}
-                className="rounded-lg p-5"
-                style={{
-                  background: "var(--bg-light)",
-                  border: "1px solid var(--border-muted)",
-                  boxShadow:
-                    "0 1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.03)",
-                }}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
-                  <div className="space-y-1">
-                    <p
-                      className="font-semibold"
-                      style={{ color: "var(--text)" }}
-                    >
-                      {referral.student.full_name}
-                    </p>
-                    <p
-                      className="text-sm"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      {REFERRAL_SOURCE_LABELS[referral.source]}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {referral.severity && (
-                      <span
-                        className="px-2 py-1 rounded text-xs font-semibold"
-                        style={{
-                          background: SEVERITY_COLORS[referral.severity],
-                          color: "var(--bg-dark)",
-                        }}
-                      >
-                        {referral.severity.toUpperCase()}
-                      </span>
-                    )}
-                    <span
-                      className="px-3 py-1 rounded-full text-xs font-medium"
-                      style={{
-                        background: getStatusColor(referral.status),
-                        color: "var(--bg-dark)",
-                      }}
-                    >
-                      {REFERRAL_STATUS_LABELS[referral.status]}
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-sm mb-4" style={{ color: "var(--text)" }}>
-                  {referral.reason || "No reason provided"}
-                </p>
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div
-                    className="flex items-center gap-2 text-sm"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    Forwarded by{" "}
-                    {referral.reviewed_by_profile?.full_name || "PSG Member"}
-                  </div>
-                  <div
-                    className="flex items-center gap-2 text-sm"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    <Calendar className="w-4 h-4" />
-                    {formatDate(referral.reviewed_at)}
-                  </div>
-                  <div
-                    className="flex items-center gap-2 text-sm"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    <User className="w-4 h-4" />
-                    Student ID: {referral.student.school_id || "N/A"}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <AlertProvider>
+            <AdminReferralQueueClient referrals={referrals} />
+          </AlertProvider>
         )}
       </main>
     </div>

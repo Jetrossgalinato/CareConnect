@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 import {
   Referral,
   ReferralWithProfiles,
@@ -102,8 +103,8 @@ export async function getAllReferrals(): Promise<
         `
         *,
         student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
-        assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
-        reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
+        assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, codename, email),
+        reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name, codename)
       `,
       )
       .order("created_at", { ascending: false });
@@ -155,8 +156,8 @@ export async function getAdminForwardedReferrals(): Promise<
         `
         *,
         student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
-        assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
-        reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
+        assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, codename, email),
+        reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name, codename)
       `,
       )
       .not("reviewed_by", "is", null)
@@ -230,8 +231,8 @@ export async function getPSGAssignedReferrals(
         `
         *,
         student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
-        assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
-        reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
+        assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, codename, email),
+        reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name, codename)
       `,
       )
       .or(
@@ -264,8 +265,8 @@ export async function getStudentReferrals(
         `
         *,
         student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
-        assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
-        reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
+        assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, codename, email),
+        reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name, codename)
       `,
       )
       .eq("student_id", studentId)
@@ -296,8 +297,8 @@ export async function getReferralById(
         `
         *,
         student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
-        assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
-        reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
+        assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, codename, email),
+        reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name, codename)
       `,
       )
       .eq("id", referralId)
@@ -684,5 +685,205 @@ export async function getPSGMembers(): Promise<
   } catch (error) {
     console.error("Unexpected error fetching PSG members:", error);
     return { success: false, error: "Failed to load PSG members" };
+  }
+}
+
+export async function approveReferralAndSchedule(
+  referralId: string,
+  input: {
+    appointment_date: string;
+    location_type: "online" | "in_person";
+    meeting_link?: string;
+    notes?: string;
+    duration_minutes?: number;
+    psg_member_id?: string;
+  },
+): Promise<ActionResponse> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: "Please login first" };
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile || profile.role !== "admin") {
+      return { success: false, error: "Unauthorized access" };
+    }
+
+    const { data: referral, error: referralError } = await supabase
+      .from("referrals")
+      .select("id, student_id, assigned_psg_member_id, reviewed_by, status")
+      .eq("id", referralId)
+      .single();
+
+    if (referralError || !referral) {
+      return { success: false, error: "Referral not found" };
+    }
+
+    const psgMemberId =
+      input.psg_member_id ||
+      referral.assigned_psg_member_id ||
+      referral.reviewed_by;
+
+    if (!psgMemberId) {
+      return {
+        success: false,
+        error: "No PSG member available for scheduling",
+      };
+    }
+
+    if (!input.appointment_date) {
+      return { success: false, error: "Appointment date is required" };
+    }
+
+    if (input.location_type === "online" && !input.meeting_link?.trim()) {
+      return {
+        success: false,
+        error: "Meeting link is required for online sessions",
+      };
+    }
+
+    const appointmentDate = new Date(input.appointment_date);
+    if (Number.isNaN(appointmentDate.getTime())) {
+      return { success: false, error: "Invalid appointment date" };
+    }
+
+    const { error: appointmentError } = await supabase
+      .from("appointments")
+      .insert({
+        student_id: referral.student_id,
+        psg_member_id: psgMemberId,
+        appointment_date: appointmentDate.toISOString(),
+        duration_minutes: input.duration_minutes || 60,
+        location_type: input.location_type,
+        meeting_link:
+          input.location_type === "online"
+            ? input.meeting_link?.trim() || null
+            : null,
+        notes: input.notes?.trim() || null,
+        status: "scheduled",
+      });
+
+    if (appointmentError) {
+      console.error(
+        "Error creating appointment from referral:",
+        appointmentError,
+      );
+      return { success: false, error: "Failed to schedule appointment" };
+    }
+
+    const { error: updateReferralError } = await supabase
+      .from("referrals")
+      .update({
+        status: "assigned",
+        assigned_psg_member_id: psgMemberId,
+        assigned_at: new Date().toISOString(),
+      })
+      .eq("id", referralId);
+
+    if (updateReferralError) {
+      console.error(
+        "Error updating referral after approval:",
+        updateReferralError,
+      );
+      return { success: false, error: "Failed to update referral status" };
+    }
+
+    await supabase.from("referral_updates").insert({
+      referral_id: referralId,
+      updated_by: user.id,
+      update_type: "status_change",
+      previous_status: referral.status,
+      new_status: "assigned",
+      content: `Approved by admin and scheduled as ${input.location_type === "online" ? "online" : "face-to-face"} session.`,
+    });
+
+    revalidatePath("/dashboard/admin/referrals");
+    revalidatePath("/dashboard/appointments");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Unexpected error approving referral:", error);
+    return { success: false, error: "Failed to approve referral" };
+  }
+}
+
+export async function rejectReferralByAdmin(
+  referralId: string,
+  reason?: string,
+): Promise<ActionResponse> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: "Please login first" };
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile || profile.role !== "admin") {
+      return { success: false, error: "Unauthorized access" };
+    }
+
+    const rejectionReason = reason?.trim() || "Rejected by admin";
+
+    const { data: referralBeforeUpdate, error: referralLoadError } =
+      await supabase
+        .from("referrals")
+        .select("status")
+        .eq("id", referralId)
+        .single();
+
+    if (referralLoadError || !referralBeforeUpdate) {
+      return { success: false, error: "Referral not found" };
+    }
+
+    const { error: rejectError } = await supabase
+      .from("referrals")
+      .update({
+        status: "escalated",
+        escalated_to: "OCCS",
+        escalation_reason: rejectionReason,
+      })
+      .eq("id", referralId);
+
+    if (rejectError) {
+      console.error("Error rejecting referral:", rejectError);
+      return { success: false, error: "Failed to reject referral" };
+    }
+
+    await supabase.from("referral_updates").insert({
+      referral_id: referralId,
+      updated_by: user.id,
+      update_type: "escalation",
+      previous_status: referralBeforeUpdate.status,
+      new_status: "escalated",
+      content: `Rejected by admin. ${rejectionReason}`,
+    });
+
+    revalidatePath("/dashboard/admin/referrals");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Unexpected error rejecting referral:", error);
+    return { success: false, error: "Failed to reject referral" };
   }
 }

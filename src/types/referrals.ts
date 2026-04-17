@@ -40,11 +40,13 @@ export interface ReferralWithProfiles extends Referral {
   assigned_psg_member: {
     id: string;
     full_name: string;
+    codename?: string | null;
     email: string;
   } | null;
   reviewed_by_profile: {
     id: string;
     full_name: string;
+    codename?: string | null;
   } | null;
 }
 
