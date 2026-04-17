@@ -779,7 +779,10 @@ export async function approveReferralAndSchedule(
         "Error creating appointment from referral:",
         appointmentError,
       );
-      return { success: false, error: "Failed to schedule appointment" };
+      return {
+        success: false,
+        error: appointmentError.message || "Failed to schedule appointment",
+      };
     }
 
     const { error: updateReferralError } = await supabase

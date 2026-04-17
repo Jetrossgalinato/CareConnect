@@ -191,6 +191,8 @@ export function AdminReferralQueueClient({ referrals }: Props) {
       {referrals.map((referral) => {
         const isExpanded = expandedReferralId === referral.id;
         const isProcessing = processingId === referral.id;
+        const canTakeAction =
+          referral.status === "pending" || referral.status === "reviewed";
         const psgDisplayName =
           referral.reviewed_by_profile?.codename?.trim() ||
           referral.reviewed_by_profile?.full_name ||
@@ -269,37 +271,39 @@ export function AdminReferralQueueClient({ referrals }: Props) {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 justify-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setExpandedReferralId(isExpanded ? null : referral.id);
-                  }}
-                  disabled={isProcessing}
-                  className="px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{
-                    background: "var(--primary)",
-                    color: "var(--bg-dark)",
-                  }}
-                >
-                  {isExpanded ? "Cancel" : "Approve"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleReject(referral.id)}
-                  disabled={isProcessing}
-                  className="px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{
-                    background: "var(--error)",
-                    color: "var(--bg-dark)",
-                  }}
-                >
-                  {isProcessing ? "Processing..." : "Reject"}
-                </button>
-              </div>
+              {canTakeAction && (
+                <div className="flex flex-wrap gap-2 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExpandedReferralId(isExpanded ? null : referral.id);
+                    }}
+                    disabled={isProcessing}
+                    className="px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{
+                      background: "var(--primary)",
+                      color: "var(--bg-dark)",
+                    }}
+                  >
+                    {isExpanded ? "Cancel" : "Approve"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleReject(referral.id)}
+                    disabled={isProcessing}
+                    className="px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{
+                      background: "var(--error)",
+                      color: "var(--bg-dark)",
+                    }}
+                  >
+                    {isProcessing ? "Processing..." : "Reject"}
+                  </button>
+                </div>
+              )}
             </div>
 
-            {isExpanded && (
+            {isExpanded && canTakeAction && (
               <div
                 className="mt-4 p-4 rounded-lg space-y-3"
                 style={{
