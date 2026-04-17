@@ -3,11 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
 import { useAlert } from "@/hooks/useAlert";
-import { createClient } from "@/lib/supabase/client";
-import { getAllReferrals, getPSGAssignedReferrals } from "@/actions/referrals";
+import { getCurrentUserReferralsView } from "@/actions/referrals";
 import {
   ReferralWithProfiles,
   ReferralStatus,
@@ -17,55 +15,127 @@ import {
 } from "@/types/referrals";
 import { User, Calendar, FileText, Filter } from "lucide-react";
 
+async function withTimeout<T>(
+  promiseLike: PromiseLike<T>,
+  timeoutMs: number,
+  message: string,
+): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      Promise.resolve(promiseLike),
+      new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(message));
+        }, timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
+}
+
 export default function PSGReferralsPage() {
   const router = useRouter();
   const { showAlert } = useAlert();
   const [referrals, setReferrals] = useState<ReferralWithProfiles[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadTimedOut, setLoadTimedOut] = useState(false);
+  const [loadPhase, setLoadPhase] = useState<"idle" | "loading" | "done">(
+    "idle",
+  );
+  const [diagnostics, setDiagnostics] = useState<{
+    referralsMs: number;
+    authMs: number;
+    profileMs: number;
+    fallbackMs: number;
+    totalMs: number;
+    failedPhase?: string;
+  } | null>(null);
   const [filter, setFilter] = useState<"all" | ReferralStatus>("all");
 
   const loadUserAndReferrals = async () => {
+    setLoading(true);
+    setLoadTimedOut(false);
+    setLoadPhase("loading");
+
+    const runStart = performance.now();
+    let fallbackMs = 0;
+
     try {
-      const supabase = createClient();
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-
-      if (authError || !user) {
-        showAlert({
-          message: "Please login first",
-          type: "error",
-          duration: 5000,
-        });
-        router.push("/login");
-        return;
-      }
-
-      // Check user role
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      // Admins see all referrals, PSG members see only their assigned ones
-      const result =
-        profile?.role === "admin"
-          ? await getAllReferrals()
-          : await getPSGAssignedReferrals(user.id);
+      const fallbackStart = performance.now();
+      const result = await withTimeout(
+        Promise.resolve(getCurrentUserReferralsView()),
+        10000,
+        "Server fallback timed out",
+      );
+      fallbackMs = Math.round(performance.now() - fallbackStart);
 
       if (result.success && result.data) {
         setReferrals(result.data);
-      } else {
-        showAlert({
-          message: result.error || "Failed to load referrals",
-          type: "error",
-          duration: 5000,
+        const totalMs = Math.round(performance.now() - runStart);
+        setDiagnostics({
+          referralsMs: 0,
+          authMs: 0,
+          profileMs: 0,
+          fallbackMs,
+          totalMs,
         });
+        setLoadPhase("done");
+        if (process.env.NODE_ENV !== "production") {
+          console.info("[PSG Referrals] Load timings", {
+            source: "server_action_primary",
+            fallbackMs,
+            totalMs,
+            count: result.data.length,
+          });
+        }
+      } else {
+        if (result.error === "Please login first") {
+          showAlert({
+            message: "Please login first",
+            type: "error",
+            duration: 5000,
+          });
+          router.push("/login");
+          return;
+        }
+
+        if (result.error === "Unauthorized access") {
+          showAlert({
+            message: "Unauthorized access",
+            type: "error",
+            duration: 5000,
+          });
+          router.push("/dashboard");
+          return;
+        }
+
+        throw new Error(result.error || "Failed to load referrals");
       }
     } catch (error) {
+      const totalMs = Math.round(performance.now() - runStart);
+      setDiagnostics({
+        referralsMs: 0,
+        authMs: 0,
+        profileMs: 0,
+        fallbackMs,
+        totalMs,
+        failedPhase: "loading",
+      });
+
       console.error("Error loading referrals:", error);
+      if (process.env.NODE_ENV !== "production") {
+        console.error("[PSG Referrals] Load failed", {
+          error,
+          fallbackMs,
+          totalMs,
+        });
+      }
+
       showAlert({
         message: "An unexpected error occurred",
         type: "error",
@@ -80,6 +150,24 @@ export default function PSGReferralsPage() {
     loadUserAndReferrals();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      return;
+    }
+
+    const watchdogId = setTimeout(() => {
+      setLoadTimedOut(true);
+      setLoading(false);
+      showAlert({
+        message: `Loading took too long during ${loadPhase}. Please try again.`,
+        type: "error",
+        duration: 5000,
+      });
+    }, 12000);
+
+    return () => clearTimeout(watchdogId);
+  }, [loading, showAlert, loadPhase]);
 
   const filteredReferrals =
     filter === "all"
@@ -117,10 +205,6 @@ export default function PSGReferralsPage() {
     return (
       <DashboardClientWrapper>
         <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-          <DashboardNavbar
-            subtitle="Referral Management"
-            showHomeButton={true}
-          />
           <div className="flex items-center justify-center py-12">
             <Loader text="Loading referrals..." />
           </div>
@@ -132,8 +216,6 @@ export default function PSGReferralsPage() {
   return (
     <DashboardClientWrapper>
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-        <DashboardNavbar subtitle="Referral Management" showHomeButton={true} />
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-6">
@@ -141,10 +223,10 @@ export default function PSGReferralsPage() {
               className="text-lg font-bold mb-2"
               style={{ color: "var(--text)" }}
             >
-              Referrals
+              Referral Reviews
             </h1>
             <p style={{ color: "var(--text-muted)" }}>
-              Manage student referrals and track case progress
+              Review referrals and forward triage decisions to admin
             </p>
           </div>
 
@@ -266,7 +348,37 @@ export default function PSGReferralsPage() {
                   className="mx-auto mb-4"
                   style={{ color: "var(--text-muted)" }}
                 />
-                <p style={{ color: "var(--text-muted)" }}>No referrals found</p>
+                <p style={{ color: "var(--text-muted)" }}>
+                  {loadTimedOut
+                    ? "Could not finish loading referrals"
+                    : "No referrals found"}
+                </p>
+                {loadTimedOut && (
+                  <>
+                    {diagnostics && (
+                      <p
+                        className="mt-2 text-xs"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        Slow phase: {diagnostics.failedPhase || loadPhase} •
+                        query {diagnostics.referralsMs}ms • auth{" "}
+                        {diagnostics.authMs}ms • profile {diagnostics.profileMs}
+                        ms • fallback {diagnostics.fallbackMs}ms • total{" "}
+                        {diagnostics.totalMs}ms
+                      </p>
+                    )}
+                    <button
+                      onClick={loadUserAndReferrals}
+                      className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition"
+                      style={{
+                        background: "var(--primary)",
+                        color: "var(--bg-dark)",
+                      }}
+                    >
+                      Retry Loading
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               filteredReferrals.map((referral) => (

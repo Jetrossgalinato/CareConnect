@@ -3,13 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { ScreeningResultDisplay } from "@/components/screening/ScreeningResultDisplay";
 import { ScreeningResult } from "@/lib/types/screening";
-import {
-  getLatestScreeningResult,
-  createCaseAssessment,
-} from "@/lib/actions/screening";
+import { getLatestScreeningResult } from "@/lib/actions/screening";
 import { MessageSquare, Calendar, RotateCcw } from "lucide-react";
 import { useAlert } from "@/hooks/useAlert";
 
@@ -100,7 +96,6 @@ export default function ScreeningResultsPage() {
     return (
       <DashboardClientWrapper>
         <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-          <DashboardNavbar showHomeButton={true} />
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div
               className="p-8 text-center rounded-xl border shadow"
@@ -123,7 +118,6 @@ export default function ScreeningResultsPage() {
     return (
       <DashboardClientWrapper>
         <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-          <DashboardNavbar showHomeButton={true} />
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div
               className="p-8 text-center rounded-xl border shadow"
@@ -150,8 +144,6 @@ export default function ScreeningResultsPage() {
   return (
     <DashboardClientWrapper>
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-        <DashboardNavbar showHomeButton={true} />
-
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="max-w-3xl mx-auto space-y-6">
@@ -258,8 +250,8 @@ export default function ScreeningResultsPage() {
                     {isCreatingAssessment
                       ? "Starting..."
                       : hasCaseAssessment
-                      ? "Case Assessment Started"
-                      : "Start Case Assessment"}
+                        ? "Case Assessment Started"
+                        : "Start Case Assessment"}
                   </button>
                   <button
                     onClick={() => {

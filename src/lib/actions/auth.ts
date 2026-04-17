@@ -1,6 +1,6 @@
 "use server";
 
-import { createHash } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { type Profile } from "@/lib/utils/auth";
 import {
@@ -57,7 +57,10 @@ export async function login(data: LoginInput) {
   }
 
   revalidatePath("/", "layout");
-  redirect(isAdmin ? "/dashboard/admin" : "/dashboard");
+
+  const loginToken = randomUUID();
+  const targetPath = isAdmin ? "/dashboard/admin" : "/dashboard";
+  redirect(`${targetPath}?loginToken=${loginToken}`);
 }
 
 export async function register(data: RegisterInput) {
@@ -195,6 +198,10 @@ export async function getUser() {
       typeof user.user_metadata?.school_id === "string"
         ? user.user_metadata.school_id
         : null,
+    codename:
+      typeof user.user_metadata?.codename === "string"
+        ? user.user_metadata.codename
+        : null,
     avatar_url:
       typeof user.user_metadata?.avatar_url === "string"
         ? user.user_metadata.avatar_url
@@ -211,4 +218,194 @@ export async function getUser() {
     .single();
 
   return createdProfile ?? fallbackProfile;
+}
+
+export async function getCurrentUserProfile() {
+  const profile = await getUser();
+
+  if (!profile) {
+    return {
+      success: false,
+      error: "Please login first",
+    };
+  }
+
+  return {
+    success: true,
+    data: profile,
+  };
+}
+
+export async function updateCurrentUserProfile(input: {
+  full_name: string;
+  codename?: string | null;
+  school_id?: string | null;
+  avatar_url?: string | null;
+}) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        error: "Please login first",
+      };
+    }
+
+    const fullName = input.full_name.trim();
+    const codename = (input.codename || "").trim();
+    const schoolId = (input.school_id || "").trim();
+    const avatarUrl = (input.avatar_url || "").trim();
+
+    if (fullName.length < 2) {
+      return {
+        success: false,
+        error: "Full name must be at least 2 characters",
+      };
+    }
+
+    const updateData: Partial<Profile> = {
+      full_name: fullName,
+      codename: codename || null,
+      school_id: schoolId || null,
+      avatar_url: avatarUrl || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: updatedProfile, error: updateError } = await supabase
+      .from("profiles")
+      .update(updateData)
+      .eq("id", user.id)
+      .select("*")
+      .single();
+
+    if (updateError || !updatedProfile) {
+      console.error("Error updating current profile:", updateError);
+      return {
+        success: false,
+        error: "Failed to update profile",
+      };
+    }
+
+    // Keep auth metadata aligned with profile information.
+    const { error: metadataError } = await supabase.auth.updateUser({
+      data: {
+        full_name: fullName,
+        codename: codename || null,
+        school_id: schoolId || null,
+        avatar_url: avatarUrl || null,
+      },
+    });
+
+    if (metadataError) {
+      console.error("Error syncing auth metadata:", metadataError);
+    }
+
+    revalidatePath("/dashboard", "layout");
+    revalidatePath("/dashboard/profile");
+
+    return {
+      success: true,
+      data: updatedProfile as Profile,
+    };
+  } catch (error) {
+    console.error("Unexpected error updating current profile:", error);
+    return {
+      success: false,
+      error: "An unexpected error occurred",
+    };
+  }
+}
+
+export async function updateCurrentUserPassword(input: {
+  old_password: string;
+  new_password: string;
+  confirm_new_password: string;
+}) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user || !user.email) {
+      return {
+        success: false,
+        error: "Please login first",
+      };
+    }
+
+    const oldPassword = input.old_password;
+    const newPassword = input.new_password;
+    const confirmNewPassword = input.confirm_new_password;
+
+    if (!oldPassword || !newPassword || !confirmNewPassword) {
+      return {
+        success: false,
+        error: "All password fields are required",
+      };
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return {
+        success: false,
+        error: "New password and confirmation do not match",
+      };
+    }
+
+    if (newPassword.length < 8) {
+      return {
+        success: false,
+        error: "New password must be at least 8 characters",
+      };
+    }
+
+    if (oldPassword === newPassword) {
+      return {
+        success: false,
+        error: "New password must be different from old password",
+      };
+    }
+
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: oldPassword,
+    });
+
+    if (verifyError) {
+      return {
+        success: false,
+        error: "Old password is incorrect",
+      };
+    }
+
+    const { error: updatePasswordError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updatePasswordError) {
+      console.error("Error updating user password:", updatePasswordError);
+      return {
+        success: false,
+        error: "Failed to update password",
+      };
+    }
+
+    revalidatePath("/dashboard/profile");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Unexpected error updating current user password:", error);
+    return {
+      success: false,
+      error: "An unexpected error occurred",
+    };
+  }
 }

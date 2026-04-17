@@ -1,6 +1,5 @@
 import { getUser } from "@/lib/actions/auth";
 import { redirect } from "next/navigation";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { getSessionById } from "@/actions/sessions";
 import { SessionDocumentationForm } from "@/components/SessionDocumentationForm";
 import Link from "next/link";
@@ -27,8 +26,6 @@ export default async function EditSessionPage({
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar subtitle="Edit Session Documentation" />
-
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Link

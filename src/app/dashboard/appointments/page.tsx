@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useStudentAppointments } from "@/hooks/useStudentAppointments";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
 import { AppointmentsFilterTabs } from "./components/AppointmentsFilterTabs";
 import { AppointmentsList } from "./components/AppointmentsList";
@@ -17,10 +16,6 @@ export default function StudentAppointmentsPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar
-        subtitle="View and manage your appointments"
-        showHomeButton={true}
-      />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <h1 className="text-lg font-bold" style={{ color: "var(--text)" }}>

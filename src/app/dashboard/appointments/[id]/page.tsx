@@ -8,7 +8,6 @@ import { getAppointmentById, cancelAppointment } from "@/actions/appointments";
 import { useAlert } from "@/hooks/useAlert";
 import type { AppointmentWithProfiles } from "@/types/appointments";
 import { APPOINTMENT_STATUS_LABELS } from "@/types/appointments";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
 
 interface PageProps {
@@ -134,10 +133,6 @@ export default function AppointmentDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar
-        subtitle="Appointment details and actions"
-        showHomeButton={true}
-      />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-6">
           <Link

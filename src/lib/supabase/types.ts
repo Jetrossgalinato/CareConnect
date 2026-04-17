@@ -31,6 +31,7 @@ export interface Database {
           role: UserRole;
           is_blocked: boolean;
           full_name: string;
+          codename: string | null;
           school_id: string | null;
           avatar_url: string | null;
           email: string;
@@ -42,6 +43,7 @@ export interface Database {
           role?: UserRole;
           is_blocked?: boolean;
           full_name: string;
+          codename?: string | null;
           school_id?: string | null;
           avatar_url?: string | null;
           email: string;
@@ -53,6 +55,7 @@ export interface Database {
           role?: UserRole;
           is_blocked?: boolean;
           full_name?: string;
+          codename?: string | null;
           school_id?: string | null;
           avatar_url?: string | null;
           email?: string;

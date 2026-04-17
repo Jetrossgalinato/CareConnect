@@ -63,8 +63,6 @@ export async function createSession(input: CreateSessionInput) {
       return { success: false, error: "Failed to create session" };
     }
 
-    revalidatePath("/dashboard/psg/appointments");
-    revalidatePath(`/dashboard/psg/appointments/${input.appointment_id}`);
     revalidatePath("/dashboard/psg/sessions");
 
     return { success: true, data: data as Session };
@@ -76,7 +74,7 @@ export async function createSession(input: CreateSessionInput) {
 
 export async function updateSession(
   sessionId: string,
-  input: UpdateSessionInput
+  input: UpdateSessionInput,
 ) {
   try {
     const supabase = await createClient();
@@ -98,7 +96,6 @@ export async function updateSession(
       return { success: false, error: "Failed to update session" };
     }
 
-    revalidatePath("/dashboard/psg/appointments");
     revalidatePath("/dashboard/psg/sessions");
 
     return { success: true, data: data as Session };
@@ -137,7 +134,7 @@ export async function getSessionById(sessionId: string) {
             avatar_url
           )
         )
-      `
+      `,
       )
       .eq("id", sessionId)
       .single();
@@ -183,7 +180,7 @@ export async function getSessionByAppointmentId(appointmentId: string) {
             avatar_url
           )
         )
-      `
+      `,
       )
       .eq("appointment_id", appointmentId)
       .single();
@@ -235,7 +232,7 @@ export async function getAllSessions() {
             avatar_url
           )
         )
-      `
+      `,
       )
       .order("created_at", { ascending: false });
 
@@ -284,7 +281,7 @@ export async function getPSGMemberSessions(psgMemberId: string) {
             avatar_url
           )
         )
-      `
+      `,
       )
       .eq("appointment.psg_member_id", psgMemberId)
       .order("created_at", { ascending: false });
@@ -333,7 +330,7 @@ export async function getStudentSessions(studentId: string) {
             avatar_url
           )
         )
-      `
+      `,
       )
       .eq("appointment.student_id", studentId)
       .order("created_at", { ascending: false });
@@ -367,7 +364,6 @@ export async function deleteSession(sessionId: string) {
       return { success: false, error: "Failed to delete session" };
     }
 
-    revalidatePath("/dashboard/psg/appointments");
     revalidatePath("/dashboard/psg/sessions");
 
     return { success: true };
@@ -391,7 +387,7 @@ export async function getAllSessionsSummary() {
       `
         duration_minutes,
         created_at
-      `
+      `,
     );
 
     if (error) {
@@ -407,13 +403,13 @@ export async function getAllSessionsSummary() {
     const totalSessions = sessions.length;
     const totalDuration = sessions.reduce(
       (sum, s) => sum + (s.duration_minutes || 0),
-      0
+      0,
     );
     const sessionsThisMonth = sessions.filter(
-      (s) => new Date(s.created_at) >= startOfMonth
+      (s) => new Date(s.created_at) >= startOfMonth,
     ).length;
     const sessionsThisWeek = sessions.filter(
-      (s) => new Date(s.created_at) >= startOfWeek
+      (s) => new Date(s.created_at) >= startOfWeek,
     ).length;
 
     const summary: SessionSummary = {
@@ -446,7 +442,7 @@ export async function getPSGSessionSummary(psgMemberId: string) {
         appointment:appointments!inner(
           psg_member_id
         )
-      `
+      `,
       )
       .eq("appointment.psg_member_id", psgMemberId);
 
@@ -463,13 +459,13 @@ export async function getPSGSessionSummary(psgMemberId: string) {
     const totalSessions = sessions.length;
     const totalDuration = sessions.reduce(
       (sum, s) => sum + (s.duration_minutes || 0),
-      0
+      0,
     );
     const sessionsThisMonth = sessions.filter(
-      (s) => new Date(s.created_at) >= startOfMonth
+      (s) => new Date(s.created_at) >= startOfMonth,
     ).length;
     const sessionsThisWeek = sessions.filter(
-      (s) => new Date(s.created_at) >= startOfWeek
+      (s) => new Date(s.created_at) >= startOfWeek,
     ).length;
 
     const summary: SessionSummary = {

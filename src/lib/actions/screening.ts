@@ -7,6 +7,35 @@ import {
   type ScreeningQuestion,
   type QuestionResponse,
 } from "@/lib/validations/screening";
+import type { PsgTriageLevel, ReferralSeverity } from "@/types/referrals";
+
+function mapPsgTriageToReferralSeverity(
+  triageLevel: PsgTriageLevel,
+): ReferralSeverity {
+  switch (triageLevel) {
+    case "needs_immediate_help":
+      return "critical";
+    case "moderate":
+      return "moderate";
+    case "good":
+      return "low";
+    default:
+      return "low";
+  }
+}
+
+function getPsgTriageLabel(triageLevel: PsgTriageLevel): string {
+  switch (triageLevel) {
+    case "needs_immediate_help":
+      return "Needs Immediate Help";
+    case "moderate":
+      return "Moderate";
+    case "good":
+      return "Good";
+    default:
+      return "Good";
+  }
+}
 
 /**
  * Submit a new screening with responses
@@ -182,7 +211,7 @@ export async function getScreeningById(screeningId: string) {
         response.question_id.startsWith("preset-")
       ) {
         const presetIndex = parseInt(
-          response.question_id.replace("preset-", "")
+          response.question_id.replace("preset-", ""),
         );
         if (!isNaN(presetIndex) && questionsByOrder[presetIndex]) {
           question = questionsByOrder[presetIndex];
@@ -218,7 +247,8 @@ export async function getScreeningById(screeningId: string) {
  */
 export async function updateScreeningReview(
   screeningId: string,
-  reviewNotes: string
+  reviewNotes: string,
+  triageLevel: PsgTriageLevel,
 ) {
   try {
     const supabase = await createClient();
@@ -231,6 +261,23 @@ export async function updateScreeningReview(
     if (userError || !user) {
       return { error: "User not authenticated" };
     }
+
+    const { data: reviewerProfile, error: reviewerProfileError } =
+      await supabase.from("profiles").select("role").eq("id", user.id).single();
+
+    if (reviewerProfileError || !reviewerProfile) {
+      return { error: "Unable to verify user role" };
+    }
+
+    if (
+      reviewerProfile.role !== "psg_member" &&
+      reviewerProfile.role !== "admin"
+    ) {
+      return { error: "Only PSG members can review screenings" };
+    }
+
+    const referralSeverity = mapPsgTriageToReferralSeverity(triageLevel);
+    const triageLabel = getPsgTriageLabel(triageLevel);
 
     const { data, error } = await supabase
       .from("screening_results")
@@ -247,6 +294,81 @@ export async function updateScreeningReview(
     if (error) {
       console.error("Error updating screening review:", error);
       return { error: "Failed to update screening review" };
+    }
+
+    const { data: existingReferral, error: referralFetchError } = await supabase
+      .from("referrals")
+      .select("id")
+      .eq("screening_result_id", screeningId)
+      .maybeSingle();
+
+    if (referralFetchError) {
+      console.error("Error fetching screening referral:", referralFetchError);
+      return { error: "Failed to route screening to admin" };
+    }
+
+    const referralNotes = reviewNotes?.trim()
+      ? `PSG review: ${reviewNotes.trim()}`
+      : `PSG triage decision: ${triageLabel}`;
+
+    let referralId = existingReferral?.id ?? null;
+
+    if (referralId) {
+      const { error: referralUpdateError } = await supabase
+        .from("referrals")
+        .update({
+          status: "reviewed",
+          severity: referralSeverity,
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+          notes: referralNotes,
+        })
+        .eq("id", referralId);
+
+      if (referralUpdateError) {
+        console.error(
+          "Error updating referral from screening:",
+          referralUpdateError,
+        );
+        return { error: "Failed to route screening to admin" };
+      }
+    } else {
+      const { data: createdReferral, error: referralCreateError } =
+        await supabase
+          .from("referrals")
+          .insert({
+            student_id: data.user_id,
+            source: "screening",
+            status: "reviewed",
+            severity: referralSeverity,
+            notes: referralNotes,
+            reason: `PSG triage decision: ${triageLabel}`,
+            screening_result_id: screeningId,
+            reviewed_by: user.id,
+            reviewed_at: new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+
+      if (referralCreateError || !createdReferral) {
+        console.error(
+          "Error creating referral from screening:",
+          referralCreateError,
+        );
+        return { error: "Failed to route screening to admin" };
+      }
+
+      referralId = createdReferral.id;
+    }
+
+    if (referralId) {
+      await supabase.from("referral_updates").insert({
+        referral_id: referralId,
+        updated_by: user.id,
+        update_type: "status_change",
+        new_status: "reviewed",
+        content: `Forwarded screening result to admin as ${triageLabel}.`,
+      });
     }
 
     return { data, success: true };
@@ -382,7 +504,7 @@ export async function getLatestScreeningResult() {
  * Add a custom screening question (Admin/PSG only)
  */
 export async function addScreeningQuestion(
-  question: Omit<ScreeningQuestion, "id" | "created_at" | "updated_at">
+  question: Omit<ScreeningQuestion, "id" | "created_at" | "updated_at">,
 ) {
   try {
     const supabase = await createClient();

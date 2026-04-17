@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useUserManagement } from "@/hooks/useUserManagement";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
 import {
   Pagination,
@@ -108,13 +107,11 @@ export default function UserManagementPage() {
   };
 
   if (loading) {
-    return <Loader fullScreen text="Loading users..." />;
+    return <Loader fullScreen text="Loading..." />;
   }
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar subtitle="User account management" />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link
           href="/dashboard"

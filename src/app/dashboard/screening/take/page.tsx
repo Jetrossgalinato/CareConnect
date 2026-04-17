@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { ScreeningForm } from "@/components/screening/ScreeningForm";
 import {
   ScreeningQuestion,
@@ -77,7 +76,6 @@ export default function TakeScreeningPage() {
     return (
       <DashboardClientWrapper>
         <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-          <DashboardNavbar showHomeButton={true} />
           <div className="flex items-center justify-center py-12">
             <Loader text="Loading screening questions..." />
           </div>
@@ -90,7 +88,6 @@ export default function TakeScreeningPage() {
     return (
       <DashboardClientWrapper>
         <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-          <DashboardNavbar showHomeButton={true} />
           <div className="flex items-center justify-center py-12">
             <div
               className="p-6 rounded-lg border text-center max-w-md"
@@ -128,8 +125,6 @@ export default function TakeScreeningPage() {
   return (
     <DashboardClientWrapper>
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-        <DashboardNavbar showHomeButton={true} />
-
         <div className="py-12 px-4">
           {/* Header */}
           <div className="max-w-3xl mx-auto mb-8">

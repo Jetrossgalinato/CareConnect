@@ -1,6 +1,5 @@
 import { getUser } from "@/lib/actions/auth";
 import { redirect } from "next/navigation";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { formatRole } from "@/lib/utils/auth";
 import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
 import Link from "next/link";
@@ -115,7 +114,11 @@ function StudentTipsSection() {
   );
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ loginToken?: string | string[] }>;
+}) {
   const user = await getUser();
 
   if (!user) {
@@ -130,6 +133,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const role: DashboardRole = user.role;
   const isStudent = role === "student";
   const quickActions = isStudent ? STUDENT_ACTIONS : PSG_ACTIONS;
@@ -137,12 +141,18 @@ export default async function DashboardPage() {
     ? "Get Started - Choose What You Need"
     : "Quick Access";
   const roleBanner = isStudent ? STUDENT_BANNER : PSG_BANNER;
+  const loginToken = Array.isArray(resolvedSearchParams?.loginToken)
+    ? resolvedSearchParams?.loginToken[0]
+    : resolvedSearchParams?.loginToken;
 
   return (
-    <DashboardClientWrapper initialRole={user.role}>
+    <DashboardClientWrapper
+      initialRole={user.role}
+      showStudentOnboarding={isStudent}
+      loginToken={loginToken}
+      studentName={user.full_name}
+    >
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-        <DashboardNavbar subtitle={`Welcome back, ${user.full_name}`} />
-
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-10">
             <div className="rounded-lg p-4" style={PANEL_STYLE}>
@@ -178,11 +188,12 @@ export default async function DashboardPage() {
                   className="text-sm leading-relaxed"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  Start by reviewing <strong>My Appointments</strong> to see
-                  upcoming sessions, or update your{" "}
-                  <strong>Availability</strong> to let students know when
-                  you&apos;re free. Don&apos;t forget to document completed
-                  sessions for proper record-keeping.
+                  Start with <strong>Review Screenings</strong> and{" "}
+                  <strong>View Referrals</strong>
+                  to evaluate each case, then forward your triage decision to
+                  admin as
+                  <strong> Needs Immediate Help</strong>,{" "}
+                  <strong>Moderate</strong>, or <strong>Good</strong>.
                 </p>
               </div>
             )}

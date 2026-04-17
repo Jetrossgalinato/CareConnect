@@ -6,6 +6,8 @@
   --bg-dark: hsl(336 0% 1%);
   --bg: hsl(300 0% 4%);
   --bg-light: hsl(0 0% 9%);
+  --navbar: oklch(1 0 0);
+  --navbar-foreground: oklch(0.145 0 0);
   --text: hsl(300 0% 95%);
   --text-muted: hsl(300 0% 69%);
   --highlight: hsl(330 0% 39%);
@@ -36,7 +38,7 @@
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent-foreground: oklch(95.514% 0.00011 271.152);
   --destructive: oklch(0.577 0.245 27.325);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -60,6 +62,7 @@
 [data-theme="light"] {
   --bg-dark: hsl(0 0% 95%);
   --bg: hsl(0 0% 98%);
+  --navbar: hsl(0 0% 100%);
   --bg-light: hsl(0 0% 100%);
   --text: hsl(0 0% 10%);
   --text-muted: hsl(0 0% 40%);
@@ -80,11 +83,14 @@
   --info-bg: hsl(217 70% 90%);
   --primary-20: hsl(111 33% 90%);
   --auth-image-filter: brightness(1);
+  --accent-foreground: oklch(0.205 0 0);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-navbar: var(--navbar);
+  --color-navbar-foreground: var(--navbar-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -125,6 +131,7 @@
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
+  --navbar: oklch(0.205 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);

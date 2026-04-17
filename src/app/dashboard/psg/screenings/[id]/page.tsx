@@ -3,7 +3,6 @@
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { AlertCircle, CheckCircle } from "lucide-react";
 import { ScreeningResultDisplay } from "@/components/screening/ScreeningResultDisplay";
 import { ScreeningResult, ScreeningResponse } from "@/lib/types/screening";
@@ -13,6 +12,7 @@ import {
 } from "@/lib/actions/screening";
 import { useAlert } from "@/hooks/useAlert";
 import { Loader } from "@/components/Loader";
+import type { PsgTriageLevel } from "@/types/referrals";
 
 export default function ScreeningDetailPage({
   params,
@@ -23,6 +23,7 @@ export default function ScreeningDetailPage({
   const [screening, setScreening] = useState<ScreeningResult | null>(null);
   const [responses, setResponses] = useState<ScreeningResponse[]>([]);
   const [reviewNotes, setReviewNotes] = useState("");
+  const [triageLevel, setTriageLevel] = useState<PsgTriageLevel>("moderate");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +52,7 @@ export default function ScreeningDetailPage({
 
         // Get student number from localStorage
         const storedNumber = localStorage.getItem(
-          `student_number_${result.data.screening.user_id}`
+          `student_number_${result.data.screening.user_id}`,
         );
         if (storedNumber) {
           setStudentNumber(parseInt(storedNumber));
@@ -71,7 +72,11 @@ export default function ScreeningDetailPage({
 
     setIsSubmitting(true);
     try {
-      const result = await updateScreeningReview(screening.id, reviewNotes);
+      const result = await updateScreeningReview(
+        screening.id,
+        reviewNotes,
+        triageLevel,
+      );
 
       if (result.error) {
         showAlert({
@@ -116,7 +121,6 @@ export default function ScreeningDetailPage({
     return (
       <DashboardClientWrapper>
         <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-          <DashboardNavbar subtitle="PSG Member Portal" showHomeButton={true} />
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-center py-12">
               <Loader text="Loading screening details..." />
@@ -131,7 +135,6 @@ export default function ScreeningDetailPage({
     return (
       <DashboardClientWrapper>
         <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-          <DashboardNavbar subtitle="PSG Member Portal" showHomeButton={true} />
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div
               className="rounded-lg border p-6 text-center"
@@ -170,8 +173,6 @@ export default function ScreeningDetailPage({
   return (
     <DashboardClientWrapper>
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-        <DashboardNavbar subtitle="PSG Member Portal" showHomeButton={true} />
-
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="space-y-2 mb-6">
@@ -309,9 +310,38 @@ export default function ScreeningDetailPage({
                     Review Notes
                   </h2>
                   <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                    Add your observations and recommendations for this screening
+                    Add your observations and choose the triage level to send to
+                    admin
                   </p>
                 </div>
+
+                <div className="mb-4">
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: "var(--text)" }}
+                  >
+                    Triage Decision
+                  </label>
+                  <select
+                    value={triageLevel}
+                    onChange={(e) =>
+                      setTriageLevel(e.target.value as PsgTriageLevel)
+                    }
+                    className="w-full rounded-md border px-3 py-2 text-sm"
+                    style={{
+                      background: "transparent",
+                      borderColor: "var(--border)",
+                      color: "var(--text)",
+                    }}
+                  >
+                    <option value="needs_immediate_help">
+                      Needs Immediate Help
+                    </option>
+                    <option value="moderate">Moderate</option>
+                    <option value="good">Good</option>
+                  </select>
+                </div>
+
                 <textarea
                   placeholder="Enter your review notes here..."
                   value={reviewNotes}
@@ -362,7 +392,7 @@ export default function ScreeningDetailPage({
                     }}
                   >
                     <CheckCircle className="h-4 w-4" />
-                    {isSubmitting ? "Saving..." : "Mark as Reviewed"}
+                    {isSubmitting ? "Saving..." : "Review and Forward to Admin"}
                   </button>
                 )}
 
