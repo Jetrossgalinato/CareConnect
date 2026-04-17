@@ -19,7 +19,13 @@ export function DashboardNavbar({
   showHomeButton = false,
 }: DashboardNavbarProps) {
   return (
-    <nav className="sticky top-0 z-50 md:-ml-64 md:w-[calc(100%+16rem)]">
+    <nav
+      className="sticky top-0 z-50 md:-ml-64 md:w-[calc(100%+16rem)]"
+      style={{
+        background: "var(--bg-light)",
+        borderBottom: "1px solid var(--border-muted)",
+      }}
+    >
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Image
