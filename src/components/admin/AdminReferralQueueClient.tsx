@@ -14,6 +14,7 @@ import {
   type ReferralStatus,
   type ReferralWithProfiles,
 } from "@/types/referrals";
+import { TimePicker } from "@/components/TimePicker";
 import { Calendar, ShieldCheck, User } from "lucide-react";
 
 function getStatusColor(status: ReferralStatus): string {
@@ -320,21 +321,14 @@ export function AdminReferralQueueClient({ referrals }: Props) {
                   >
                     Date and Time
                   </label>
-                  <input
-                    type="datetime-local"
+                  <TimePicker
                     value={scheduleForm.appointment_date}
-                    onChange={(e) =>
+                    onChange={(value) =>
                       setScheduleForm((prev) => ({
                         ...prev,
-                        appointment_date: e.target.value,
+                        appointment_date: value,
                       }))
                     }
-                    className="w-full px-3 py-2 rounded-lg"
-                    style={{
-                      background: "var(--bg-light)",
-                      border: "1px solid var(--border-muted)",
-                      color: "var(--text)",
-                    }}
                   />
                 </div>
 
