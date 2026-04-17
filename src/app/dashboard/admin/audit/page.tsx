@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
 import {
   Pagination,
@@ -96,13 +95,11 @@ export default function AuditLogsPage() {
   };
 
   if (loading) {
-    return <Loader fullScreen text="Loading audit logs..." />;
+    return <Loader fullScreen text="Loading..." />;
   }
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar subtitle="System activity tracking" />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link
           href="/dashboard"

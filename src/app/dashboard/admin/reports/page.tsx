@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
 import {
   Pagination,
@@ -117,8 +116,6 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar subtitle="System reports and analytics" />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link
           href="/dashboard"
@@ -169,7 +166,7 @@ export default function ReportsPage() {
         />
 
         {loading ? (
-          <Loader text="Generating report..." />
+          <Loader text="Loading..." />
         ) : hasData ? (
           <ReportResults
             activeTab={activeTab}

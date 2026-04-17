@@ -1,7 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
-import { getUser } from "@/lib/actions/auth";
 import {
   Shield,
   Users,
@@ -11,20 +8,8 @@ import {
 } from "lucide-react";
 
 export default async function AdminPage() {
-  const user = await getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  if (user.role !== "admin") {
-    redirect("/dashboard");
-  }
-
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar subtitle="Admin workspace" showHomeButton />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <section
           className="rounded-lg p-6 mb-8"
