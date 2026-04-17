@@ -215,3 +215,100 @@ export async function getUser() {
 
   return createdProfile ?? fallbackProfile;
 }
+
+export async function getCurrentUserProfile() {
+  const profile = await getUser();
+
+  if (!profile) {
+    return {
+      success: false,
+      error: "Please login first",
+    };
+  }
+
+  return {
+    success: true,
+    data: profile,
+  };
+}
+
+export async function updateCurrentUserProfile(input: {
+  full_name: string;
+  school_id?: string | null;
+  avatar_url?: string | null;
+}) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        error: "Please login first",
+      };
+    }
+
+    const fullName = input.full_name.trim();
+    const schoolId = (input.school_id || "").trim();
+    const avatarUrl = (input.avatar_url || "").trim();
+
+    if (fullName.length < 2) {
+      return {
+        success: false,
+        error: "Full name must be at least 2 characters",
+      };
+    }
+
+    const updateData: Partial<Profile> = {
+      full_name: fullName,
+      school_id: schoolId || null,
+      avatar_url: avatarUrl || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: updatedProfile, error: updateError } = await supabase
+      .from("profiles")
+      .update(updateData)
+      .eq("id", user.id)
+      .select("*")
+      .single();
+
+    if (updateError || !updatedProfile) {
+      console.error("Error updating current profile:", updateError);
+      return {
+        success: false,
+        error: "Failed to update profile",
+      };
+    }
+
+    // Keep auth metadata aligned with profile information.
+    const { error: metadataError } = await supabase.auth.updateUser({
+      data: {
+        full_name: fullName,
+        school_id: schoolId || null,
+        avatar_url: avatarUrl || null,
+      },
+    });
+
+    if (metadataError) {
+      console.error("Error syncing auth metadata:", metadataError);
+    }
+
+    revalidatePath("/dashboard", "layout");
+    revalidatePath("/dashboard/profile");
+
+    return {
+      success: true,
+      data: updatedProfile as Profile,
+    };
+  } catch (error) {
+    console.error("Unexpected error updating current profile:", error);
+    return {
+      success: false,
+      error: "An unexpected error occurred",
+    };
+  }
+}

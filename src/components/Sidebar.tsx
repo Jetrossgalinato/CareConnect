@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home,
+  User,
   ClipboardList,
   FileText,
   FilePlus,
@@ -58,6 +59,7 @@ const STUDENT_MENU: SidebarMenuItem[] = [
     icon: FilePlus,
   },
   { label: "My Referrals", href: "/dashboard/referrals", icon: Activity },
+  { label: "Profile", href: "/dashboard/profile", icon: User },
 ];
 
 const PSG_MENU: SidebarMenuItem[] = [
@@ -69,6 +71,7 @@ const PSG_MENU: SidebarMenuItem[] = [
     icon: ClipboardList,
   },
   { label: "Sessions", href: "/dashboard/psg/sessions", icon: Stethoscope },
+  { label: "Profile", href: "/dashboard/profile", icon: User },
 ];
 
 const ADMIN_MENU: SidebarMenuItem[] = [
@@ -81,6 +84,7 @@ const ADMIN_MENU: SidebarMenuItem[] = [
   { label: "User Management", href: "/dashboard/admin/users", icon: Users },
   { label: "Reports", href: "/dashboard/admin/reports", icon: BarChart3 },
   { label: "Audit Logs", href: "/dashboard/admin/audit", icon: FileText },
+  { label: "Profile", href: "/dashboard/profile", icon: User },
 ];
 
 function getMenusByRole(role: UserRole): SidebarMenuItem[] {
