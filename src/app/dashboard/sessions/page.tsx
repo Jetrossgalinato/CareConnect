@@ -1,6 +1,5 @@
 import { getUser } from "@/lib/actions/auth";
 import { redirect } from "next/navigation";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { getStudentSessions } from "@/actions/sessions";
 import Link from "next/link";
 import { ArrowLeft, FileText, Calendar, Clock, User } from "lucide-react";
@@ -17,8 +16,6 @@ export default async function StudentSessionHistoryPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar subtitle="My Session History" />
-
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Link
@@ -68,16 +65,15 @@ export default async function StudentSessionHistoryPage() {
             <div className="space-y-4">
               {sessions.map((session) => {
                 const appointment = session.appointment;
-                const psgMember = appointment.psg_member;
                 const sessionDate = new Date(
-                  appointment.appointment_date
+                  appointment.appointment_date,
                 ).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
                 });
                 const sessionTime = new Date(
-                  appointment.appointment_date
+                  appointment.appointment_date,
                 ).toLocaleTimeString("en-US", {
                   hour: "numeric",
                   minute: "2-digit",

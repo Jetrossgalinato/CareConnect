@@ -1,4 +1,3 @@
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { getStudentReferrals } from "@/actions/referrals";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/actions/auth";
@@ -40,8 +39,6 @@ export default async function StudentReferralsPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar subtitle="My Referrals" />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -164,7 +161,7 @@ export default async function StudentReferralsPage() {
                             year: "numeric",
                             month: "long",
                             day: "numeric",
-                          }
+                          },
                         )}
                       </p>
                     </div>

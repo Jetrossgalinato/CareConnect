@@ -1,6 +1,5 @@
 import { getUser } from "@/lib/actions/auth";
 import { redirect } from "next/navigation";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { formatRole } from "@/lib/utils/auth";
 import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
 import Link from "next/link";
@@ -154,8 +153,6 @@ export default async function DashboardPage({
       studentName={user.full_name}
     >
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-        <DashboardNavbar subtitle={`Welcome back, ${user.full_name}`} />
-
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-10">
             <div className="rounded-lg p-4" style={PANEL_STYLE}>

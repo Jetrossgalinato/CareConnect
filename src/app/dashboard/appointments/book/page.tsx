@@ -7,7 +7,6 @@ import { createAppointment } from "@/actions/appointments";
 import { useAlert } from "@/hooks/useAlert";
 import type { AvailableTimeSlot } from "@/types/appointments";
 import { createClient } from "@/lib/supabase/client";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
 
 export default function BookAppointmentPage() {
@@ -17,11 +16,11 @@ export default function BookAppointmentPage() {
   const [loading, setLoading] = useState(false);
   const [slots, setSlots] = useState<AvailableTimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<AvailableTimeSlot | null>(
-    null
+    null,
   );
   const [notes, setNotes] = useState("");
   const [locationType, setLocationType] = useState<"online" | "in_person">(
-    "online"
+    "online",
   );
   const [meetingLink, setMeetingLink] = useState("");
 
@@ -71,7 +70,7 @@ export default function BookAppointmentPage() {
           duration: 5000,
         });
       }
-    } catch (error) {
+    } catch {
       showAlert({
         message: "An unexpected error occurred while searching for slots",
         type: "error",
@@ -163,7 +162,7 @@ export default function BookAppointmentPage() {
           duration: 5000,
         });
       }
-    } catch (error) {
+    } catch {
       showAlert({
         message: "An unexpected error occurred",
         type: "error",
@@ -175,13 +174,16 @@ export default function BookAppointmentPage() {
   };
 
   // Group slots by date
-  const slotsByDate = slots.reduce((acc, slot) => {
-    if (!acc[slot.date]) {
-      acc[slot.date] = [];
-    }
-    acc[slot.date].push(slot);
-    return acc;
-  }, {} as Record<string, AvailableTimeSlot[]>);
+  const slotsByDate = slots.reduce(
+    (acc, slot) => {
+      if (!acc[slot.date]) {
+        acc[slot.date] = [];
+      }
+      acc[slot.date].push(slot);
+      return acc;
+    },
+    {} as Record<string, AvailableTimeSlot[]>,
+  );
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -195,10 +197,6 @@ export default function BookAppointmentPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar
-        subtitle="Schedule a new appointment with a PSG member"
-        showHomeButton={true}
-      />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <h1
           className="text-base font-bold mb-6"

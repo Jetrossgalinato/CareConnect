@@ -1,6 +1,5 @@
 import { getUser } from "@/lib/actions/auth";
 import { redirect } from "next/navigation";
-import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { getSessionById } from "@/actions/sessions";
 import Link from "next/link";
 import {
@@ -46,8 +45,6 @@ export default async function SessionDetailPage({
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <DashboardNavbar subtitle="Welcome back, PSG Member" />
-
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Link
