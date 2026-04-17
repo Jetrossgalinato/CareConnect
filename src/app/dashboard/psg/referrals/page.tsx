@@ -6,7 +6,6 @@ import { DashboardClientWrapper } from "@/components/DashboardClientWrapper";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { Loader } from "@/components/Loader";
 import { useAlert } from "@/hooks/useAlert";
-import { createClient } from "@/lib/supabase/client";
 import { getCurrentUserReferralsView } from "@/actions/referrals";
 import {
   ReferralWithProfiles,
@@ -46,9 +45,9 @@ export default function PSGReferralsPage() {
   const [referrals, setReferrals] = useState<ReferralWithProfiles[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadTimedOut, setLoadTimedOut] = useState(false);
-  const [loadPhase, setLoadPhase] = useState<
-    "idle" | "referrals" | "auth" | "profile" | "fallback" | "done"
-  >("idle");
+  const [loadPhase, setLoadPhase] = useState<"idle" | "loading" | "done">(
+    "idle",
+  );
   const [diagnostics, setDiagnostics] = useState<{
     referralsMs: number;
     authMs: number;
@@ -62,78 +61,12 @@ export default function PSGReferralsPage() {
   const loadUserAndReferrals = async () => {
     setLoading(true);
     setLoadTimedOut(false);
-    setLoadPhase("referrals");
+    setLoadPhase("loading");
 
     const runStart = performance.now();
-    let referralsMs = 0;
-    const authMs = 0;
-    const profileMs = 0;
     let fallbackMs = 0;
-    let fastPathError: unknown = null;
-    let currentPhase: "referrals" | "auth" | "profile" | "fallback" =
-      "referrals";
 
     try {
-      const supabase = createClient();
-      try {
-        const referralsStart = performance.now();
-        const referralsResult = await withTimeout(
-          Promise.resolve(
-            supabase
-              .from("referrals")
-              .select(
-                `
-                *,
-                student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
-                assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
-                reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
-              `,
-              )
-              .order("created_at", { ascending: false }),
-          ),
-          7000,
-          "Loading referrals timed out",
-        );
-        referralsMs = Math.round(performance.now() - referralsStart);
-
-        if (!referralsResult.error && referralsResult.data) {
-          setReferrals(referralsResult.data as ReferralWithProfiles[]);
-          const totalMs = Math.round(performance.now() - runStart);
-          setDiagnostics({
-            referralsMs,
-            authMs,
-            profileMs,
-            fallbackMs,
-            totalMs,
-          });
-          setLoadPhase("done");
-          if (process.env.NODE_ENV !== "production") {
-            console.info("[PSG Referrals] Load timings", {
-              source: "client_query",
-              referralsMs,
-              totalMs,
-              count: referralsResult.data.length,
-            });
-          }
-          return;
-        }
-
-        fastPathError = referralsResult.error;
-      } catch (error) {
-        fastPathError = error;
-        referralsMs = Math.round(performance.now() - runStart);
-      }
-
-      if (fastPathError && process.env.NODE_ENV !== "production") {
-        console.warn("[PSG Referrals] Fast path failed, using fallback", {
-          error: fastPathError,
-          referralsMs,
-        });
-      }
-
-      // Fallback path: preserve old behavior for compatibility/debugging.
-      currentPhase = "fallback";
-      setLoadPhase("fallback");
       const fallbackStart = performance.now();
       const result = await withTimeout(
         Promise.resolve(getCurrentUserReferralsView()),
@@ -146,20 +79,16 @@ export default function PSGReferralsPage() {
         setReferrals(result.data);
         const totalMs = Math.round(performance.now() - runStart);
         setDiagnostics({
-          referralsMs,
-          authMs,
-          profileMs,
+          referralsMs: 0,
+          authMs: 0,
+          profileMs: 0,
           fallbackMs,
           totalMs,
         });
         setLoadPhase("done");
         if (process.env.NODE_ENV !== "production") {
           console.info("[PSG Referrals] Load timings", {
-            source: "server_action_fallback",
-            fastPathError,
-            referralsMs,
-            authMs,
-            profileMs,
+            source: "server_action_primary",
             fallbackMs,
             totalMs,
             count: result.data.length,
@@ -191,22 +120,18 @@ export default function PSGReferralsPage() {
     } catch (error) {
       const totalMs = Math.round(performance.now() - runStart);
       setDiagnostics({
-        referralsMs,
-        authMs,
-        profileMs,
+        referralsMs: 0,
+        authMs: 0,
+        profileMs: 0,
         fallbackMs,
         totalMs,
-        failedPhase: currentPhase,
+        failedPhase: "loading",
       });
 
       console.error("Error loading referrals:", error);
       if (process.env.NODE_ENV !== "production") {
         console.error("[PSG Referrals] Load failed", {
           error,
-          currentPhase,
-          referralsMs,
-          authMs,
-          profileMs,
           fallbackMs,
           totalMs,
         });
