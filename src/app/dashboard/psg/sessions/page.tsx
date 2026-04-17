@@ -28,7 +28,7 @@ export default async function PSGSessionsPage() {
   const [sessionsResult, summaryResult] = await Promise.all(
     user.role === "admin"
       ? [getAllSessions(), getAllSessionsSummary()]
-      : [getPSGMemberSessions(user.id), getPSGSessionSummary(user.id)]
+      : [getPSGMemberSessions(user.id), getPSGSessionSummary(user.id)],
   );
 
   const sessions = sessionsResult.success ? sessionsResult.data || [] : [];
@@ -41,12 +41,12 @@ export default async function PSGSessionsPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Link
-          href="/dashboard/psg/appointments"
+          href="/dashboard"
           className="inline-flex items-center gap-2 mb-6 transition-colors"
           style={{ color: "var(--primary)" }}
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Appointments
+          Back to Dashboard
         </Link>
 
         {/* Summary Cards */}
@@ -222,7 +222,7 @@ export default async function PSGSessionsPage() {
                 const appointment = session.appointment;
                 const student = appointment.student;
                 const sessionDate = new Date(
-                  appointment.appointment_date
+                  appointment.appointment_date,
                 ).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -329,17 +329,6 @@ export default async function PSGSessionsPage() {
                         }}
                       >
                         View Details
-                      </Link>
-                      <Link
-                        href={`/dashboard/psg/appointments/${appointment.id}`}
-                        className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
-                        style={{
-                          background: "var(--bg-light)",
-                          border: "1px solid var(--border-muted)",
-                          color: "var(--text)",
-                        }}
-                      >
-                        View Appointment
                       </Link>
                     </div>
                   </div>

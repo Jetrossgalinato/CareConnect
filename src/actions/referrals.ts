@@ -9,6 +9,7 @@ import {
   ReferralSource,
   ReferralStatus,
   ReferralSeverity,
+  PsgTriageLevel,
 } from "@/types/referrals";
 
 type ActionResponse<T = unknown> = {
@@ -16,6 +17,32 @@ type ActionResponse<T = unknown> = {
   data?: T;
   error?: string;
 };
+
+function mapPsgTriageToSeverity(triageLevel: PsgTriageLevel): ReferralSeverity {
+  switch (triageLevel) {
+    case "needs_immediate_help":
+      return "critical";
+    case "moderate":
+      return "moderate";
+    case "good":
+      return "low";
+    default:
+      return "low";
+  }
+}
+
+function getPsgTriageLabel(triageLevel: PsgTriageLevel): string {
+  switch (triageLevel) {
+    case "needs_immediate_help":
+      return "Needs Immediate Help";
+    case "moderate":
+      return "Moderate";
+    case "good":
+      return "Good";
+    default:
+      return "Good";
+  }
+}
 
 // Create a new referral
 export async function createReferral(data: {
@@ -77,7 +104,7 @@ export async function getAllReferrals(): Promise<
         student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
         assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
         reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
-      `
+      `,
       )
       .order("created_at", { ascending: false });
 
@@ -95,7 +122,7 @@ export async function getAllReferrals(): Promise<
 
 // Get referrals for a specific PSG member (assigned to them OR unassigned)
 export async function getPSGAssignedReferrals(
-  psgMemberId: string
+  psgMemberId: string,
 ): Promise<ActionResponse<ReferralWithProfiles[]>> {
   try {
     const supabase = await createClient();
@@ -108,10 +135,10 @@ export async function getPSGAssignedReferrals(
         student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
         assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
         reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
-      `
+      `,
       )
       .or(
-        `assigned_psg_member_id.eq.${psgMemberId},assigned_psg_member_id.is.null`
+        `assigned_psg_member_id.eq.${psgMemberId},assigned_psg_member_id.is.null`,
       )
       .order("created_at", { ascending: false });
 
@@ -129,7 +156,7 @@ export async function getPSGAssignedReferrals(
 
 // Get student's own referrals
 export async function getStudentReferrals(
-  studentId: string
+  studentId: string,
 ): Promise<ActionResponse<ReferralWithProfiles[]>> {
   try {
     const supabase = await createClient();
@@ -142,7 +169,7 @@ export async function getStudentReferrals(
         student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
         assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
         reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
-      `
+      `,
       )
       .eq("student_id", studentId)
       .order("created_at", { ascending: false });
@@ -161,7 +188,7 @@ export async function getStudentReferrals(
 
 // Get single referral details
 export async function getReferralById(
-  referralId: string
+  referralId: string,
 ): Promise<ActionResponse<ReferralWithProfiles>> {
   try {
     const supabase = await createClient();
@@ -174,7 +201,7 @@ export async function getReferralById(
         student:profiles!referrals_student_id_fkey(id, full_name, email, school_id),
         assigned_psg_member:profiles!referrals_assigned_psg_member_id_fkey(id, full_name, email),
         reviewed_by_profile:profiles!referrals_reviewed_by_fkey(id, full_name)
-      `
+      `,
       )
       .eq("id", referralId)
       .single();
@@ -196,7 +223,7 @@ export async function updateReferralStatus(
   referralId: string,
   status: ReferralStatus,
   severity?: ReferralSeverity,
-  assignedPsgMemberId?: string
+  assignedPsgMemberId?: string,
 ): Promise<ActionResponse<Referral>> {
   try {
     const supabase = await createClient();
@@ -206,6 +233,32 @@ export async function updateReferralStatus(
 
     if (!user) {
       return { success: false, error: "Authentication required" };
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return { success: false, error: "Unable to verify user role" };
+    }
+
+    if (profile.role === "psg_member") {
+      if (status !== "reviewed") {
+        return {
+          success: false,
+          error: "PSG members can only forward referrals to admin after review",
+        };
+      }
+
+      if (!severity) {
+        return {
+          success: false,
+          error: "Select a triage level before forwarding to admin",
+        };
+      }
     }
 
     const updateData: Partial<Referral> = {
@@ -253,12 +306,84 @@ export async function updateReferralStatus(
   }
 }
 
+export async function forwardReferralToAdmin(
+  referralId: string,
+  triageLevel: PsgTriageLevel,
+  reviewNotes?: string,
+): Promise<ActionResponse<Referral>> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return { success: false, error: "Unable to verify user role" };
+    }
+
+    if (profile.role !== "psg_member" && profile.role !== "admin") {
+      return {
+        success: false,
+        error: "Only PSG members can forward referrals",
+      };
+    }
+
+    const severity = mapPsgTriageToSeverity(triageLevel);
+    const triageLabel = getPsgTriageLabel(triageLevel);
+
+    const { data: referral, error: updateError } = await supabase
+      .from("referrals")
+      .update({
+        status: "reviewed",
+        severity,
+        reviewed_by: user.id,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("id", referralId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error("Error forwarding referral to admin:", updateError);
+      return { success: false, error: updateError.message };
+    }
+
+    const updateContent = reviewNotes?.trim()
+      ? `Forwarded to admin as ${triageLabel}. Notes: ${reviewNotes.trim()}`
+      : `Forwarded to admin as ${triageLabel}.`;
+
+    await supabase.from("referral_updates").insert({
+      referral_id: referralId,
+      updated_by: user.id,
+      update_type: "status_change",
+      new_status: "reviewed",
+      content: updateContent,
+    });
+
+    return { success: true, data: referral };
+  } catch (error) {
+    console.error("Unexpected error forwarding referral:", error);
+    return { success: false, error: "Failed to forward referral to admin" };
+  }
+}
+
 // Create case assessment
 export async function createReferralAssessment(
   data: Omit<
     ReferralAssessment,
     "id" | "created_at" | "updated_at" | "assessed_by"
-  >
+  >,
 ): Promise<ActionResponse<ReferralAssessment>> {
   try {
     const supabase = await createClient();
@@ -307,7 +432,7 @@ export async function createReferralAssessment(
 
 // Get case assessment for a referral
 export async function getReferralAssessment(
-  referralId: string
+  referralId: string,
 ): Promise<ActionResponse<ReferralAssessment>> {
   try {
     const supabase = await createClient();
@@ -333,7 +458,7 @@ export async function getReferralAssessment(
 
 // Get referral updates
 export async function getReferralUpdates(
-  referralId: string
+  referralId: string,
 ): Promise<ActionResponse<ReferralUpdateWithProfile[]>> {
   try {
     const supabase = await createClient();
@@ -344,7 +469,7 @@ export async function getReferralUpdates(
         `
         *,
         updated_by_profile:profiles!referral_updates_updated_by_fkey(id, full_name, role)
-      `
+      `,
       )
       .eq("referral_id", referralId)
       .order("created_at", { ascending: false });
@@ -364,7 +489,7 @@ export async function getReferralUpdates(
 // Add a note to referral
 export async function addReferralNote(
   referralId: string,
-  content: string
+  content: string,
 ): Promise<ActionResponse> {
   try {
     const supabase = await createClient();
@@ -399,7 +524,7 @@ export async function addReferralNote(
 export async function escalateReferral(
   referralId: string,
   escalatedTo: string,
-  escalationReason: string
+  escalationReason: string,
 ): Promise<ActionResponse> {
   try {
     const supabase = await createClient();

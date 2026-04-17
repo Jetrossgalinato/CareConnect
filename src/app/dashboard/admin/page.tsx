@@ -2,7 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DashboardNavbar } from "@/components/DashboardNavbar";
 import { getUser } from "@/lib/actions/auth";
-import { Shield, Users, BarChart3, FileText } from "lucide-react";
+import {
+  Shield,
+  Users,
+  BarChart3,
+  FileText,
+  ClipboardList,
+} from "lucide-react";
 
 export default async function AdminPage() {
   const user = await getUser();
@@ -47,7 +53,30 @@ export default async function AdminPage() {
           >
             Existing Admin Modules
           </h2>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-4">
+            <Link
+              href="/dashboard/psg/referrals"
+              className="rounded-lg p-5 transition hover:opacity-90"
+              style={{
+                background: "var(--bg-light)",
+                border: "1px solid var(--border-muted)",
+              }}
+            >
+              <ClipboardList
+                className="w-5 h-5 mb-2"
+                style={{ color: "var(--primary)" }}
+              />
+              <p className="font-semibold" style={{ color: "var(--text)" }}>
+                Referral Queue
+              </p>
+              <p
+                className="text-sm mt-1"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Review PSG-triaged referrals sent to admin.
+              </p>
+            </Link>
+
             <Link
               href="/dashboard/admin/users"
               className="rounded-lg p-5 transition hover:opacity-90"

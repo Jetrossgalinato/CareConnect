@@ -41,7 +41,7 @@ export async function createAppointment(input: CreateAppointmentInput) {
         p_psg_member_id: input.psg_member_id,
         p_appointment_date: input.appointment_date,
         p_duration_minutes: input.duration_minutes || 60,
-      }
+      },
     );
 
     if (checkError) {
@@ -92,7 +92,7 @@ export async function getStudentAppointments(studentId: string) {
         `
         *,
         psg_member:profiles!psg_member_id(id, full_name, avatar_url)
-      `
+      `,
       )
       .eq("student_id", studentId)
       .order("appointment_date", { ascending: true });
@@ -120,7 +120,7 @@ export async function getPSGAppointments(psgMemberId: string) {
         *,
         student:profiles!student_id(id, full_name, school_id, avatar_url),
         psg_member:profiles!psg_member_id(id, full_name, avatar_url)
-      `
+      `,
       )
       .eq("psg_member_id", psgMemberId)
       .order("appointment_date", { ascending: true });
@@ -166,7 +166,7 @@ export async function getAllPSGAppointments() {
         *,
         student:profiles!student_id(id, full_name, school_id, avatar_url),
         psg_member:profiles!psg_member_id(id, full_name, avatar_url)
-      `
+      `,
       )
       .order("appointment_date", { ascending: false });
 
@@ -182,6 +182,65 @@ export async function getAllPSGAppointments() {
   }
 }
 
+export async function getCurrentUserAppointmentsView() {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile?.role) {
+      return { success: false, error: "Failed to load profile" };
+    }
+
+    if (profile.role !== "psg_member" && profile.role !== "admin") {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    let query = supabase.from("appointments").select(
+      `
+      *,
+      student:profiles!student_id(id, full_name, school_id, avatar_url),
+      psg_member:profiles!psg_member_id(id, full_name, avatar_url)
+    `,
+    );
+
+    if (profile.role !== "admin") {
+      query = query.eq("psg_member_id", user.id);
+    }
+
+    const { data, error } = await query.order("appointment_date", {
+      ascending: true,
+    });
+
+    if (error) {
+      console.error("Get current user appointments view error:", error);
+      return { success: false, error: "Failed to fetch appointments" };
+    }
+
+    return {
+      success: true,
+      data: data as AppointmentWithProfiles[],
+      role: profile.role,
+    };
+  } catch (error) {
+    console.error("Unexpected error getting appointments view:", error);
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
 export async function getAppointmentById(appointmentId: string) {
   try {
     const supabase = await createClient();
@@ -193,7 +252,7 @@ export async function getAppointmentById(appointmentId: string) {
         *,
         student:profiles!student_id(id, full_name, school_id, avatar_url),
         psg_member:profiles!psg_member_id(id, full_name, avatar_url)
-      `
+      `,
       )
       .eq("id", appointmentId)
       .single();
@@ -212,7 +271,7 @@ export async function getAppointmentById(appointmentId: string) {
 
 export async function updateAppointment(
   appointmentId: string,
-  input: UpdateAppointmentInput
+  input: UpdateAppointmentInput,
 ) {
   try {
     const supabase = await createClient();
@@ -273,7 +332,7 @@ export async function confirmAppointment(appointmentId: string) {
 
 export async function completeAppointment(
   appointmentId: string,
-  notes?: string
+  notes?: string,
 ) {
   return updateAppointment(appointmentId, {
     status: "completed",

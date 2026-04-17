@@ -6,15 +6,12 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   ClipboardList,
-  Calendar,
-  CalendarPlus,
   FileText,
   FilePlus,
   Shield,
   Users,
   BarChart3,
   Activity,
-  Clock3,
   Stethoscope,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -61,22 +58,10 @@ const STUDENT_MENU: SidebarMenuItem[] = [
     icon: FilePlus,
   },
   { label: "My Referrals", href: "/dashboard/referrals", icon: Activity },
-  { label: "My Appointments", href: "/dashboard/appointments", icon: Calendar },
-  {
-    label: "Book Appointment",
-    href: "/dashboard/appointments/book",
-    icon: CalendarPlus,
-  },
 ];
 
 const PSG_MENU: SidebarMenuItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: Home },
-  {
-    label: "Appointments",
-    href: "/dashboard/psg/appointments",
-    icon: Calendar,
-  },
-  { label: "Availability", href: "/dashboard/psg/availability", icon: Clock3 },
   { label: "Referrals", href: "/dashboard/psg/referrals", icon: FileText },
   {
     label: "Screenings",

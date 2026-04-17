@@ -1,11 +1,5 @@
 import type { CSSProperties } from "react";
-import {
-  ClipboardList,
-  FileText,
-  Calendar,
-  TrendingUp,
-  Users,
-} from "lucide-react";
+import { ClipboardList, FileText, TrendingUp, Users } from "lucide-react";
 import type { BannerContent, QuickAction, StudentTip } from "@/types/dashboard";
 
 export const ACTION_CARD_CLASS =
@@ -38,7 +32,7 @@ export const STUDENT_BANNER: BannerContent = {
 export const PSG_BANNER: BannerContent = {
   title: "Welcome, PSG Member",
   description:
-    "Thank you for being part of the Peer Support Group. Your role is vital in providing mental health support to fellow students through active listening, guidance, and compassionate care.",
+    "Your role is to review student screenings and referrals, then forward your triage decision to admin so each case receives the right level of support.",
 };
 
 export const STUDENT_ACTIONS: QuickAction[] = [
@@ -55,12 +49,6 @@ export const STUDENT_ACTIONS: QuickAction[] = [
     icon: TrendingUp,
   },
   {
-    href: "/dashboard/appointments",
-    title: "My Appointments",
-    description: "Schedule sessions with PSG members",
-    icon: Calendar,
-  },
-  {
     href: "/dashboard/referrals/create",
     title: "Self-Referral Form",
     description: "Submit a referral request for support",
@@ -72,25 +60,13 @@ export const PSG_ACTIONS: QuickAction[] = [
   {
     href: "/dashboard/psg/screenings",
     title: "Review Screenings",
-    description: "Review student mental health screenings",
+    description: "Review screenings and forward triage decisions to admin",
     icon: ClipboardList,
-  },
-  {
-    href: "/dashboard/psg/appointments",
-    title: "My Appointments",
-    description: "View and confirm scheduled sessions",
-    icon: Calendar,
-  },
-  {
-    href: "/dashboard/psg/availability",
-    title: "Manage Availability",
-    description: "Set your weekly schedule",
-    icon: Calendar,
   },
   {
     href: "/dashboard/psg/referrals",
     title: "View Referrals",
-    description: "Manage assigned student referrals",
+    description: "Review referrals and forward as immediate, moderate, or good",
     icon: Users,
   },
   {

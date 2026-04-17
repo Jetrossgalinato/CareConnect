@@ -118,7 +118,7 @@ function StudentTipsSection() {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams?: { loginToken?: string | string[] };
+  searchParams?: Promise<{ loginToken?: string | string[] }>;
 }) {
   const user = await getUser();
 
@@ -134,6 +134,7 @@ export default async function DashboardPage({
     redirect("/login");
   }
 
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const role: DashboardRole = user.role;
   const isStudent = role === "student";
   const quickActions = isStudent ? STUDENT_ACTIONS : PSG_ACTIONS;
@@ -141,9 +142,9 @@ export default async function DashboardPage({
     ? "Get Started - Choose What You Need"
     : "Quick Access";
   const roleBanner = isStudent ? STUDENT_BANNER : PSG_BANNER;
-  const loginToken = Array.isArray(searchParams?.loginToken)
-    ? searchParams?.loginToken[0]
-    : searchParams?.loginToken;
+  const loginToken = Array.isArray(resolvedSearchParams?.loginToken)
+    ? resolvedSearchParams?.loginToken[0]
+    : resolvedSearchParams?.loginToken;
 
   return (
     <DashboardClientWrapper
@@ -190,11 +191,12 @@ export default async function DashboardPage({
                   className="text-sm leading-relaxed"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  Start by reviewing <strong>My Appointments</strong> to see
-                  upcoming sessions, or update your{" "}
-                  <strong>Availability</strong> to let students know when
-                  you&apos;re free. Don&apos;t forget to document completed
-                  sessions for proper record-keeping.
+                  Start with <strong>Review Screenings</strong> and{" "}
+                  <strong>View Referrals</strong>
+                  to evaluate each case, then forward your triage decision to
+                  admin as
+                  <strong> Needs Immediate Help</strong>,{" "}
+                  <strong>Moderate</strong>, or <strong>Good</strong>.
                 </p>
               </div>
             )}

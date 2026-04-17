@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
 import type {
   CreatePSGAvailabilityInput,
   PSGAvailability,
@@ -51,7 +50,6 @@ export async function createPSGAvailability(input: CreatePSGAvailabilityInput) {
       return { success: false, error: "Failed to create availability" };
     }
 
-    revalidatePath("/dashboard/psg/availability");
     return { success: true, data };
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -92,7 +90,7 @@ export async function getAllActivePSGAvailability() {
         `
         *,
         psg_member:profiles!psg_member_id(id, full_name, avatar_url)
-      `
+      `,
       )
       .eq("is_active", true)
       .order("day_of_week", { ascending: true })
@@ -112,7 +110,7 @@ export async function getAllActivePSGAvailability() {
 
 export async function updatePSGAvailability(
   availabilityId: string,
-  updates: Partial<CreatePSGAvailabilityInput>
+  updates: Partial<CreatePSGAvailabilityInput>,
 ) {
   try {
     const supabase = await createClient();
@@ -129,7 +127,6 @@ export async function updatePSGAvailability(
       return { success: false, error: "Failed to update availability" };
     }
 
-    revalidatePath("/dashboard/psg/availability");
     return { success: true, data };
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -151,7 +148,6 @@ export async function deletePSGAvailability(availabilityId: string) {
       return { success: false, error: "Failed to delete availability" };
     }
 
-    revalidatePath("/dashboard/psg/availability");
     return { success: true };
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -161,7 +157,7 @@ export async function deletePSGAvailability(availabilityId: string) {
 
 export async function togglePSGAvailability(
   availabilityId: string,
-  isActive: boolean
+  isActive: boolean,
 ) {
   return updatePSGAvailability(availabilityId, { is_active: isActive });
 }
@@ -173,7 +169,7 @@ export async function togglePSGAvailability(
 export async function getAvailableTimeSlots(
   startDate: string,
   endDate: string,
-  durationMinutes: number = 60
+  durationMinutes: number = 60,
 ): Promise<{ success: boolean; data?: AvailableTimeSlot[]; error?: string }> {
   try {
     const supabase = await createClient();
@@ -218,7 +214,7 @@ export async function getAvailableTimeSlots(
       profiles?.map((p) => [
         p.id,
         p as { id: string; full_name: string; avatar_url?: string },
-      ]) || []
+      ]) || [],
     );
 
     // Map availabilities with profiles
@@ -282,11 +278,11 @@ export async function getAvailableTimeSlots(
         // If start time is in the past, start from next available hour
         if (currentSlot < now) {
           const minutesFromNow = Math.ceil(
-            (now.getTime() - currentSlot.getTime()) / (1000 * 60)
+            (now.getTime() - currentSlot.getTime()) / (1000 * 60),
           );
           const slotsToSkip = Math.ceil(minutesFromNow / durationMinutes);
           currentSlot.setMinutes(
-            currentSlot.getMinutes() + slotsToSkip * durationMinutes
+            currentSlot.getMinutes() + slotsToSkip * durationMinutes,
           );
         }
 
@@ -313,7 +309,7 @@ export async function getAvailableTimeSlots(
                 p_psg_member_id: availability.psg_member_id,
                 p_appointment_date: appointmentTimestamp,
                 p_duration_minutes: durationMinutes,
-              }
+              },
             );
 
             if (rpcError) {
@@ -369,7 +365,7 @@ export async function getAvailableTimeSlots(
 export async function getAvailablePSGMembers(
   date: string,
   time: string,
-  durationMinutes: number = 60
+  durationMinutes: number = 60,
 ) {
   try {
     const supabase = await createClient();
@@ -385,7 +381,7 @@ export async function getAvailablePSGMembers(
         `
         *,
         psg_member:profiles!psg_member_id(id, full_name, avatar_url)
-      `
+      `,
       )
       .eq("is_active", true)
       .eq("day_of_week", dayOfWeek)

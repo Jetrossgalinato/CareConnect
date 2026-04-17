@@ -8,6 +8,7 @@ export type ReferralStatus =
   | "escalated";
 export type ReferralSeverity = "low" | "moderate" | "high" | "critical";
 export type RiskLevel = "low" | "moderate" | "high" | "critical";
+export type PsgTriageLevel = "needs_immediate_help" | "moderate" | "good";
 
 export interface Referral {
   id: string;
@@ -112,4 +113,10 @@ export const SEVERITY_COLORS: Record<ReferralSeverity, string> = {
   moderate: "var(--warning)",
   high: "var(--error)",
   critical: "var(--danger)",
+};
+
+export const PSG_TRIAGE_LABELS: Record<PsgTriageLevel, string> = {
+  needs_immediate_help: "Needs Immediate Help",
+  moderate: "Moderate",
+  good: "Good",
 };

@@ -11,7 +11,6 @@ import {
   MessageSquare,
   User,
   MapPin,
-  ExternalLink,
 } from "lucide-react";
 
 export default async function SessionDetailPage({
@@ -42,16 +41,7 @@ export default async function SessionDetailPage({
       month: "long",
       day: "numeric",
       year: "numeric",
-    }
-  );
-
-  const sessionTime = new Date(appointment.appointment_date).toLocaleTimeString(
-    "en-US",
-    {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    }
+    },
   );
 
   return (
@@ -249,20 +239,8 @@ export default async function SessionDetailPage({
         {/* Actions */}
         <div className="flex gap-3">
           <Link
-            href={`/dashboard/psg/appointments/${appointment.id}`}
-            className="flex-1 px-6 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
-            style={{
-              background: "var(--primary)",
-              color: "var(--text-inverse)",
-            }}
-          >
-            <ExternalLink className="w-5 h-5" />
-            View Full Appointment
-          </Link>
-
-          <Link
             href={`/dashboard/psg/sessions/${session.id}/edit`}
-            className="px-6 py-3 rounded-lg font-semibold transition-all"
+            className="flex-1 px-6 py-3 rounded-lg font-semibold transition-all"
             style={{
               background: "var(--bg-light)",
               border: "1px solid var(--border-muted)",

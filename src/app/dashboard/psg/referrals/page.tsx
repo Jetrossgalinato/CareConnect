@@ -49,7 +49,16 @@ export default function PSGReferralsPage() {
         .eq("id", user.id)
         .single();
 
-      // Admins see all referrals, PSG members see only their assigned ones
+      if (profile?.role !== "psg_member" && profile?.role !== "admin") {
+        showAlert({
+          message: "Unauthorized access",
+          type: "error",
+          duration: 5000,
+        });
+        router.push("/dashboard");
+        return;
+      }
+
       const result =
         profile?.role === "admin"
           ? await getAllReferrals()
@@ -141,10 +150,10 @@ export default function PSGReferralsPage() {
               className="text-lg font-bold mb-2"
               style={{ color: "var(--text)" }}
             >
-              Referrals
+              Referral Reviews
             </h1>
             <p style={{ color: "var(--text-muted)" }}>
-              Manage student referrals and track case progress
+              Review referrals and forward triage decisions to admin
             </p>
           </div>
 
