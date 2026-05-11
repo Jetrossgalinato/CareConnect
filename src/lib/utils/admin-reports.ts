@@ -221,6 +221,34 @@ export function getReferralStatusStyle(status: string): BadgeStyle {
     };
   }
 
+  if (normalized === "pending") {
+    return {
+      background: "var(--warning-20)",
+      color: "var(--warning)",
+    };
+  }
+
+  if (normalized === "reviewed") {
+    return {
+      background: "var(--info-20)",
+      color: "var(--info)",
+    };
+  }
+
+  if (normalized === "assigned") {
+    return {
+      background: "var(--primary-20)",
+      color: "var(--primary)",
+    };
+  }
+
+  if (normalized === "escalated") {
+    return {
+      background: "var(--error-20)",
+      color: "var(--error)",
+    };
+  }
+
   return {
     background: "var(--text-muted)",
     color: "var(--text)",

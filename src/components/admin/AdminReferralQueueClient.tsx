@@ -223,22 +223,27 @@ export function AdminReferralQueueClient({ referrals }: Props) {
                   <span
                     className="px-2 py-1 rounded text-xs font-semibold"
                     style={{
-                      background: SEVERITY_COLORS[referral.severity],
-                      color: "var(--bg-dark)",
+                      background: `${SEVERITY_COLORS[referral.severity]}20`,
+                      color: SEVERITY_COLORS[referral.severity],
                     }}
                   >
                     {referral.severity.toUpperCase()}
                   </span>
                 )}
-                <span
-                  className="px-3 py-1 rounded-full text-xs font-medium"
-                  style={{
-                    background: getStatusColor(referral.status),
-                    color: "var(--bg-dark)",
-                  }}
-                >
-                  {REFERRAL_STATUS_LABELS[referral.status]}
-                </span>
+                {(() => {
+                  const statusColor = getStatusColor(referral.status);
+                  return (
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-medium"
+                      style={{
+                        background: `${statusColor}20`,
+                        color: statusColor,
+                      }}
+                    >
+                      {REFERRAL_STATUS_LABELS[referral.status]}
+                    </span>
+                  );
+                })()}
               </div>
             </div>
 
@@ -388,6 +393,13 @@ export function AdminReferralQueueClient({ referrals }: Props) {
                       }}
                       placeholder="https://meet.google.com/..."
                     />
+                    <p
+                      className="mt-2 text-xs leading-relaxed"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      Request the meeting link from RGC or coordinate with the
+                      Head of the Guidance Office before confirming the session.
+                    </p>
                   </div>
                 )}
 
