@@ -25,7 +25,7 @@ export default async function Home() {
         <ThemeToggler />
       </div>
 
-      <main className="relative mx-auto flex min-h-screen w-full max-w-7xl items-center px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <main className="relative mx-auto flex min-h-screen w-full max-w-screen-2xl items-center px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <div className="grid w-full items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]">
           <section className="space-y-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-muted)] bg-[rgba(255,255,255,0.04)] px-4 py-2 text-sm text-[var(--text-muted)] backdrop-blur">
@@ -74,6 +74,42 @@ export default async function Home() {
                   </p>
                 </div>
               ))}
+            </div>
+
+            <div className="rounded-3xl border border-[var(--border-muted)] bg-[rgba(255,255,255,0.04)] p-5">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="max-w-2xl">
+                  <h2 className="text-lg font-semibold text-[var(--text)]">
+                    PSG Recruitment — Join the Peer Support Group
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
+                    The Peer Support Group (PSG) is now recruiting student
+                    facilitators. Attend essential trainings and become part of
+                    a supportive campus community. Click below to register or
+                    learn more about the requirements and schedule.
+                  </p>
+                </div>
+
+                <div className="mt-3 flex gap-3 md:mt-0">
+                  <a
+                    href="https://tinyurl.com/PSGCSU"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--bg-dark)] transition-transform duration-150 hover:-translate-y-0.5"
+                  >
+                    Register
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                  <a
+                    href="https://tinyurl.com/PSGCSU"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border-muted)] bg-[rgba(255,255,255,0.03)] px-4 py-2 text-sm font-semibold text-[var(--text)] transition-transform duration-150 hover:-translate-y-0.5 hover:border-[var(--primary)]"
+                  >
+                    More info
+                  </a>
+                </div>
+              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
