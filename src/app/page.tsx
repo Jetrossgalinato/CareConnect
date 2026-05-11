@@ -29,7 +29,7 @@ export default async function Home() {
         <div className="flex w-full flex-col items-center justify-center">
           <section className="flex w-full max-w-5xl flex-col items-center space-y-10">
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-muted)] bg-[rgba(255,255,255,0.04)] px-4 py-2 text-sm text-[var(--text-muted)] backdrop-blur">
-              <Sparkles className="h-4 w-4 text-[var(--primary)]" />
+              <Sparkles className="h-4 w-4 text-primary" />
               Caraga State University PSG Referral System
             </div>
 
@@ -130,7 +130,7 @@ export default async function Home() {
                 return (
                   <article
                     key={item.title}
-                    className="rounded-3xl border border-[var(--border-muted)] bg-[rgba(255,255,255,0.04)] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.18)] backdrop-blur"
+                    className="rounded-3xl border border-[var(--border-muted)] bg-[rgba(255,255,255,0.04)] p-5 shadow-md hover:shadow-lg backdrop-blur"
                   >
                     <div className="mb-4 inline-flex rounded-2xl bg-[var(--primary-20)] p-3 text-[var(--primary)]">
                       <Icon className="h-5 w-5" />
