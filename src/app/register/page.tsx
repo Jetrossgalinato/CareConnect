@@ -3,6 +3,8 @@ import { ThemeToggler } from "@/components/ThemeToggler";
 import { Loader } from "@/components/Loader";
 import Image from "next/image";
 import { Suspense } from "react";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function RegisterPage() {
   return (
@@ -10,13 +12,27 @@ export default function RegisterPage() {
       className="flex min-h-screen relative"
       style={{ background: "var(--bg)", transition: "background 0.3s" }}
     >
+      <div className="absolute top-4 left-4 z-50 md:top-6 md:left-6">
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium shadow-sm transition-all hover:-translate-x-1 hover:shadow-md"
+          style={{
+            color: "var(--text)",
+            backgroundColor: "var(--bg-light)",
+            borderColor: "var(--border-muted)",
+          }}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back
+        </Link>
+      </div>
       <div className="absolute top-4 right-4 z-50">
         <ThemeToggler />
       </div>
 
       {/* Left side - Branding */}
       <div
-        className="hidden lg:flex lg:w-1/2 p-12 flex-col justify-between"
+        className="hidden lg:flex lg:w-1/2 p-12 pt-20 flex-col justify-between"
         style={{
           background: "var(--bg-dark)",
           transition: "background 0.3s, border-radius 0.3s",
