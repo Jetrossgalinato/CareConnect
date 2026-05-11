@@ -388,6 +388,13 @@ export function AdminReferralQueueClient({ referrals }: Props) {
                       }}
                       placeholder="https://meet.google.com/..."
                     />
+                    <p
+                      className="mt-2 text-xs leading-relaxed"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      Request the meeting link from RGC or coordinate with the
+                      Head of the Guidance Office before confirming the session.
+                    </p>
                   </div>
                 )}
 

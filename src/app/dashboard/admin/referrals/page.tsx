@@ -32,6 +32,17 @@ export default async function AdminReferralQueuePage() {
           <p style={{ color: "var(--text-muted)" }}>
             Referrals forwarded by PSG members for admin review.
           </p>
+          <p
+            className="mt-2 rounded-lg px-3 py-2 text-sm"
+            style={{
+              color: "var(--text-muted)",
+              background: "var(--bg-light)",
+              border: "1px solid var(--border-muted)",
+            }}
+          >
+            For online sessions, request the meeting link from RGC or coordinate
+            with the Head of the Guidance Office before confirming the schedule.
+          </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3 mb-6">
