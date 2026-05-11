@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { ArrowRight, Sparkles, Users } from "lucide-react";
 import { ThemeToggler } from "@/components/ThemeToggler";
 import { getUser } from "@/lib/actions/auth";
 import { highlights, stats, steps } from "@/lib/constants/landingPage";
@@ -76,10 +76,24 @@ export default async function Home() {
               ))}
             </div>
 
-            <div className="rounded-3xl border border-[var(--border-muted)] bg-[rgba(255,255,255,0.04)] p-5">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="max-w-2xl">
-                  <h2 className="text-lg font-semibold text-[var(--text)]">
+            {/* UPATED PSG RECRUITMENT SECTION START */}
+            <div className="flex flex-col gap-4">
+              {/* Large Image Card */}
+              <div className="overflow-hidden rounded-3xl border border-[var(--border-muted)] bg-[rgba(255,255,255,0.04)] shadow-sm">
+                <Image
+                  src="/psg.jpg"
+                  alt="PSG recruitment poster"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto max-h-[500px] object-contain sm:max-h-[600px] md:max-h-[700px] bg-black/10"
+                  priority
+                />
+              </div>
+
+              {/* Text and Actions Card */}
+              <div className="flex flex-col justify-between gap-6 rounded-3xl border border-[var(--border-muted)] bg-[rgba(255,255,255,0.04)] p-5 md:flex-row md:items-center md:p-6 backdrop-blur">
+                <div className="max-w-3xl">
+                  <h2 className="text-lg font-semibold text-[var(--text)] sm:text-xl">
                     PSG Recruitment — Join the Peer Support Group
                   </h2>
                   <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
@@ -90,12 +104,12 @@ export default async function Home() {
                   </p>
                 </div>
 
-                <div className="mt-3 flex gap-3 md:mt-0">
+                <div className="flex shrink-0 flex-wrap gap-3">
                   <a
                     href="https://tinyurl.com/PSGCSU"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--bg-dark)] transition-transform duration-150 hover:-translate-y-0.5"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-[var(--bg-dark)] transition-transform duration-150 hover:-translate-y-0.5"
                   >
                     Register
                     <ArrowRight className="h-4 w-4" />
@@ -104,13 +118,14 @@ export default async function Home() {
                     href="https://tinyurl.com/PSGCSU"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border-muted)] bg-[rgba(255,255,255,0.03)] px-4 py-2 text-sm font-semibold text-[var(--text)] transition-transform duration-150 hover:-translate-y-0.5 hover:border-[var(--primary)]"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border-muted)] bg-[rgba(255,255,255,0.03)] px-5 py-2.5 text-sm font-semibold text-[var(--text)] transition-transform duration-150 hover:-translate-y-0.5 hover:border-[var(--primary)]"
                   >
                     More info
                   </a>
                 </div>
               </div>
             </div>
+            {/* UPATED PSG RECRUITMENT SECTION END */}
 
             <div className="grid gap-4 md:grid-cols-3">
               {highlights.map((item) => {
@@ -182,54 +197,6 @@ export default async function Home() {
               </p>
             </div>
           </section>
-
-          <aside className="relative">
-            <div className="absolute inset-0 -z-10 rounded-[2rem] bg-[radial-gradient(circle_at_top,_rgba(111,209,108,0.16),_transparent_45%),linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] blur-2xl" />
-            <div className="rounded-[2rem] border border-[var(--border-muted)] bg-[rgba(255,255,255,0.05)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.24em] text-[var(--text-muted)]">
-                    CareConnect
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold text-[var(--text)]">
-                    Support that feels organized.
-                  </h2>
-                </div>
-                <div className="rounded-2xl bg-[var(--primary-20)] p-3 text-[var(--primary)]">
-                  <ShieldCheck className="h-6 w-6" />
-                </div>
-              </div>
-
-              <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-[var(--border-muted)] bg-[var(--bg-dark)]/60 p-4">
-                <Image
-                  src="/authlogo.png"
-                  alt="CareConnect"
-                  width={720}
-                  height={720}
-                  priority
-                  className="h-auto w-full object-contain"
-                  style={{ filter: "var(--auth-image-filter)" }}
-                />
-              </div>
-
-              <div className="mt-6 grid gap-3">
-                {[
-                  "Self-referrals for students",
-                  "PSG review and triage tools",
-                  "Appointment scheduling and follow-up",
-                  "Role-based dashboards and audit-ready tracking",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-3 rounded-2xl border border-[var(--border-muted)] bg-[rgba(255,255,255,0.03)] px-4 py-3 text-sm text-[var(--text-muted)]"
-                  >
-                    <div className="h-2.5 w-2.5 rounded-full bg-[var(--primary)]" />
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </aside>
         </div>
       </main>
     </div>
